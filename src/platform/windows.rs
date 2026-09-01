@@ -64,6 +64,7 @@ const SYSTEM_DRIVE_METADATA_ACCESS: u32 =
 pub(crate) struct PlatformSandbox {
     powershell: PathBuf,
     system_drive: PathBuf,
+    implicit_read_roots: Vec<PathBuf>,
     profile: AppContainerProfile,
 }
 
@@ -76,10 +77,12 @@ impl PlatformSandbox {
             .filter(|path| path.is_absolute())
             .map(Path::to_path_buf)
             .context("failed to resolve the Windows system-drive root")?;
+        let implicit_read_roots = implicit_appcontainer_read_roots(&powershell);
         let profile = AppContainerProfile::create(workspace)?;
         Ok(Self {
             powershell,
             system_drive,
+            implicit_read_roots,
             profile,
         })
     }
@@ -93,7 +96,12 @@ impl PlatformSandbox {
         // their apply/use/revoke lifetime atomic across in-process executions.
         let _execution = execution_gate().lock().await;
         let pins = WorkspacePins::acquire(policy)?;
-        let mut acls = ExecutionAcls::apply(policy, &self.profile.sid, &self.system_drive)?;
+        let mut acls = ExecutionAcls::apply(
+            policy,
+            &self.profile.sid,
+            &self.system_drive,
+            &self.implicit_read_roots,
+        )?;
         let execution = match policy.child_environment(request.env.as_deref()) {
             Ok(environment) => match spawn_appcontainer_process(
                 &self.powershell,
@@ -112,6 +120,57 @@ impl PlatformSandbox {
         drop(pins);
         finish_execution(execution, acl_cleanup)
     }
+}
+
+fn implicit_appcontainer_read_roots(powershell: &Path) -> Vec<PathBuf> {
+    // Windows and Program Files normally carry well-known package grants.
+    // Rewriting either tree with an inheritable per-profile ACE would trigger
+    // expensive ACL propagation across the host. A hardened host that removes
+    // those grants still fails closed when the child cannot load its tools.
+    let mut roots = Vec::new();
+    if let Some(system_root) = powershell.ancestors().find(|path| {
+        path.file_name()
+            .is_some_and(|name| name.to_string_lossy().eq_ignore_ascii_case("Windows"))
+    }) {
+        roots.push(system_root.to_path_buf());
+    }
+    for variable in ["ProgramFiles", "ProgramFiles(x86)", "ProgramW6432"] {
+        let Some(path) = std::env::var_os(variable).filter(|value| !value.is_empty()) else {
+            continue;
+        };
+        let path = PathBuf::from(path);
+        if path.is_absolute() && path.exists() {
+            roots.push(path.canonicalize().unwrap_or(path));
+        }
+    }
+    roots.sort_by(|left, right| {
+        left.to_string_lossy()
+            .to_ascii_lowercase()
+            .cmp(&right.to_string_lossy().to_ascii_lowercase())
+    });
+    roots.dedup_by(|left, right| windows_paths_equal(left, right));
+    roots
+}
+
+fn windows_path_starts_with(path: &Path, root: &Path) -> bool {
+    let mut path_components = path.components();
+    for root_component in root.components() {
+        let Some(path_component) = path_components.next() else {
+            return false;
+        };
+        if !path_component
+            .as_os_str()
+            .to_string_lossy()
+            .eq_ignore_ascii_case(&root_component.as_os_str().to_string_lossy())
+        {
+            return false;
+        }
+    }
+    true
+}
+
+fn windows_paths_equal(left: &Path, right: &Path) -> bool {
+    windows_path_starts_with(left, right) && windows_path_starts_with(right, left)
 }
 
 fn execution_gate() -> &'static tokio::sync::Mutex<()> {
@@ -265,7 +324,12 @@ struct ExecutionAcls<'a> {
 }
 
 impl<'a> ExecutionAcls<'a> {
-    fn apply(policy: &SandboxPolicy, sid: &'a SidBuffer, system_drive: &Path) -> Result<Self> {
+    fn apply(
+        policy: &SandboxPolicy,
+        sid: &'a SidBuffer,
+        system_drive: &Path,
+        implicit_read_roots: &[PathBuf],
+    ) -> Result<Self> {
         let mut guard = Self {
             sid,
             paths: Vec::new(),
@@ -291,6 +355,9 @@ impl<'a> ExecutionAcls<'a> {
             if path == &policy.workspace
                 || path == &policy.scratch
                 || path == system_drive
+                || implicit_read_roots
+                    .iter()
+                    .any(|root| windows_path_starts_with(path, root))
                 || !path.exists()
             {
                 continue;
@@ -1254,5 +1321,22 @@ mod tests {
         assert_eq!(first, same);
         assert_ne!(first, second);
         assert!(first.starts_with("A3S.Sandbox.Execution."));
+    }
+
+    #[test]
+    fn implicit_read_roots_are_matched_by_component_and_case() {
+        let windows = Path::new(r"C:\Windows");
+        assert!(windows_path_starts_with(
+            Path::new(r"c:\WINDOWS\System32\WindowsPowerShell"),
+            windows,
+        ));
+        assert!(!windows_path_starts_with(
+            Path::new(r"C:\Windows.old\System32"),
+            windows,
+        ));
+        assert!(windows_paths_equal(
+            Path::new(r"C:\Program Files"),
+            Path::new(r"c:\PROGRAM FILES"),
+        ));
     }
 }
