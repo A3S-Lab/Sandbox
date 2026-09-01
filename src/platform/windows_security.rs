@@ -13,7 +13,7 @@ use std::sync::OnceLock;
 use windows_sys::Win32::Foundation::LocalFree;
 use windows_sys::Win32::Security::Authorization::{
     GetNamedSecurityInfoW, SetEntriesInAclW, SetNamedSecurityInfoW, EXPLICIT_ACCESS_W,
-    GRANT_ACCESS, SET_ACCESS, SE_FILE_OBJECT, TRUSTEE_IS_SID, TRUSTEE_IS_UNKNOWN,
+    GRANT_ACCESS, REVOKE_ACCESS, SET_ACCESS, SE_FILE_OBJECT, TRUSTEE_IS_SID, TRUSTEE_IS_UNKNOWN,
 };
 use windows_sys::Win32::Security::Isolation::{
     CreateAppContainerProfile, DeriveAppContainerSidFromAppContainerName,
@@ -229,7 +229,12 @@ impl<'a> ExecutionAcls<'a> {
         } else {
             NO_INHERITANCE
         };
-        self.modify_with_inheritance(path, permissions, SET_ACCESS, inheritance, true)
+        let access_mode = if permissions == 0 {
+            REVOKE_ACCESS
+        } else {
+            SET_ACCESS
+        };
+        self.modify_with_inheritance(path, permissions, access_mode, inheritance, true)
     }
 
     fn modify_with_inheritance(
@@ -240,11 +245,11 @@ impl<'a> ExecutionAcls<'a> {
         inheritance: u32,
         protect_dacl: bool,
     ) -> Result<()> {
-        let snapshot = if self.modified.contains(path) {
-            None
-        } else {
-            Some(capture_path_dacl(path)?)
-        };
+        if !self.modified.contains(path) {
+            let snapshot = capture_path_dacl(path)?;
+            self.modified.insert(path.to_path_buf());
+            self.paths.push((path.to_path_buf(), snapshot));
+        }
         modify_path_acl(
             path,
             self.sid,
@@ -253,10 +258,6 @@ impl<'a> ExecutionAcls<'a> {
             inheritance,
             protect_dacl,
         )?;
-        if let Some(snapshot) = snapshot {
-            self.modified.insert(path.to_path_buf());
-            self.paths.push((path.to_path_buf(), snapshot));
-        }
         Ok(())
     }
 
@@ -402,28 +403,35 @@ fn modify_path_acl(
 ) -> Result<()> {
     let security_path = win32_process_path(path);
     let wide = wide_null(security_path.as_os_str());
-    let mut old_acl: *mut ACL = null_mut();
-    let mut descriptor = null_mut();
-    let status = unsafe {
-        GetNamedSecurityInfoW(
-            wide.as_ptr(),
-            SE_FILE_OBJECT,
-            DACL_SECURITY_INFORMATION,
-            null_mut(),
-            null_mut(),
-            &mut old_acl,
-            null_mut(),
-            &mut descriptor,
-        )
-    };
-    if status != 0 {
-        bail!(
-            "GetNamedSecurityInfoW failed for {} with error {}",
-            path.display(),
-            status
-        );
+    let (mut old_acl, mut descriptor) = query_path_dacl(path, &wide)?;
+
+    if protect_dacl {
+        // Inherited ACEs cannot be replaced while the DACL still participates
+        // in automatic inheritance. Protecting the current DACL first turns
+        // those ACEs into explicit entries; the following SET_ACCESS or
+        // REVOKE_ACCESS operation can then replace every package-SID entry with
+        // the bounded mask.
+        let status = unsafe {
+            SetNamedSecurityInfoW(
+                wide.as_ptr(),
+                SE_FILE_OBJECT,
+                DACL_SECURITY_INFORMATION | PROTECTED_DACL_SECURITY_INFORMATION,
+                null_mut(),
+                null_mut(),
+                old_acl,
+                null(),
+            )
+        };
+        if status != 0 {
+            bail!(
+                "SetNamedSecurityInfoW failed while protecting {} with error {}",
+                path.display(),
+                status
+            );
+        }
+        drop(descriptor);
+        (old_acl, descriptor) = query_path_dacl(path, &wide)?;
     }
-    let _descriptor = LocalAllocation(descriptor);
 
     let mut access = EXPLICIT_ACCESS_W {
         grfAccessPermissions: permissions,
@@ -468,5 +476,37 @@ fn modify_path_acl(
             status
         );
     }
+    drop(descriptor);
     Ok(())
+}
+
+fn query_path_dacl(path: &Path, wide: &[u16]) -> Result<(*mut ACL, LocalAllocation)> {
+    let mut acl: *mut ACL = null_mut();
+    let mut descriptor = null_mut();
+    let status = unsafe {
+        GetNamedSecurityInfoW(
+            wide.as_ptr(),
+            SE_FILE_OBJECT,
+            DACL_SECURITY_INFORMATION,
+            null_mut(),
+            null_mut(),
+            &mut acl,
+            null_mut(),
+            &mut descriptor,
+        )
+    };
+    if status != 0 {
+        bail!(
+            "GetNamedSecurityInfoW failed for {} with error {}",
+            path.display(),
+            status
+        );
+    }
+    if descriptor.is_null() {
+        bail!(
+            "Windows returned an empty security descriptor for {}",
+            path.display()
+        );
+    }
+    Ok((acl, LocalAllocation(descriptor)))
 }

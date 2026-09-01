@@ -62,6 +62,11 @@ if ([IO.File]::ReadAllText((Join-Path (Get-Location) '.git/config')) -ne 'origin
         std::fs::read_to_string(workspace.path().join("ordinary.txt")).unwrap(),
         "changed"
     );
+    assert_eq!(
+        std::fs::read_to_string(workspace.path().join(".env")).unwrap(),
+        "workspace-secret",
+        "sandbox cleanup did not restore host credential access"
+    );
 
     #[cfg(not(windows))]
     let protected_writes = [
