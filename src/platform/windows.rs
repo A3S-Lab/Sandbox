@@ -20,23 +20,24 @@ use windows_sys::Win32::Foundation::{
     HANDLE_FLAG_INHERIT, INVALID_HANDLE_VALUE, WAIT_OBJECT_0,
 };
 use windows_sys::Win32::Security::Authorization::{
-    GetNamedSecurityInfoW, SetEntriesInAclW, SetNamedSecurityInfoW, DENY_ACCESS, EXPLICIT_ACCESS_W,
-    GRANT_ACCESS, SE_FILE_OBJECT, TRUSTEE_IS_SID, TRUSTEE_IS_UNKNOWN,
+    GetNamedSecurityInfoW, SetEntriesInAclW, SetNamedSecurityInfoW, EXPLICIT_ACCESS_W,
+    GRANT_ACCESS, SET_ACCESS, SE_FILE_OBJECT, TRUSTEE_IS_SID, TRUSTEE_IS_UNKNOWN,
 };
 use windows_sys::Win32::Security::Isolation::{
     CreateAppContainerProfile, DeriveAppContainerSidFromAppContainerName,
 };
 use windows_sys::Win32::Security::{
-    FreeSid, GetLengthSid, ACL, DACL_SECURITY_INFORMATION, NO_INHERITANCE, PSID,
-    SECURITY_ATTRIBUTES, SECURITY_CAPABILITIES, SUB_CONTAINERS_AND_OBJECTS_INHERIT,
+    FreeSid, GetLengthSid, GetSecurityDescriptorControl, ACL, DACL_SECURITY_INFORMATION,
+    NO_INHERITANCE, PROTECTED_DACL_SECURITY_INFORMATION, PSID, SECURITY_ATTRIBUTES,
+    SECURITY_CAPABILITIES, SE_DACL_PROTECTED, SUB_CONTAINERS_AND_OBJECTS_INHERIT,
+    UNPROTECTED_DACL_SECURITY_INFORMATION,
 };
 use windows_sys::Win32::Storage::FileSystem::{
     CreateFileW, DefineDosDeviceW, GetFileInformationByHandle, GetLogicalDrives, ReadFile,
     BY_HANDLE_FILE_INFORMATION, DDD_EXACT_MATCH_ON_REMOVE, DDD_NO_BROADCAST_SYSTEM,
-    DDD_RAW_TARGET_PATH, DDD_REMOVE_DEFINITION, DELETE, FILE_ALL_ACCESS, FILE_ATTRIBUTE_NORMAL,
-    FILE_DELETE_CHILD, FILE_FLAG_BACKUP_SEMANTICS, FILE_GENERIC_EXECUTE, FILE_GENERIC_READ,
-    FILE_GENERIC_WRITE, FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE, FILE_TRAVERSE,
-    OPEN_EXISTING,
+    DDD_RAW_TARGET_PATH, DDD_REMOVE_DEFINITION, DELETE, FILE_ATTRIBUTE_NORMAL, FILE_DELETE_CHILD,
+    FILE_FLAG_BACKUP_SEMANTICS, FILE_GENERIC_EXECUTE, FILE_GENERIC_READ, FILE_GENERIC_WRITE,
+    FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE, FILE_TRAVERSE, OPEN_EXISTING,
 };
 use windows_sys::Win32::System::JobObjects::{
     AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
@@ -285,10 +286,11 @@ impl<'a> ExecutionAcls<'a> {
             {
                 continue;
             }
-            guard.modify(path, FILE_ALL_ACCESS, DENY_ACCESS)?;
+            guard.restrict(path, 0)?;
         }
         for path in &policy.deny_write {
-            if !path.exists()
+            if policy.deny_read.iter().any(|denied| denied == path)
+                || !path.exists()
                 || !policy
                     .allow_write
                     .iter()
@@ -296,11 +298,7 @@ impl<'a> ExecutionAcls<'a> {
             {
                 continue;
             }
-            guard.modify(
-                path,
-                FILE_GENERIC_WRITE | DELETE | FILE_DELETE_CHILD,
-                DENY_ACCESS,
-            )?;
+            guard.restrict(path, FILE_GENERIC_READ | FILE_GENERIC_EXECUTE)?;
         }
         Ok(guard)
     }
@@ -312,7 +310,13 @@ impl<'a> ExecutionAcls<'a> {
             .filter(|ancestor| ancestor.parent().is_some())
             .collect::<Vec<_>>();
         for ancestor in ancestors.into_iter().rev() {
-            self.modify_with_inheritance(ancestor, FILE_TRAVERSE, GRANT_ACCESS, NO_INHERITANCE)?;
+            self.modify_with_inheritance(
+                ancestor,
+                FILE_TRAVERSE,
+                GRANT_ACCESS,
+                NO_INHERITANCE,
+                false,
+            )?;
         }
         Ok(())
     }
@@ -323,7 +327,16 @@ impl<'a> ExecutionAcls<'a> {
         } else {
             NO_INHERITANCE
         };
-        self.modify_with_inheritance(path, permissions, access_mode, inheritance)
+        self.modify_with_inheritance(path, permissions, access_mode, inheritance, false)
+    }
+
+    fn restrict(&mut self, path: &Path, permissions: u32) -> Result<()> {
+        let inheritance = if path.is_dir() {
+            SUB_CONTAINERS_AND_OBJECTS_INHERIT
+        } else {
+            NO_INHERITANCE
+        };
+        self.modify_with_inheritance(path, permissions, SET_ACCESS, inheritance, true)
     }
 
     fn modify_with_inheritance(
@@ -332,13 +345,21 @@ impl<'a> ExecutionAcls<'a> {
         permissions: u32,
         access_mode: i32,
         inheritance: u32,
+        protect_dacl: bool,
     ) -> Result<()> {
         let snapshot = if self.modified.contains(path) {
             None
         } else {
             Some(capture_path_dacl(path)?)
         };
-        modify_path_acl(path, self.sid, permissions, access_mode, inheritance)?;
+        modify_path_acl(
+            path,
+            self.sid,
+            permissions,
+            access_mode,
+            inheritance,
+            protect_dacl,
+        )?;
         if let Some(snapshot) = snapshot {
             self.modified.insert(path.to_path_buf());
             self.paths.push((path.to_path_buf(), snapshot));
@@ -385,6 +406,7 @@ impl Drop for LocalAllocation {
 
 struct DaclSnapshot {
     words: Option<Vec<u32>>,
+    protected: bool,
 }
 
 fn capture_path_dacl(path: &Path) -> Result<DaclSnapshot> {
@@ -411,9 +433,24 @@ fn capture_path_dacl(path: &Path) -> Result<DaclSnapshot> {
             status
         );
     }
+    if descriptor.is_null() {
+        bail!(
+            "Windows returned an empty security descriptor for {}",
+            path.display()
+        );
+    }
     let _descriptor = LocalAllocation(descriptor);
+    let mut control = 0_u16;
+    let mut revision = 0_u32;
+    if unsafe { GetSecurityDescriptorControl(descriptor, &mut control, &mut revision) } == 0 {
+        return Err(last_windows_error("inspect Windows DACL inheritance state"));
+    }
+    let protected = control & SE_DACL_PROTECTED != 0;
     if acl.is_null() {
-        return Ok(DaclSnapshot { words: None });
+        return Ok(DaclSnapshot {
+            words: None,
+            protected,
+        });
     }
     let bytes = usize::from(unsafe { (*acl).AclSize });
     if bytes < size_of::<ACL>() {
@@ -423,7 +460,10 @@ fn capture_path_dacl(path: &Path) -> Result<DaclSnapshot> {
     unsafe {
         std::ptr::copy_nonoverlapping(acl.cast::<u8>(), words.as_mut_ptr().cast::<u8>(), bytes);
     }
-    Ok(DaclSnapshot { words: Some(words) })
+    Ok(DaclSnapshot {
+        words: Some(words),
+        protected,
+    })
 }
 
 fn restore_path_dacl(path: &Path, snapshot: &DaclSnapshot) -> Result<()> {
@@ -433,11 +473,16 @@ fn restore_path_dacl(path: &Path, snapshot: &DaclSnapshot) -> Result<()> {
         .words
         .as_ref()
         .map_or(null_mut(), |words| words.as_ptr().cast_mut().cast::<ACL>());
+    let inheritance = if snapshot.protected {
+        PROTECTED_DACL_SECURITY_INFORMATION
+    } else {
+        UNPROTECTED_DACL_SECURITY_INFORMATION
+    };
     let status = unsafe {
         SetNamedSecurityInfoW(
             wide.as_ptr(),
             SE_FILE_OBJECT,
-            DACL_SECURITY_INFORMATION,
+            DACL_SECURITY_INFORMATION | inheritance,
             null_mut(),
             null_mut(),
             acl,
@@ -460,6 +505,7 @@ fn modify_path_acl(
     permissions: u32,
     access_mode: i32,
     inheritance: u32,
+    protect_dacl: bool,
 ) -> Result<()> {
     let security_path = win32_process_path(path);
     let wide = wide_null(security_path.as_os_str());
@@ -506,11 +552,16 @@ fn modify_path_acl(
         );
     }
     let _new_acl = LocalAllocation(new_acl.cast::<c_void>());
+    let security_information = if protect_dacl {
+        DACL_SECURITY_INFORMATION | PROTECTED_DACL_SECURITY_INFORMATION
+    } else {
+        DACL_SECURITY_INFORMATION
+    };
     let status = unsafe {
         SetNamedSecurityInfoW(
             wide.as_ptr(),
             SE_FILE_OBJECT,
-            DACL_SECURITY_INFORMATION,
+            security_information,
             null_mut(),
             null_mut(),
             new_acl,
