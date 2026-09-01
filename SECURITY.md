@@ -21,15 +21,15 @@ seccomp on Linux, and AppContainer plus a kill-on-close Job Object on Windows.
 Initialization or capability-probe failures are returned to the caller. The
 crate never falls back to executing the command without isolation.
 
-On Linux, seccomp rejects `socket`, `socketpair`, and `io_uring` entry points
-before Bash starts. It also rejects `unshare`, `setns`, `clone3`, and namespace
-flags passed to `clone`, preventing a command from entering or creating another
-namespace while ordinary child-process creation remains available. Bubblewrap
-closes unexpected inherited file descriptors, so a command cannot bypass
-socket creation denial through an ambient host connection. The backend
-deliberately avoids a network namespace: the seccomp boundary already denies
-socket creation, while loopback setup and nested user-namespace mapping are not
-available under every unprivileged Linux host policy.
+On Linux, seccomp rejects `socket`, `socketpair`, `io_uring`, `unshare`, and
+`setns` entry points before Bash starts. Bubblewrap creates a nested user
+namespace with further user-namespace creation disabled, and Bash starts with
+an empty capability set, so namespace flags passed to `clone` or `clone3`
+cannot create another isolation boundary. Bubblewrap also closes unexpected
+inherited file descriptors, so a command cannot bypass socket creation denial
+through an ambient host connection. The backend deliberately avoids a network
+namespace: the seccomp boundary already denies socket creation, while loopback
+setup is not available under every unprivileged Linux host policy.
 
 On Windows, every command receives a fresh AppContainer identity. Workspace
 ACL entries for that identity are installed only for the command lifetime and
