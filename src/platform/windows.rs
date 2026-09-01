@@ -14,11 +14,10 @@ use std::os::windows::io::{AsRawHandle, FromRawHandle, OwnedHandle};
 use std::path::{Path, PathBuf};
 use std::ptr::{null, null_mut};
 use std::sync::{Mutex, OnceLock};
-use tokio::io::AsyncReadExt;
 use windows_sys::Win32::Foundation::{
     DuplicateHandle, GetLastError, LocalFree, SetHandleInformation, DUPLICATE_SAME_ACCESS,
-    ERROR_BROKEN_PIPE, GENERIC_ALL, GENERIC_EXECUTE, GENERIC_READ, GENERIC_WRITE, HANDLE,
-    HANDLE_FLAG_INHERIT, INVALID_HANDLE_VALUE, WAIT_OBJECT_0,
+    ERROR_BROKEN_PIPE, ERROR_NO_DATA, ERROR_PIPE_NOT_CONNECTED, GENERIC_ALL, GENERIC_EXECUTE,
+    GENERIC_READ, GENERIC_WRITE, HANDLE, HANDLE_FLAG_INHERIT, INVALID_HANDLE_VALUE, WAIT_OBJECT_0,
 };
 use windows_sys::Win32::Security::Authorization::{
     GetNamedSecurityInfoW, SetEntriesInAclW, SetNamedSecurityInfoW, DENY_ACCESS, EXPLICIT_ACCESS_W,
@@ -32,7 +31,7 @@ use windows_sys::Win32::Security::{
     SECURITY_ATTRIBUTES, SECURITY_CAPABILITIES, SUB_CONTAINERS_AND_OBJECTS_INHERIT,
 };
 use windows_sys::Win32::Storage::FileSystem::{
-    CreateFileW, GetFileInformationByHandle, BY_HANDLE_FILE_INFORMATION, DELETE,
+    CreateFileW, GetFileInformationByHandle, ReadFile, BY_HANDLE_FILE_INFORMATION, DELETE,
     FILE_ATTRIBUTE_NORMAL, FILE_FLAG_BACKUP_SEMANTICS, FILE_READ_ATTRIBUTES, FILE_READ_EA,
     FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE, OPEN_EXISTING, READ_CONTROL, SYNCHRONIZE,
 };
@@ -42,7 +41,7 @@ use windows_sys::Win32::System::JobObjects::{
     JOB_OBJECT_LIMIT_ACTIVE_PROCESS, JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION,
     JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
 };
-use windows_sys::Win32::System::Pipes::CreatePipe;
+use windows_sys::Win32::System::Pipes::{CreatePipe, PeekNamedPipe};
 use windows_sys::Win32::System::SystemInformation::GetSystemDirectoryW;
 use windows_sys::Win32::System::Threading::{
     CreateProcessW, DeleteProcThreadAttributeList, GetCurrentProcess, GetExitCodeProcess,
@@ -54,6 +53,8 @@ use windows_sys::Win32::System::Threading::{
 };
 
 const READ_CHUNK_BYTES: usize = 8 * 1024;
+const PIPE_POLL_MS: u64 = 5;
+const PIPE_SETTLEMENT_MS: u64 = 500;
 const PROCESS_LIMIT: u32 = 256;
 const SYSTEM_DRIVE_METADATA_ACCESS: u32 =
     FILE_READ_ATTRIBUTES | FILE_READ_EA | READ_CONTROL | SYNCHRONIZE;
@@ -84,6 +85,9 @@ impl PlatformSandbox {
         policy: &SandboxPolicy,
         request: CommandRequest,
     ) -> Result<CommandOutput> {
+        // The system-drive and executable DACLs are shared host objects. Keep
+        // their apply/use/revoke lifetime atomic across in-process executions.
+        let _execution = execution_gate().lock().await;
         let mut profile = AppContainerProfile::create(&policy.scratch)?;
         let pins = WorkspacePins::acquire(policy)?;
         let mut acls = ExecutionAcls::apply(policy, &profile.sid, &self.system_drive)?;
@@ -106,6 +110,11 @@ impl PlatformSandbox {
         let profile_cleanup = profile.delete();
         finish_execution(execution, acl_cleanup, profile_cleanup)
     }
+}
+
+fn execution_gate() -> &'static tokio::sync::Mutex<()> {
+    static GATE: OnceLock<tokio::sync::Mutex<()>> = OnceLock::new();
+    GATE.get_or_init(|| tokio::sync::Mutex::new(()))
 }
 
 fn finish_execution(
@@ -749,10 +758,6 @@ async fn capture_process(child: WindowsChild, request: CommandRequest) -> Result
         }
         Ok::<(), anyhow::Error>(())
     });
-    let stdout = File::from(stdout);
-    let stderr = File::from(stderr);
-    let mut stdout = tokio::fs::File::from_std(stdout);
-    let mut stderr = tokio::fs::File::from_std(stderr);
     let mut stdout_buffer = vec![0_u8; READ_CHUNK_BYTES];
     let mut stderr_buffer = vec![0_u8; READ_CHUNK_BYTES];
     let mut stdout_done = false;
@@ -762,53 +767,70 @@ async fn capture_process(child: WindowsChild, request: CommandRequest) -> Result
     let mut capture = BoundedCapture::new();
     let deadline = tokio::time::sleep(tokio::time::Duration::from_millis(request.timeout_ms));
     tokio::pin!(deadline);
+    let settlement = tokio::time::sleep(tokio::time::Duration::from_secs(24 * 60 * 60));
+    tokio::pin!(settlement);
+    let mut settlement_active = false;
+    let mut pipe_poll = tokio::time::interval(tokio::time::Duration::from_millis(PIPE_POLL_MS));
+    pipe_poll.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
 
     while !process_done || !stdout_done || !stderr_done {
         tokio::select! {
-            read = stdout.read(&mut stdout_buffer), if !stdout_done => {
-                match read {
-                    Ok(0) => stdout_done = true,
-                    Ok(count) => {
+            _ = pipe_poll.tick(), if !stdout_done || !stderr_done => {
+                if !stdout_done {
+                    match poll_pipe(&stdout, &mut stdout_buffer)? {
+                        PipePoll::Closed => stdout_done = true,
+                        PipePoll::Empty => {}
+                        PipePoll::Data(count) => {
                         let bytes = &stdout_buffer[..count];
                         capture.push(OutputStream::Stdout, bytes);
                         if let Some(observer) = request.output_observer.as_deref() {
                             observer.on_output_delta(&String::from_utf8_lossy(bytes)).await;
                         }
                     }
-                    Err(error) => {
-                        let message = format!("\n[failed to read command stdout: {error}]\n");
-                        capture.push(OutputStream::Stderr, message.as_bytes());
-                        stdout_done = true;
                     }
                 }
-            }
-            read = stderr.read(&mut stderr_buffer), if !stderr_done => {
-                match read {
-                    Ok(0) => stderr_done = true,
-                    Ok(count) => {
+                if !stderr_done {
+                    match poll_pipe(&stderr, &mut stderr_buffer)? {
+                        PipePoll::Closed => stderr_done = true,
+                        PipePoll::Empty => {}
+                        PipePoll::Data(count) => {
                         let bytes = &stderr_buffer[..count];
                         capture.push(OutputStream::Stderr, bytes);
                         if let Some(observer) = request.output_observer.as_deref() {
                             observer.on_output_delta(&String::from_utf8_lossy(bytes)).await;
                         }
                     }
-                    Err(error) => {
-                        let code = error.raw_os_error().map(|code| code as u32);
-                        if code != Some(ERROR_BROKEN_PIPE) {
-                            let message = format!("\n[failed to read command stderr: {error}]\n");
-                            capture.push(OutputStream::Stderr, message.as_bytes());
-                        }
-                        stderr_done = true;
                     }
                 }
             }
             result = &mut wait, if !process_done => {
                 result.context("AppContainer wait task failed")??;
                 process_done = true;
+                if (!stdout_done || !stderr_done) && !settlement_active {
+                    settlement.as_mut().reset(
+                        tokio::time::Instant::now()
+                            + tokio::time::Duration::from_millis(PIPE_SETTLEMENT_MS),
+                    );
+                    settlement_active = true;
+                }
             }
             _ = &mut deadline, if !timed_out => {
                 timed_out = true;
                 job.terminate();
+                if !settlement_active {
+                    settlement.as_mut().reset(
+                        tokio::time::Instant::now()
+                            + tokio::time::Duration::from_millis(PIPE_SETTLEMENT_MS),
+                    );
+                    settlement_active = true;
+                }
+            }
+            _ = &mut settlement, if settlement_active => {
+                // A broker or descendant can retain a duplicate write handle
+                // after the root exits. Bound that drain window and kill the
+                // complete job before the temporary ACLs are revoked.
+                job.terminate();
+                break;
             }
         }
     }
@@ -833,6 +855,64 @@ async fn capture_process(child: WindowsChild, request: CommandRequest) -> Result
         exit_code,
         timed_out,
     })
+}
+
+enum PipePoll {
+    Data(usize),
+    Empty,
+    Closed,
+}
+
+fn poll_pipe(handle: &OwnedHandle, buffer: &mut [u8]) -> Result<PipePoll> {
+    let mut available = 0u32;
+    if unsafe {
+        PeekNamedPipe(
+            handle.as_raw_handle(),
+            null_mut(),
+            0,
+            null_mut(),
+            &mut available,
+            null_mut(),
+        )
+    } == 0
+    {
+        let code = unsafe { GetLastError() };
+        if matches!(
+            code,
+            ERROR_BROKEN_PIPE | ERROR_NO_DATA | ERROR_PIPE_NOT_CONNECTED
+        ) {
+            return Ok(PipePoll::Closed);
+        }
+        bail!("peek AppContainer output pipe failed with Windows error {code}");
+    }
+    if available == 0 {
+        return Ok(PipePoll::Empty);
+    }
+    let bytes = available
+        .min(u32::try_from(buffer.len()).context("AppContainer output buffer size overflowed")?);
+    let mut read = 0u32;
+    if unsafe {
+        ReadFile(
+            handle.as_raw_handle(),
+            buffer.as_mut_ptr(),
+            bytes,
+            &mut read,
+            null_mut(),
+        )
+    } == 0
+    {
+        let code = unsafe { GetLastError() };
+        if matches!(
+            code,
+            ERROR_BROKEN_PIPE | ERROR_NO_DATA | ERROR_PIPE_NOT_CONNECTED
+        ) {
+            return Ok(PipePoll::Closed);
+        }
+        bail!("read AppContainer output pipe failed with Windows error {code}");
+    }
+    Ok(PipePoll::Data(
+        usize::try_from(read).context("AppContainer output byte count overflowed")?,
+    ))
 }
 
 fn duplicate_handle(handle: &OwnedHandle) -> Result<OwnedHandle> {

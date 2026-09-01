@@ -33,8 +33,10 @@ available under every unprivileged Linux host policy.
 
 On Windows, every command receives a fresh AppContainer identity. Workspace
 ACL entries for that identity are installed only for the command lifetime and
-revoked before its profile is deleted. This prevents concurrent or later
-commands from inheriting another execution's grants or denials.
+revoked before its profile is deleted. Executions are serialized inside one
+host process because system DACL updates are shared mutable state. This prevents
+concurrent or later commands from inheriting another execution's grants or
+denials.
 
 ## Non-goals
 
