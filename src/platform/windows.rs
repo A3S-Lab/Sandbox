@@ -33,7 +33,7 @@ use windows_sys::Win32::Security::{
 use windows_sys::Win32::Storage::FileSystem::{
     CreateFileW, GetFileInformationByHandle, ReadFile, BY_HANDLE_FILE_INFORMATION, DELETE,
     FILE_ATTRIBUTE_NORMAL, FILE_FLAG_BACKUP_SEMANTICS, FILE_SHARE_DELETE, FILE_SHARE_READ,
-    FILE_SHARE_WRITE, OPEN_EXISTING,
+    FILE_SHARE_WRITE, FILE_TRAVERSE, OPEN_EXISTING,
 };
 use windows_sys::Win32::System::JobObjects::{
     AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
@@ -249,6 +249,8 @@ impl<'a> ExecutionAcls<'a> {
             paths: Vec::new(),
             modified: HashSet::new(),
         };
+        guard.grant_ancestor_traversal(&policy.workspace)?;
+        guard.grant_ancestor_traversal(&policy.scratch)?;
         guard.modify(
             &policy.workspace,
             GENERIC_READ | GENERIC_WRITE | GENERIC_EXECUTE | DELETE,
@@ -286,6 +288,14 @@ impl<'a> ExecutionAcls<'a> {
             guard.modify(path, GENERIC_WRITE | DELETE, DENY_ACCESS)?;
         }
         Ok(guard)
+    }
+
+    fn grant_ancestor_traversal(&mut self, path: &Path) -> Result<()> {
+        let ancestors = path.ancestors().skip(1).collect::<Vec<_>>();
+        for ancestor in ancestors.into_iter().rev() {
+            self.modify_with_inheritance(ancestor, FILE_TRAVERSE, GRANT_ACCESS, NO_INHERITANCE)?;
+        }
+        Ok(())
     }
 
     fn modify(&mut self, path: &Path, permissions: u32, access_mode: i32) -> Result<()> {
@@ -359,7 +369,8 @@ struct DaclSnapshot {
 }
 
 fn capture_path_dacl(path: &Path) -> Result<DaclSnapshot> {
-    let wide = wide_null(path.as_os_str());
+    let security_path = win32_process_path(path);
+    let wide = wide_null(security_path.as_os_str());
     let mut acl: *mut ACL = null_mut();
     let mut descriptor = null_mut();
     let status = unsafe {
@@ -397,7 +408,8 @@ fn capture_path_dacl(path: &Path) -> Result<DaclSnapshot> {
 }
 
 fn restore_path_dacl(path: &Path, snapshot: &DaclSnapshot) -> Result<()> {
-    let wide = wide_null(path.as_os_str());
+    let security_path = win32_process_path(path);
+    let wide = wide_null(security_path.as_os_str());
     let acl = snapshot
         .words
         .as_ref()
@@ -430,7 +442,8 @@ fn modify_path_acl(
     access_mode: i32,
     inheritance: u32,
 ) -> Result<()> {
-    let wide = wide_null(path.as_os_str());
+    let security_path = win32_process_path(path);
+    let wide = wide_null(security_path.as_os_str());
     let mut old_acl: *mut ACL = null_mut();
     let mut descriptor = null_mut();
     let status = unsafe {
