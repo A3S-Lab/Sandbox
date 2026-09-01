@@ -37,10 +37,13 @@ async fn main() -> anyhow::Result<()> {
 Linux hosts must provide Bubblewrap at `/usr/bin/bwrap` and permit Bubblewrap to
 create an unprivileged user namespace; initialization fails closed when the host
 policy forbids that boundary. macOS uses the system `/usr/bin/sandbox-exec`.
-Windows uses the system Windows PowerShell executable inside a per-execution
-AppContainer token. One process-scoped profile identity is reused by each
-workspace sandbox, while temporary workspace ACL entries are revoked after
-every command.
+Windows uses the system Windows PowerShell executable inside an AppContainer
+token. One process-scoped profile identity is reused by each workspace sandbox,
+while temporary workspace ACL entries are revoked after every command. Tools
+under Windows or Program Files use their existing AppContainer access. A tool
+stored in a private user directory must be copied into the workspace or
+pre-authorized for AppContainer access by the host; the sandbox never
+recursively rewrites arbitrary PATH or toolchain directories.
 
 See [SECURITY.md](SECURITY.md) for the threat model and fail-closed guarantees.
 
