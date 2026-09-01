@@ -2,7 +2,8 @@
 
 `a3s-sandbox` is the A3S-owned, fail-closed native command isolation boundary.
 It is intentionally independent of the A3S Code runtime and exposes a small
-library contract that other A3S products can embed.
+library contract that other A3S products can embed without Node.js or the
+Anthropic Sandbox Runtime package.
 
 ## Platform boundaries
 
@@ -17,12 +18,36 @@ metadata, allows workspace writes only outside protected paths, and uses a
 private temporary directory. Unsupported platforms return an error instead of
 executing on the host.
 
-## Status
+## Usage
 
-The crate is under active extraction from A3S Code. Its public API remains
-small until the cross-platform policy and conformance suite are stabilized.
+```rust,no_run
+use a3s_sandbox::NativeSandbox;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let sandbox = NativeSandbox::new("/path/to/workspace")?;
+    sandbox.probe().await?;
+
+    let output = sandbox.exec_command("cargo test").await?;
+    println!("{}", output.stdout);
+    Ok(())
+}
+```
+
+Linux hosts must provide Bubblewrap at `/usr/bin/bwrap`. macOS uses the system
+`/usr/bin/sandbox-exec`. Windows uses the system Windows PowerShell executable
+inside a workspace-specific AppContainer.
+
+See [SECURITY.md](SECURITY.md) for the threat model and fail-closed guarantees.
+
+## Development
+
+```bash
+cargo fmt --all -- --check
+cargo clippy --all-targets -- -D warnings
+cargo test --all-targets
+```
 
 ## License
 
 MIT
-
