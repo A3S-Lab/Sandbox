@@ -1,0 +1,18 @@
+[package]
+name = "a3s-sandbox"
+version = "0.1.0"
+edition = "2021"
+authors = ["A3S Lab Team"]
+license = "MIT"
+repository = "https://github.com/A3S-Lab/Sandbox"
+description = "Cross-platform native command sandbox for A3S"
+keywords = ["sandbox", "security", "a3s"]
+categories = ["os", "development-tools"]
+
+[lib]
+name = "a3s_sandbox"
+path = "src/lib.rs"
+
+[lints.rust]
+unsafe_code = "deny"
+
