@@ -56,9 +56,9 @@ covered by the workspace grant, and inaccessible user-private tools fail closed.
 
 ## Non-goals
 
-This crate does not provide an HTTP proxy, selective network allow-list, remote
-container orchestration, or compatibility with Anthropic SRT's internal API.
-Those features are intentionally outside the A3S baseline policy.
+This crate does not provide an HTTP proxy, selective network allow-list, or
+remote container orchestration. Those features are intentionally outside the
+A3S baseline policy; network access is denied by the native platform boundary.
 
 ## Reporting
 

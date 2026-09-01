@@ -2,8 +2,8 @@
 
 `a3s-sandbox` is the A3S-owned, fail-closed native command isolation boundary.
 It is intentionally independent of the A3S Code runtime and exposes a small
-library contract that other A3S products can embed without Node.js or the
-Anthropic Sandbox Runtime package.
+Rust library contract that other A3S products can embed without Node.js or a
+third-party runtime wrapper.
 
 ## Platform boundaries
 
