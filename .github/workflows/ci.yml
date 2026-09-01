@@ -34,4 +34,10 @@ jobs:
           fi
       - run: cargo fmt --all -- --check
       - run: cargo clippy --all-targets -- -D warnings
-      - run: cargo test --all-targets
+      - name: Run tests
+        if: runner.os != 'Windows'
+        run: cargo test --all-targets
+      - name: Run Windows tests with bounded diagnostics
+        if: runner.os == 'Windows'
+        timeout-minutes: 3
+        run: cargo test --all-targets -- --test-threads=1 --nocapture

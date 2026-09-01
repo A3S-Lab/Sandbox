@@ -3,18 +3,36 @@ use std::collections::HashMap;
 
 const TEST_COMMAND_TIMEOUT_MS: u64 = 5_000;
 
+fn create_test_sandbox(workspace: &std::path::Path) -> NativeSandbox {
+    #[cfg(windows)]
+    eprintln!(
+        "[a3s-sandbox-test] create AppContainer for {}",
+        workspace.display()
+    );
+    let sandbox = NativeSandbox::new(workspace).unwrap();
+    #[cfg(windows)]
+    eprintln!("[a3s-sandbox-test] AppContainer created");
+    sandbox
+}
+
 async fn execute_test_command(
     sandbox: &NativeSandbox,
     command: impl Into<String>,
 ) -> anyhow::Result<CommandOutput> {
-    sandbox
+    let command = command.into();
+    #[cfg(windows)]
+    eprintln!("[a3s-sandbox-test] execute {command:?}");
+    let result = sandbox
         .execute(CommandRequest {
-            command: command.into(),
+            command,
             timeout_ms: TEST_COMMAND_TIMEOUT_MS,
             output_observer: None,
             env: None,
         })
-        .await
+        .await;
+    #[cfg(windows)]
+    eprintln!("[a3s-sandbox-test] command completed");
+    result
 }
 
 #[tokio::test]
@@ -24,9 +42,13 @@ async fn native_backend_starts_and_writes_only_ordinary_workspace_content() {
     std::fs::create_dir_all(workspace.path().join(".a3s")).unwrap();
     std::fs::write(workspace.path().join(".git/config"), "original-git").unwrap();
     std::fs::write(workspace.path().join(".a3s/policy.acl"), "original-policy").unwrap();
-    let sandbox = NativeSandbox::new(workspace.path()).unwrap();
+    let sandbox = create_test_sandbox(workspace.path());
 
+    #[cfg(windows)]
+    eprintln!("[a3s-sandbox-test] probe AppContainer");
     sandbox.probe().await.unwrap();
+    #[cfg(windows)]
+    eprintln!("[a3s-sandbox-test] AppContainer probe completed");
     #[cfg(not(windows))]
     let ordinary_command = "printf changed > ordinary.txt";
     #[cfg(windows)]
@@ -108,7 +130,7 @@ async fn native_backend_blocks_symlink_hardlink_and_credential_escape() {
     .unwrap();
     symlink(outside.path(), workspace.path().join("outside-link")).unwrap();
     std::fs::write(workspace.path().join(".env"), "workspace-secret").unwrap();
-    let sandbox = NativeSandbox::new(workspace.path()).unwrap();
+    let sandbox = create_test_sandbox(workspace.path());
 
     for command in [
         "cat .env",
@@ -145,7 +167,7 @@ async fn windows_backend_blocks_preexisting_hardlink_escape() {
     let outside_secret = outside.path().join("secret");
     std::fs::write(&outside_secret, "outside-secret").unwrap();
     std::fs::hard_link(&outside_secret, workspace.path().join("outside-hardlink")).unwrap();
-    let sandbox = NativeSandbox::new(workspace.path()).unwrap();
+    let sandbox = create_test_sandbox(workspace.path());
 
     let output = execute_test_command(
         &sandbox,
@@ -163,7 +185,7 @@ async fn windows_backend_blocks_preexisting_hardlink_escape() {
 #[tokio::test]
 async fn native_backend_blocks_ip_binding_and_unix_sockets() {
     let workspace = tempfile::tempdir().unwrap();
-    let sandbox = NativeSandbox::new(workspace.path()).unwrap();
+    let sandbox = create_test_sandbox(workspace.path());
 
     #[cfg(windows)]
     let probes = [
@@ -190,7 +212,7 @@ async fn native_backend_blocks_ip_binding_and_unix_sockets() {
 #[tokio::test]
 async fn linux_backend_drops_all_process_capabilities_before_bash() {
     let workspace = tempfile::tempdir().unwrap();
-    let sandbox = NativeSandbox::new(workspace.path()).unwrap();
+    let sandbox = create_test_sandbox(workspace.path());
     let output = execute_test_command(
         &sandbox,
         "grep '^Cap\\(Inh\\|Prm\\|Eff\\|Bnd\\|Amb\\):' /proc/self/status",
@@ -212,7 +234,7 @@ async fn linux_backend_drops_all_process_capabilities_before_bash() {
 #[tokio::test]
 async fn native_backend_sanitizes_environment_and_kills_timed_out_descendants() {
     let workspace = tempfile::tempdir().unwrap();
-    let sandbox = NativeSandbox::new(workspace.path()).unwrap();
+    let sandbox = create_test_sandbox(workspace.path());
     let request = CommandRequest {
         #[cfg(not(windows))]
         command: "printf '%s|%s|%s' \"${SAFE_VALUE:-}\" \"${BASH_ENV:-}\" \"$HOME\"".to_string(),
