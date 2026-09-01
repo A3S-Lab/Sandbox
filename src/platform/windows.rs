@@ -66,7 +66,7 @@ pub(crate) struct PlatformSandbox {
 impl PlatformSandbox {
     pub(crate) fn new(workspace: &Path) -> Result<Self> {
         let powershell = resolve_powershell(workspace)?;
-        let profile = AppContainerProfile::create(workspace)?;
+        let profile = AppContainerProfile::create()?;
         Ok(Self {
             powershell,
             profile,
@@ -188,8 +188,8 @@ struct AppContainerProfile {
 }
 
 impl AppContainerProfile {
-    fn create(workspace: &Path) -> Result<Self> {
-        let name = appcontainer_profile_name(workspace);
+    fn create() -> Result<Self> {
+        let name = appcontainer_profile_name();
         let name = wide_null(OsStr::new(&name));
         let display = wide_null(OsStr::new("A3S Native Sandbox"));
         let description = wide_null(OsStr::new(
@@ -228,12 +228,9 @@ impl AppContainerProfile {
     }
 }
 
-fn appcontainer_profile_name(workspace: &Path) -> String {
+fn appcontainer_profile_name() -> String {
     static PROCESS_SCOPE: OnceLock<u128> = OnceLock::new();
     let mut hasher = Sha256::new();
-    for word in workspace.as_os_str().encode_wide() {
-        hasher.update(word.to_le_bytes());
-    }
     hasher.update(std::process::id().to_le_bytes());
     let process_scope = PROCESS_SCOPE.get_or_init(|| {
         std::time::SystemTime::now()
@@ -1218,11 +1215,9 @@ mod tests {
 
     #[test]
     fn appcontainer_name_is_stable_and_process_scoped() {
-        let first = appcontainer_profile_name(Path::new(r"C:\\work\\one"));
-        let same = appcontainer_profile_name(Path::new(r"C:\\work\\one"));
-        let second = appcontainer_profile_name(Path::new(r"C:\\work\\two"));
+        let first = appcontainer_profile_name();
+        let same = appcontainer_profile_name();
         assert_eq!(first, same);
-        assert_ne!(first, second);
         assert!(first.starts_with("A3S.Sandbox.Execution."));
     }
 }

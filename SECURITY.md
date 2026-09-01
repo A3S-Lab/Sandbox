@@ -31,17 +31,17 @@ through an ambient host connection. The backend deliberately avoids a network
 namespace: the seccomp boundary already denies socket creation, while loopback
 setup is not available under every unprivileged Linux host policy.
 
-On Windows, each workspace receives a process-scoped AppContainer identity with
-no network capabilities. Workspace ACL entries for that identity are installed
-only for the command lifetime and then revoked. Executions are serialized
-inside one host process because workspace DACL updates are shared mutable state.
-The profile remains inert after ACL revocation and is reused only by the same
-workspace sandbox process, avoiding unsafe profile deletion while container
-brokers may still hold profile resources. The backend does not modify the
-system-drive root or add inheritable ACEs to arbitrary PATH, Cargo, Rustup, or
-other user toolchain roots. System tools retain their host-provided AppContainer
-grants, workspace-local tools are covered by the workspace grant, and
-inaccessible user-private tools fail closed.
+On Windows, all workspaces in one host process share one process-scoped
+AppContainer identity with no network capabilities. Workspace ACL entries for
+that identity are installed only for the command lifetime and then revoked.
+Executions are serialized inside one host process because workspace DACL updates
+are shared mutable state. The profile remains inert after ACL revocation and is
+reused only by the same sandbox process, avoiding unsafe profile deletion while
+container brokers may still hold profile resources. The backend does not modify
+the system-drive root or add inheritable ACEs to arbitrary PATH, Cargo, Rustup,
+or other user toolchain roots. System tools retain their host-provided
+AppContainer grants, workspace-local tools are covered by the workspace grant,
+and inaccessible user-private tools fail closed.
 
 ## Non-goals
 
