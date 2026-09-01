@@ -438,7 +438,7 @@ mod tests {
         let mut child = spawn_test_shell(
             directory.path(),
             "exec 1>&- 2>&-; \
-             (touch descendant-started; sleep 0.30; touch cancellation-leak) & wait",
+             (touch descendant-started; sleep 2; touch cancellation-leak) & wait",
         );
         let capture =
             tokio::spawn(async move { read_process_output(&mut child, 5_000, None).await });
@@ -453,7 +453,7 @@ mod tests {
         capture.abort();
         assert!(capture.await.unwrap_err().is_cancelled());
 
-        tokio::time::sleep(std::time::Duration::from_millis(400)).await;
+        tokio::time::sleep(std::time::Duration::from_millis(2_200)).await;
         assert!(
             !directory.path().join("cancellation-leak").exists(),
             "dropping process capture must kill every descendant"
