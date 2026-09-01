@@ -38,7 +38,9 @@ Linux hosts must provide Bubblewrap at `/usr/bin/bwrap` and permit Bubblewrap to
 create an unprivileged user namespace; initialization fails closed when the host
 policy forbids that boundary. macOS uses the system `/usr/bin/sandbox-exec`.
 Windows uses the system Windows PowerShell executable inside a per-execution
-AppContainer whose temporary workspace ACL entries are revoked during cleanup.
+AppContainer token. One process-scoped profile identity is reused by each
+workspace sandbox, while temporary workspace ACL entries are revoked after
+every command.
 
 See [SECURITY.md](SECURITY.md) for the threat model and fail-closed guarantees.
 

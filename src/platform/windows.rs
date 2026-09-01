@@ -21,10 +21,10 @@ use windows_sys::Win32::Foundation::{
 };
 use windows_sys::Win32::Security::Authorization::{
     GetNamedSecurityInfoW, SetEntriesInAclW, SetNamedSecurityInfoW, DENY_ACCESS, EXPLICIT_ACCESS_W,
-    GRANT_ACCESS, REVOKE_ACCESS, SE_FILE_OBJECT, TRUSTEE_IS_SID, TRUSTEE_IS_UNKNOWN,
+    GRANT_ACCESS, SE_FILE_OBJECT, TRUSTEE_IS_SID, TRUSTEE_IS_UNKNOWN,
 };
 use windows_sys::Win32::Security::Isolation::{
-    CreateAppContainerProfile, DeleteAppContainerProfile,
+    CreateAppContainerProfile, DeriveAppContainerSidFromAppContainerName,
 };
 use windows_sys::Win32::Security::{
     FreeSid, GetLengthSid, ACL, DACL_SECURITY_INFORMATION, NO_INHERITANCE, PSID,
@@ -56,6 +56,7 @@ const READ_CHUNK_BYTES: usize = 8 * 1024;
 const PIPE_POLL_MS: u64 = 5;
 const PIPE_SETTLEMENT_MS: u64 = 500;
 const PROCESS_LIMIT: u32 = 256;
+const HRESULT_ALREADY_EXISTS: u32 = 0x8007_00b7;
 const SYSTEM_DRIVE_METADATA_ACCESS: u32 =
     FILE_READ_ATTRIBUTES | FILE_READ_EA | READ_CONTROL | SYNCHRONIZE;
 
@@ -63,6 +64,7 @@ const SYSTEM_DRIVE_METADATA_ACCESS: u32 =
 pub(crate) struct PlatformSandbox {
     powershell: PathBuf,
     system_drive: PathBuf,
+    profile: AppContainerProfile,
 }
 
 impl PlatformSandbox {
@@ -74,9 +76,11 @@ impl PlatformSandbox {
             .filter(|path| path.is_absolute())
             .map(Path::to_path_buf)
             .context("failed to resolve the Windows system-drive root")?;
+        let profile = AppContainerProfile::create(workspace)?;
         Ok(Self {
             powershell,
             system_drive,
+            profile,
         })
     }
 
@@ -88,13 +92,12 @@ impl PlatformSandbox {
         // The system-drive and executable DACLs are shared host objects. Keep
         // their apply/use/revoke lifetime atomic across in-process executions.
         let _execution = execution_gate().lock().await;
-        let mut profile = AppContainerProfile::create(&policy.scratch)?;
         let pins = WorkspacePins::acquire(policy)?;
-        let mut acls = ExecutionAcls::apply(policy, &profile.sid, &self.system_drive)?;
+        let mut acls = ExecutionAcls::apply(policy, &self.profile.sid, &self.system_drive)?;
         let execution = match policy.child_environment(request.env.as_deref()) {
             Ok(environment) => match spawn_appcontainer_process(
                 &self.powershell,
-                &profile.sid,
+                &self.profile.sid,
                 &policy.workspace,
                 &request.command,
                 environment,
@@ -107,8 +110,7 @@ impl PlatformSandbox {
         let acl_cleanup = acls.restore();
         drop(acls);
         drop(pins);
-        let profile_cleanup = profile.delete();
-        finish_execution(execution, acl_cleanup, profile_cleanup)
+        finish_execution(execution, acl_cleanup)
     }
 }
 
@@ -120,16 +122,8 @@ fn execution_gate() -> &'static tokio::sync::Mutex<()> {
 fn finish_execution(
     execution: Result<CommandOutput>,
     acl_cleanup: Result<()>,
-    profile_cleanup: Result<()>,
 ) -> Result<CommandOutput> {
-    let cleanup = match (acl_cleanup, profile_cleanup) {
-        (Ok(()), Ok(())) => Ok(()),
-        (Err(error), Ok(())) | (Ok(()), Err(error)) => Err(error),
-        (Err(acl_error), Err(profile_error)) => Err(anyhow::anyhow!(
-            "Windows sandbox cleanup failed: ACL cleanup: {acl_error:#}; AppContainer cleanup: {profile_error:#}"
-        )),
-    };
-    match (execution, cleanup) {
+    match (execution, acl_cleanup) {
         (Ok(output), Ok(())) => Ok(output),
         (Ok(_), Err(error)) => Err(error),
         (Err(error), Ok(())) => Err(error),
@@ -197,19 +191,18 @@ impl SidBuffer {
     }
 }
 
+#[derive(Debug)]
 struct AppContainerProfile {
-    name: Vec<u16>,
     sid: SidBuffer,
-    active: bool,
 }
 
 impl AppContainerProfile {
-    fn create(execution_root: &Path) -> Result<Self> {
-        let name = appcontainer_profile_name(execution_root);
+    fn create(workspace: &Path) -> Result<Self> {
+        let name = appcontainer_profile_name(workspace);
         let name = wide_null(OsStr::new(&name));
-        let display = wide_null(OsStr::new("A3S Native Sandbox Execution"));
+        let display = wide_null(OsStr::new("A3S Native Sandbox"));
         let description = wide_null(OsStr::new(
-            "Per-execution AppContainer for fail-closed A3S command execution",
+            "Process-scoped AppContainer for fail-closed A3S command execution",
         ));
         let mut sid = null_mut();
         let status = unsafe {
@@ -222,55 +215,41 @@ impl AppContainerProfile {
                 &mut sid,
             )
         };
-        if status < 0 {
+        if status as u32 == HRESULT_ALREADY_EXISTS {
+            sid = null_mut();
+            let derived =
+                unsafe { DeriveAppContainerSidFromAppContainerName(name.as_ptr(), &mut sid) };
+            if derived < 0 {
+                bail!(
+                    "DeriveAppContainerSidFromAppContainerName failed with HRESULT 0x{:08x}",
+                    derived as u32
+                );
+            }
+        } else if status < 0 {
             bail!(
                 "CreateAppContainerProfile failed with HRESULT 0x{:08x}",
                 status as u32
             );
         }
-        let sid = match SidBuffer::from_allocated(sid) {
-            Ok(sid) => sid,
-            Err(error) => {
-                unsafe {
-                    DeleteAppContainerProfile(name.as_ptr());
-                }
-                return Err(error);
-            }
-        };
         Ok(Self {
-            name,
-            sid,
-            active: true,
+            sid: SidBuffer::from_allocated(sid)?,
         })
     }
-
-    fn delete(&mut self) -> Result<()> {
-        if !self.active {
-            return Ok(());
-        }
-        let status = unsafe { DeleteAppContainerProfile(self.name.as_ptr()) };
-        if status < 0 {
-            bail!(
-                "DeleteAppContainerProfile failed with HRESULT 0x{:08x}",
-                status as u32
-            );
-        }
-        self.active = false;
-        Ok(())
-    }
 }
 
-impl Drop for AppContainerProfile {
-    fn drop(&mut self) {
-        let _ = self.delete();
-    }
-}
-
-fn appcontainer_profile_name(execution_root: &Path) -> String {
+fn appcontainer_profile_name(workspace: &Path) -> String {
+    static PROCESS_SCOPE: OnceLock<u128> = OnceLock::new();
     let mut hasher = Sha256::new();
-    for word in execution_root.as_os_str().encode_wide() {
+    for word in workspace.as_os_str().encode_wide() {
         hasher.update(word.to_le_bytes());
     }
+    hasher.update(std::process::id().to_le_bytes());
+    let process_scope = PROCESS_SCOPE.get_or_init(|| {
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_or(0, |duration| duration.as_nanos())
+    });
+    hasher.update(process_scope.to_le_bytes());
     let digest = hasher.finalize();
     let suffix = digest[..16]
         .iter()
@@ -281,7 +260,7 @@ fn appcontainer_profile_name(execution_root: &Path) -> String {
 
 struct ExecutionAcls<'a> {
     sid: &'a SidBuffer,
-    paths: Vec<PathBuf>,
+    paths: Vec<(PathBuf, DaclSnapshot)>,
     modified: HashSet<PathBuf>,
 }
 
@@ -368,17 +347,23 @@ impl<'a> ExecutionAcls<'a> {
         access_mode: i32,
         inheritance: u32,
     ) -> Result<()> {
+        let snapshot = if self.modified.contains(path) {
+            None
+        } else {
+            Some(capture_path_dacl(path)?)
+        };
         modify_path_acl(path, self.sid, permissions, access_mode, inheritance)?;
-        if self.modified.insert(path.to_path_buf()) {
-            self.paths.push(path.to_path_buf());
+        if let Some(snapshot) = snapshot {
+            self.modified.insert(path.to_path_buf());
+            self.paths.push((path.to_path_buf(), snapshot));
         }
         Ok(())
     }
 
     fn restore(&mut self) -> Result<()> {
         let mut failure = None;
-        for path in self.paths.drain(..).rev() {
-            if let Err(error) = modify_path_acl(&path, self.sid, 0, REVOKE_ACCESS, NO_INHERITANCE) {
+        for (path, snapshot) in self.paths.drain(..).rev() {
+            if let Err(error) = restore_path_dacl(&path, &snapshot) {
                 if failure.is_none() {
                     failure = Some(
                         error.context(format!("failed to restore the ACL for {}", path.display())),
@@ -410,6 +395,75 @@ impl Drop for LocalAllocation {
             }
         }
     }
+}
+
+struct DaclSnapshot {
+    words: Option<Vec<u32>>,
+}
+
+fn capture_path_dacl(path: &Path) -> Result<DaclSnapshot> {
+    let wide = wide_null(path.as_os_str());
+    let mut acl: *mut ACL = null_mut();
+    let mut descriptor = null_mut();
+    let status = unsafe {
+        GetNamedSecurityInfoW(
+            wide.as_ptr(),
+            SE_FILE_OBJECT,
+            DACL_SECURITY_INFORMATION,
+            null_mut(),
+            null_mut(),
+            &mut acl,
+            null_mut(),
+            &mut descriptor,
+        )
+    };
+    if status != 0 {
+        bail!(
+            "GetNamedSecurityInfoW failed for {} with error {}",
+            path.display(),
+            status
+        );
+    }
+    let _descriptor = LocalAllocation(descriptor);
+    if acl.is_null() {
+        return Ok(DaclSnapshot { words: None });
+    }
+    let bytes = usize::from(unsafe { (*acl).AclSize });
+    if bytes < size_of::<ACL>() {
+        bail!("Windows returned an invalid DACL for {}", path.display());
+    }
+    let mut words = vec![0_u32; bytes.div_ceil(size_of::<u32>())];
+    unsafe {
+        std::ptr::copy_nonoverlapping(acl.cast::<u8>(), words.as_mut_ptr().cast::<u8>(), bytes);
+    }
+    Ok(DaclSnapshot { words: Some(words) })
+}
+
+fn restore_path_dacl(path: &Path, snapshot: &DaclSnapshot) -> Result<()> {
+    let wide = wide_null(path.as_os_str());
+    let acl = snapshot
+        .words
+        .as_ref()
+        .map_or(null_mut(), |words| words.as_ptr().cast_mut().cast::<ACL>());
+    let status = unsafe {
+        SetNamedSecurityInfoW(
+            wide.as_ptr(),
+            SE_FILE_OBJECT,
+            DACL_SECURITY_INFORMATION,
+            null_mut(),
+            null_mut(),
+            acl,
+            null(),
+        )
+    };
+    if status != 0 {
+        bail!(
+            "SetNamedSecurityInfoW failed while restoring {} with error {}",
+            path.display(),
+            status
+        );
+    }
+    Ok(())
 }
 
 fn modify_path_acl(
@@ -1193,7 +1247,7 @@ mod tests {
     }
 
     #[test]
-    fn appcontainer_name_is_stable_and_execution_scoped() {
+    fn appcontainer_name_is_stable_and_process_scoped() {
         let first = appcontainer_profile_name(Path::new(r"C:\\work\\one"));
         let same = appcontainer_profile_name(Path::new(r"C:\\work\\one"));
         let second = appcontainer_profile_name(Path::new(r"C:\\work\\two"));

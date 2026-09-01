@@ -31,12 +31,13 @@ through an ambient host connection. The backend deliberately avoids a network
 namespace: the seccomp boundary already denies socket creation, while loopback
 setup is not available under every unprivileged Linux host policy.
 
-On Windows, every command receives a fresh AppContainer identity. Workspace
-ACL entries for that identity are installed only for the command lifetime and
-revoked before its profile is deleted. Executions are serialized inside one
-host process because system DACL updates are shared mutable state. This prevents
-concurrent or later commands from inheriting another execution's grants or
-denials.
+On Windows, each workspace receives a process-scoped AppContainer identity with
+no network capabilities. Workspace ACL entries for that identity are installed
+only for the command lifetime and then revoked. Executions are serialized
+inside one host process because system DACL updates are shared mutable state.
+The profile remains inert after ACL revocation and is reused only by the same
+workspace sandbox process, avoiding unsafe profile deletion while container
+brokers may still hold profile resources.
 
 ## Non-goals
 
