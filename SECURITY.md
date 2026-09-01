@@ -21,6 +21,13 @@ seccomp on Linux, and AppContainer plus a kill-on-close Job Object on Windows.
 Initialization or capability-probe failures are returned to the caller. The
 crate never falls back to executing the command without isolation.
 
+On Linux, seccomp rejects every `socket` call as well as `io_uring` setup and
+entry points before Bash starts. Bubblewrap closes unexpected inherited file
+descriptors, so a command cannot bypass socket creation denial through an
+ambient host connection. The backend deliberately avoids a network namespace:
+the seccomp boundary already denies socket creation, while loopback setup is
+not available under every unprivileged Linux host policy.
+
 On Windows, every command receives a fresh AppContainer identity. Workspace
 ACL entries for that identity are installed only for the command lifetime and
 revoked before its profile is deleted. This prevents concurrent or later
