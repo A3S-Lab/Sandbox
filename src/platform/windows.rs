@@ -291,7 +291,11 @@ impl<'a> ExecutionAcls<'a> {
     }
 
     fn grant_ancestor_traversal(&mut self, path: &Path) -> Result<()> {
-        let ancestors = path.ancestors().skip(1).collect::<Vec<_>>();
+        let ancestors = path
+            .ancestors()
+            .skip(1)
+            .filter(|ancestor| ancestor.parent().is_some())
+            .collect::<Vec<_>>();
         for ancestor in ancestors.into_iter().rev() {
             self.modify_with_inheritance(ancestor, FILE_TRAVERSE, GRANT_ACCESS, NO_INHERITANCE)?;
         }

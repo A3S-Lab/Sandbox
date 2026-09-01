@@ -44,8 +44,8 @@ and parent-directory traversal ACL entries are restored after every command.
 Tools and system paths use only their existing AppContainer access. A tool
 stored in a private user directory must be copied into the workspace or
 pre-authorized for AppContainer access by the host; the sandbox never installs
-inheritable access on the system-drive root or recursively rewrites arbitrary
-PATH and toolchain directories.
+an ACE on the system-drive root and never recursively rewrites arbitrary PATH
+and toolchain directories.
 
 See [SECURITY.md](SECURITY.md) for the threat model and fail-closed guarantees.
 
