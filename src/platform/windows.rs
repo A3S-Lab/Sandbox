@@ -652,7 +652,8 @@ fn spawn_appcontainer_process(
         .to_string_lossy()
         .replace('\'', "''");
     let wrapped = format!(
-        "Set-Location -LiteralPath '{workspace_literal}' -ErrorAction Stop\n{}",
+        "$null = New-PSDrive -Name A3SWorkspace -PSProvider FileSystem -Root '{workspace_literal}' -Scope Global -ErrorAction Stop\n\
+         Set-Location -LiteralPath 'A3SWorkspace:\\' -ErrorAction Stop\n{}",
         build_powershell_command(script)
     );
     let encoded = encode_powershell_command(&wrapped);
@@ -668,7 +669,10 @@ fn spawn_appcontainer_process(
     ];
     let mut command_line = wide_null(OsStr::new(&join_windows_arguments(&arguments)));
     let application = wide_null(powershell.as_os_str());
-    let current_directory_path = win32_process_path(workspace);
+    let current_directory_path = powershell
+        .parent()
+        .map(win32_process_path)
+        .context("PowerShell executable has no installation directory")?;
     let current_directory = wide_null(current_directory_path.as_os_str());
     let environment = environment_block(environment)?;
 
