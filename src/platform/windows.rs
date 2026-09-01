@@ -16,8 +16,8 @@ use std::ptr::{null, null_mut};
 use std::sync::{Mutex, OnceLock};
 use windows_sys::Win32::Foundation::{
     DuplicateHandle, GetLastError, LocalFree, SetHandleInformation, DUPLICATE_SAME_ACCESS,
-    ERROR_BROKEN_PIPE, ERROR_NO_DATA, ERROR_PIPE_NOT_CONNECTED, GENERIC_ALL, GENERIC_EXECUTE,
-    GENERIC_READ, GENERIC_WRITE, HANDLE, HANDLE_FLAG_INHERIT, INVALID_HANDLE_VALUE, WAIT_OBJECT_0,
+    ERROR_BROKEN_PIPE, ERROR_NO_DATA, ERROR_PIPE_NOT_CONNECTED, GENERIC_READ, HANDLE,
+    HANDLE_FLAG_INHERIT, INVALID_HANDLE_VALUE, WAIT_OBJECT_0,
 };
 use windows_sys::Win32::Security::Authorization::{
     GetNamedSecurityInfoW, SetEntriesInAclW, SetNamedSecurityInfoW, DENY_ACCESS, EXPLICIT_ACCESS_W,
@@ -33,9 +33,10 @@ use windows_sys::Win32::Security::{
 use windows_sys::Win32::Storage::FileSystem::{
     CreateFileW, DefineDosDeviceW, GetFileInformationByHandle, GetLogicalDrives, ReadFile,
     BY_HANDLE_FILE_INFORMATION, DDD_EXACT_MATCH_ON_REMOVE, DDD_NO_BROADCAST_SYSTEM,
-    DDD_RAW_TARGET_PATH, DDD_REMOVE_DEFINITION, DELETE, FILE_ATTRIBUTE_NORMAL,
-    FILE_FLAG_BACKUP_SEMANTICS, FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE,
-    FILE_TRAVERSE, OPEN_EXISTING,
+    DDD_RAW_TARGET_PATH, DDD_REMOVE_DEFINITION, DELETE, FILE_ALL_ACCESS, FILE_ATTRIBUTE_NORMAL,
+    FILE_DELETE_CHILD, FILE_FLAG_BACKUP_SEMANTICS, FILE_GENERIC_EXECUTE, FILE_GENERIC_READ,
+    FILE_GENERIC_WRITE, FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE, FILE_TRAVERSE,
+    OPEN_EXISTING,
 };
 use windows_sys::Win32::System::JobObjects::{
     AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
@@ -255,12 +256,20 @@ impl<'a> ExecutionAcls<'a> {
         guard.grant_ancestor_traversal(&policy.scratch)?;
         guard.modify(
             &policy.workspace,
-            GENERIC_READ | GENERIC_WRITE | GENERIC_EXECUTE | DELETE,
+            FILE_GENERIC_READ
+                | FILE_GENERIC_WRITE
+                | FILE_GENERIC_EXECUTE
+                | DELETE
+                | FILE_DELETE_CHILD,
             GRANT_ACCESS,
         )?;
         guard.modify(
             &policy.scratch,
-            GENERIC_READ | GENERIC_WRITE | GENERIC_EXECUTE | DELETE,
+            FILE_GENERIC_READ
+                | FILE_GENERIC_WRITE
+                | FILE_GENERIC_EXECUTE
+                | DELETE
+                | FILE_DELETE_CHILD,
             GRANT_ACCESS,
         )?;
         // Do not recursively mutate arbitrary PATH or toolchain roots. Windows
@@ -276,7 +285,7 @@ impl<'a> ExecutionAcls<'a> {
             {
                 continue;
             }
-            guard.modify(path, GENERIC_ALL, DENY_ACCESS)?;
+            guard.modify(path, FILE_ALL_ACCESS, DENY_ACCESS)?;
         }
         for path in &policy.deny_write {
             if !path.exists()
@@ -287,7 +296,11 @@ impl<'a> ExecutionAcls<'a> {
             {
                 continue;
             }
-            guard.modify(path, GENERIC_WRITE | DELETE, DENY_ACCESS)?;
+            guard.modify(
+                path,
+                FILE_GENERIC_WRITE | DELETE | FILE_DELETE_CHILD,
+                DENY_ACCESS,
+            )?;
         }
         Ok(guard)
     }
