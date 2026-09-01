@@ -31,14 +31,29 @@ async fn native_backend_starts_and_writes_only_ordinary_workspace_content() {
     std::fs::create_dir_all(workspace.path().join(".a3s")).unwrap();
     std::fs::write(workspace.path().join(".git/config"), "original-git").unwrap();
     std::fs::write(workspace.path().join(".a3s/policy.acl"), "original-policy").unwrap();
+    std::fs::write(workspace.path().join(".env"), "workspace-secret").unwrap();
     let sandbox = create_test_sandbox(workspace.path());
 
     sandbox.probe().await.unwrap();
     #[cfg(not(windows))]
     let ordinary_command = "printf changed > ordinary.txt";
     #[cfg(windows)]
-    let ordinary_command =
-        "[IO.File]::WriteAllText((Join-Path (Get-Location) 'ordinary.txt'), 'changed')";
+    let ordinary_command = r#"
+$ErrorActionPreference = 'Stop'
+$secretDenied = $false
+try {
+    $null = [IO.File]::ReadAllText((Join-Path (Get-Location) '.env'))
+} catch {
+    $secretDenied = $true
+}
+if (-not $secretDenied) {
+    throw 'workspace credential read unexpectedly succeeded'
+}
+if ([IO.File]::ReadAllText((Join-Path (Get-Location) '.git/config')) -ne 'original-git') {
+    throw 'read-only control metadata is unavailable'
+}
+[IO.File]::WriteAllText((Join-Path (Get-Location) 'ordinary.txt'), 'changed')
+"#;
     let ordinary = execute_test_command(&sandbox, ordinary_command)
         .await
         .unwrap();
@@ -174,49 +189,89 @@ async fn native_backend_blocks_ip_and_host_unix_socket_communication() {
     let sandbox = create_test_sandbox(workspace.path());
 
     #[cfg(windows)]
-    let ipv4_listener = std::net::TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, 0)).unwrap();
-    #[cfg(windows)]
-    let ipv6_listener = std::net::TcpListener::bind((std::net::Ipv6Addr::LOCALHOST, 0)).unwrap();
-    #[cfg(windows)]
-    let unix_parent = tempfile::tempdir().unwrap();
-    #[cfg(windows)]
-    let unix_socket = unix_parent
-        .path()
-        .join("blocked.sock")
-        .to_string_lossy()
-        .replace('\'', "''");
-    #[cfg(windows)]
-    let probes = [
-        format!(
-            "[Console]::Out.Write('{WINDOWS_PROBE_MARKER}'); $ErrorActionPreference = 'Stop'; $client = [Net.Sockets.TcpClient]::new(); $client.Connect([Net.IPAddress]::Loopback, {})",
-            ipv4_listener.local_addr().unwrap().port()
-        ),
-        format!(
-            "[Console]::Out.Write('{WINDOWS_PROBE_MARKER}'); $ErrorActionPreference = 'Stop'; $client = [Net.Sockets.TcpClient]::new([Net.Sockets.AddressFamily]::InterNetworkV6); $client.Connect([Net.IPAddress]::IPv6Loopback, {})",
-            ipv6_listener.local_addr().unwrap().port()
-        ),
-        format!(
-            "[Console]::Out.Write('{WINDOWS_PROBE_MARKER}'); $ErrorActionPreference = 'Stop'; $socket = [Net.Sockets.Socket]::new([Net.Sockets.AddressFamily]::Unix, [Net.Sockets.SocketType]::Stream, [Net.Sockets.ProtocolType]::Unspecified); $socket.Bind([Net.Sockets.UnixDomainSocketEndPoint]::new('{unix_socket}'))"
-        ),
-    ];
+    {
+        let ipv4_listener =
+            std::net::TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, 0)).unwrap();
+        let ipv6_listener =
+            std::net::TcpListener::bind((std::net::Ipv6Addr::LOCALHOST, 0)).unwrap();
+        let unix_parent = tempfile::tempdir().unwrap();
+        let unix_socket = unix_parent
+            .path()
+            .join("blocked.sock")
+            .to_string_lossy()
+            .replace('\'', "''");
+        let probe = format!(
+            r#"
+[Console]::Out.Write('{WINDOWS_PROBE_MARKER}')
+$ErrorActionPreference = 'Stop'
+
+$client = [Net.Sockets.TcpClient]::new()
+$ipv4Allowed = $false
+try {{
+    $task = $client.ConnectAsync([Net.IPAddress]::Loopback, {ipv4_port})
+    if ($task.Wait(500)) {{
+        $task.GetAwaiter().GetResult()
+        $ipv4Allowed = $true
+    }}
+}} catch {{
+}} finally {{
+    $client.Dispose()
+}}
+if ($ipv4Allowed) {{ throw 'IPv4 loopback communication unexpectedly succeeded' }}
+
+$client = [Net.Sockets.TcpClient]::new([Net.Sockets.AddressFamily]::InterNetworkV6)
+$ipv6Allowed = $false
+try {{
+    $task = $client.ConnectAsync([Net.IPAddress]::IPv6Loopback, {ipv6_port})
+    if ($task.Wait(500)) {{
+        $task.GetAwaiter().GetResult()
+        $ipv6Allowed = $true
+    }}
+}} catch {{
+}} finally {{
+    $client.Dispose()
+}}
+if ($ipv6Allowed) {{ throw 'IPv6 loopback communication unexpectedly succeeded' }}
+
+$socket = [Net.Sockets.Socket]::new(
+    [Net.Sockets.AddressFamily]::Unix,
+    [Net.Sockets.SocketType]::Stream,
+    [Net.Sockets.ProtocolType]::Unspecified
+)
+$unixAllowed = $false
+try {{
+    $socket.Bind([Net.Sockets.UnixDomainSocketEndPoint]::new('{unix_socket}'))
+    $unixAllowed = $true
+}} catch {{
+}} finally {{
+    $socket.Dispose()
+}}
+if ($unixAllowed) {{ throw 'host Unix socket creation unexpectedly succeeded' }}
+"#,
+            ipv4_port = ipv4_listener.local_addr().unwrap().port(),
+            ipv6_port = ipv6_listener.local_addr().unwrap().port(),
+        );
+        let output = execute_test_command(&sandbox, probe).await.unwrap();
+        assert_eq!(output.stdout, WINDOWS_PROBE_MARKER, "{}", output.stderr);
+        assert_eq!(output.exit_code, 0, "{}", output.stderr);
+        assert!(!unix_parent.path().join("blocked.sock").exists());
+    }
+
     #[cfg(not(windows))]
     let probes = [
         "python3 -c 'import socket; s=socket.socket(); s.bind((\"127.0.0.1\", 0))'",
         "python3 -c 'import socket; s=socket.socket(socket.AF_UNIX); s.bind(\"blocked.sock\")'",
     ];
 
+    #[cfg(not(windows))]
     for probe in probes {
         let output = execute_test_command(&sandbox, probe).await.unwrap();
-        #[cfg(windows)]
-        assert_eq!(output.stdout, WINDOWS_PROBE_MARKER, "{}", output.stderr);
         assert_ne!(
             output.exit_code, 0,
             "network or host IPC probe unexpectedly succeeded: {}{}",
             output.stdout, output.stderr
         );
     }
-    #[cfg(windows)]
-    assert!(!unix_parent.path().join("blocked.sock").exists());
 }
 
 #[cfg(target_os = "linux")]

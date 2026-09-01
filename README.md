@@ -40,14 +40,16 @@ policy forbids that boundary. macOS uses the system `/usr/bin/sandbox-exec`.
 Windows requires PowerShell 7 in the system Program Files directory and runs it
 inside an AppContainer token. One process-scoped profile identity is reused
 across all workspace sandboxes in the host process. Temporary workspace access
-ACL entries are restored after every command. The launcher temporarily grants
-that SID non-inheriting traverse-only access to workspace and scratch ancestors,
-excluding the volume root, and restores each exact DACL snapshot after the
-command. Tools and system paths use only their existing AppContainer access. A
-tool stored in a private user directory must be copied into the workspace or
-pre-authorized for AppContainer access by the host; the sandbox never grants
-parent-directory listing or data access and never rewrites the system-drive
-root, PATH, or toolchain trees.
+ACL entries are restored after every command. Protected workspace paths replace
+that identity's inherited access mask under a protected DACL, then restore both
+the exact DACL and its original inheritance state. The launcher grants only
+non-inheriting traverse access to workspace and scratch ancestors, excluding the
+volume root, and exposes the workspace through a temporary local DOS drive that
+is removed during child cleanup. Tools and system paths use only their existing
+AppContainer access. A tool stored in a private user directory must be copied
+into the workspace or pre-authorized for AppContainer access by the host; the
+sandbox never grants parent-directory listing or data access and never rewrites
+the system-drive root, PATH, or toolchain trees.
 
 See [SECURITY.md](SECURITY.md) for the threat model and fail-closed guarantees.
 

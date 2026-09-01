@@ -9,6 +9,8 @@ mod unsupported;
 #[cfg(windows)]
 mod windows;
 #[cfg(windows)]
+mod windows_security;
+#[cfg(windows)]
 mod windows_shell;
 
 #[cfg(target_os = "linux")]

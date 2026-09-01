@@ -38,10 +38,14 @@ setup is not available under every unprivileged Linux host policy.
 On Windows, all workspaces in one host process share one process-scoped
 AppContainer identity with no network capabilities. Workspace ACL entries for
 that identity are installed only for the command lifetime and then restored from
-exact snapshots. Workspace and scratch ancestors receive only a non-inheriting
-`FILE_TRAVERSE` entry for that identity; the volume root is excluded, directory
-listing and data access are not granted, and every ancestor DACL is restored.
-Executions are serialized inside one host process because these DACL updates are
+exact snapshots. Protected paths replace the package SID's inherited permission
+mask while their DACL inheritance is disabled; cleanup restores both the ACL and
+its original protected or inheriting state. Workspace and scratch ancestors
+receive only a non-inheriting `FILE_TRAVERSE` entry for that identity; the volume
+root is excluded, directory listing and data access are not granted, and every
+ancestor DACL is restored. A temporary local DOS drive exposes only the selected
+workspace to the child and is removed during child cleanup. Executions are
+serialized inside one host process because these DACL and device-map updates are
 shared mutable state. The profile remains inert after ACL restoration and is
 reused only by the same sandbox process, avoiding unsafe profile deletion while
 container brokers may still hold profile resources. The backend does not modify
