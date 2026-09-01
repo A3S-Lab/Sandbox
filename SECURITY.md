@@ -26,14 +26,15 @@ Windows PowerShell 5.1 is not used because its .NET Framework initialization is
 not AppContainer-safe under the baseline policy.
 
 On Linux, seccomp rejects `socket`, `socketpair`, `io_uring`, `unshare`, and
-`setns` entry points before Bash starts. Bubblewrap creates a nested user
-namespace with further user-namespace creation disabled, and Bash starts with
-an empty capability set, so namespace flags passed to `clone` or `clone3`
-cannot create another isolation boundary. Bubblewrap also closes unexpected
-inherited file descriptors, so a command cannot bypass socket creation denial
-through an ambient host connection. The backend deliberately avoids a network
-namespace: the seccomp boundary already denies socket creation, while loopback
-setup is not available under every unprivileged Linux host policy.
+`setns` entry points before Bash starts. It also rejects `clone3` and rejects
+namespace flags passed to `clone`, while ordinary child-process creation
+remains available. This keeps the boundary compatible with Bubblewrap releases
+that predate its optional `--disable-userns` flag. Bubblewrap starts Bash with
+an empty capability set and closes unexpected inherited file descriptors, so a
+command cannot bypass socket creation denial through an ambient host
+connection. The backend deliberately avoids a network namespace: the seccomp
+boundary already denies socket creation, while loopback setup is not available
+under every unprivileged Linux host policy.
 
 On Windows, all workspaces in one host process share one process-scoped
 AppContainer identity with no network capabilities. Workspace ACL entries for

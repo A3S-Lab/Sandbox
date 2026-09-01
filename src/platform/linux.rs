@@ -65,7 +65,6 @@ fn configure_base_arguments(command: &mut Command, policy: &SandboxPolicy) -> Re
         "--unshare-ipc",
         "--unshare-uts",
         "--unshare-cgroup-try",
-        "--disable-userns",
         "--cap-drop",
         "ALL",
         "--ro-bind",
@@ -265,6 +264,7 @@ fn write_seccomp_filter(scratch: &Path) -> Result<File> {
 
 fn seccomp_instructions() -> Result<Vec<SockFilter>> {
     const BPF_LD_W_ABS: u16 = 0x20;
+    const BPF_ALU_AND_K: u16 = 0x54;
     const BPF_JMP_JEQ_K: u16 = 0x15;
     const BPF_RET_K: u16 = 0x06;
     const SECCOMP_RET_KILL_PROCESS: u32 = 0x8000_0000;
@@ -278,6 +278,8 @@ fn seccomp_instructions() -> Result<Vec<SockFilter>> {
     #[cfg(target_arch = "x86_64")]
     const SYS_SOCKETPAIR: u32 = 53;
     #[cfg(target_arch = "x86_64")]
+    const SYS_CLONE: u32 = 56;
+    #[cfg(target_arch = "x86_64")]
     const SYS_UNSHARE: u32 = 272;
     #[cfg(target_arch = "x86_64")]
     const SYS_SETNS: u32 = 308;
@@ -290,6 +292,8 @@ fn seccomp_instructions() -> Result<Vec<SockFilter>> {
     const SYS_SOCKET: u32 = 198;
     #[cfg(target_arch = "aarch64")]
     const SYS_SOCKETPAIR: u32 = 199;
+    #[cfg(target_arch = "aarch64")]
+    const SYS_CLONE: u32 = 220;
     #[cfg(target_arch = "aarch64")]
     const SYS_UNSHARE: u32 = 97;
     #[cfg(target_arch = "aarch64")]
@@ -310,7 +314,11 @@ fn seccomp_instructions() -> Result<Vec<SockFilter>> {
         const SYS_IO_URING_SETUP: u32 = 425;
         const SYS_IO_URING_ENTER: u32 = 426;
         const SYS_IO_URING_REGISTER: u32 = 427;
+        const SYS_CLONE3: u32 = 435;
+        const CLONE_NEW_NAMESPACE_FLAGS: u32 = 0x7e02_0000;
         let errno = SECCOMP_RET_ERRNO | u32::try_from(libc::EPERM).unwrap_or(1);
+        let unsupported =
+            SECCOMP_RET_ERRNO | u32::try_from(libc::ENOSYS).unwrap_or(libc::EPERM as u32);
         let mut instructions = vec![
             SockFilter {
                 code: BPF_LD_W_ABS,
@@ -337,7 +345,7 @@ fn seccomp_instructions() -> Result<Vec<SockFilter>> {
                 k: 0,
             },
         ];
-        let blocked = [
+        let blocked_with_errno = [
             &[
                 SYS_SOCKET,
                 SYS_SOCKETPAIR,
@@ -350,8 +358,16 @@ fn seccomp_instructions() -> Result<Vec<SockFilter>> {
             LINK_SYSCALLS,
         ]
         .concat();
-        for (index, syscall) in blocked.iter().copied().enumerate() {
-            let jump = u8::try_from(blocked.len() - index)
+        let clone3_jump = u8::try_from(blocked_with_errno.len() + 6)
+            .context("native sandbox clone3 seccomp jump offset overflowed")?;
+        instructions.push(SockFilter {
+            code: BPF_JMP_JEQ_K,
+            jt: clone3_jump,
+            jf: 0,
+            k: SYS_CLONE3,
+        });
+        for (index, syscall) in blocked_with_errno.iter().copied().enumerate() {
+            let jump = u8::try_from(blocked_with_errno.len() + 4 - index)
                 .context("native sandbox seccomp jump offset overflowed")?;
             instructions.push(SockFilter {
                 code: BPF_JMP_JEQ_K,
@@ -361,6 +377,30 @@ fn seccomp_instructions() -> Result<Vec<SockFilter>> {
             });
         }
         instructions.extend([
+            SockFilter {
+                code: BPF_JMP_JEQ_K,
+                jt: 0,
+                jf: 3,
+                k: SYS_CLONE,
+            },
+            SockFilter {
+                code: BPF_LD_W_ABS,
+                jt: 0,
+                jf: 0,
+                k: 16,
+            },
+            SockFilter {
+                code: BPF_ALU_AND_K,
+                jt: 0,
+                jf: 0,
+                k: CLONE_NEW_NAMESPACE_FLAGS,
+            },
+            SockFilter {
+                code: BPF_JMP_JEQ_K,
+                jt: 0,
+                jf: 1,
+                k: 0,
+            },
             SockFilter {
                 code: BPF_RET_K,
                 jt: 0,
@@ -372,6 +412,12 @@ fn seccomp_instructions() -> Result<Vec<SockFilter>> {
                 jt: 0,
                 jf: 0,
                 k: errno,
+            },
+            SockFilter {
+                code: BPF_RET_K,
+                jt: 0,
+                jf: 0,
+                k: unsupported,
             },
         ]);
         Ok(instructions)
@@ -506,7 +552,7 @@ impl Drop for WorkspacePins {
 mod tests {
     use super::*;
 
-    fn evaluate_filter(filter: &[SockFilter], arch: u32, syscall: u32) -> u32 {
+    fn evaluate_filter(filter: &[SockFilter], arch: u32, syscall: u32, arg0: u32) -> u32 {
         let mut accumulator = 0;
         let mut index = 0;
         loop {
@@ -516,8 +562,13 @@ mod tests {
                     accumulator = match instruction.k {
                         0 => syscall,
                         4 => arch,
+                        16 => arg0,
                         offset => panic!("unexpected seccomp data offset {offset}"),
                     };
+                    index += 1;
+                }
+                0x54 => {
+                    accumulator &= instruction.k;
                     index += 1;
                 }
                 0x15 => {
@@ -535,23 +586,34 @@ mod tests {
     }
 
     #[test]
-    fn seccomp_filter_blocks_sockets_and_namespace_entry_syscalls() {
+    fn seccomp_filter_blocks_sockets_and_namespace_reentry() {
         let filter = seccomp_instructions().unwrap();
         #[cfg(target_arch = "x86_64")]
-        let (arch, socket, socketpair, unshare, setns) = (0xc000_003e, 41, 53, 272, 308);
+        let (arch, socket, socketpair, clone, unshare, setns) = (0xc000_003e, 41, 53, 56, 272, 308);
         #[cfg(target_arch = "aarch64")]
-        let (arch, socket, socketpair, unshare, setns) = (0xc000_00b7, 198, 199, 97, 268);
+        let (arch, socket, socketpair, clone, unshare, setns) =
+            (0xc000_00b7, 198, 199, 220, 97, 268);
 
         let allow = 0x7fff_0000;
         let permission_denied = 0x0005_0000 | u32::try_from(libc::EPERM).unwrap();
-        assert_eq!(evaluate_filter(&filter, arch, socket), permission_denied);
+        let unsupported = 0x0005_0000 | u32::try_from(libc::ENOSYS).unwrap();
+        assert_eq!(evaluate_filter(&filter, arch, socket, 0), permission_denied);
         assert_eq!(
-            evaluate_filter(&filter, arch, socketpair),
+            evaluate_filter(&filter, arch, socketpair, 0),
             permission_denied
         );
-        assert_eq!(evaluate_filter(&filter, arch, unshare), permission_denied);
-        assert_eq!(evaluate_filter(&filter, arch, setns), permission_denied);
-        assert_eq!(evaluate_filter(&filter, arch, u32::MAX), allow);
+        assert_eq!(
+            evaluate_filter(&filter, arch, unshare, 0),
+            permission_denied
+        );
+        assert_eq!(evaluate_filter(&filter, arch, setns, 0), permission_denied);
+        assert_eq!(evaluate_filter(&filter, arch, 435, 0), unsupported);
+        assert_eq!(
+            evaluate_filter(&filter, arch, clone, 0x1000_0000),
+            permission_denied
+        );
+        assert_eq!(evaluate_filter(&filter, arch, clone, 0), allow);
+        assert_eq!(evaluate_filter(&filter, arch, u32::MAX, 0), allow);
     }
 
     #[test]
