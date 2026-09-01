@@ -34,10 +34,10 @@ async fn main() -> anyhow::Result<()> {
 }
 ```
 
-Linux hosts must provide Bubblewrap at `/usr/bin/bwrap`. macOS uses the system
-`/usr/bin/sandbox-exec`. Windows uses the system Windows PowerShell executable
-inside a per-execution AppContainer whose temporary workspace ACL entries are
-revoked during cleanup.
+Linux hosts must provide Bubblewrap at `/usr/bin/bwrap` and util-linux
+`setpriv` at `/usr/bin/setpriv`. macOS uses the system `/usr/bin/sandbox-exec`.
+Windows uses the system Windows PowerShell executable inside a per-execution
+AppContainer whose temporary workspace ACL entries are revoked during cleanup.
 
 See [SECURITY.md](SECURITY.md) for the threat model and fail-closed guarantees.
 

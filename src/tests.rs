@@ -167,6 +167,27 @@ async fn native_backend_blocks_ip_binding_and_unix_sockets() {
     }
 }
 
+#[cfg(target_os = "linux")]
+#[tokio::test]
+async fn linux_backend_drops_all_process_capabilities_before_bash() {
+    let workspace = tempfile::tempdir().unwrap();
+    let sandbox = NativeSandbox::new(workspace.path()).unwrap();
+    let output = sandbox
+        .exec_command("grep '^Cap\\(Inh\\|Prm\\|Eff\\|Bnd\\|Amb\\):' /proc/self/status")
+        .await
+        .unwrap();
+    assert_eq!(output.exit_code, 0, "{}", output.stderr);
+    let capabilities = output.stdout.lines().collect::<Vec<_>>();
+    assert_eq!(capabilities.len(), 5, "{}", output.stdout);
+    assert!(
+        capabilities
+            .iter()
+            .all(|line| line.ends_with("0000000000000000")),
+        "sandboxed Bash retained Linux capabilities: {}",
+        output.stdout
+    );
+}
+
 #[tokio::test]
 async fn native_backend_sanitizes_environment_and_kills_timed_out_descendants() {
     let workspace = tempfile::tempdir().unwrap();

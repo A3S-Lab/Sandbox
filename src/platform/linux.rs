@@ -21,6 +21,7 @@ const SECCOMP_FD: libc::c_int = 198;
 #[derive(Debug)]
 pub(crate) struct PlatformSandbox {
     bwrap: PathBuf,
+    setpriv: PathBuf,
     shell: PathBuf,
 }
 
@@ -28,9 +29,15 @@ impl PlatformSandbox {
     pub(crate) fn new(workspace: &Path) -> Result<Self> {
         let bwrap = resolve_executable("/usr/bin/bwrap", workspace)
             .context("Linux native sandbox requires bubblewrap at /usr/bin/bwrap")?;
+        let setpriv = resolve_executable("/usr/bin/setpriv", workspace)
+            .context("Linux native sandbox requires util-linux setpriv at /usr/bin/setpriv")?;
         let shell = resolve_executable("/bin/bash", workspace)
             .context("trusted Linux bash executable is unavailable")?;
-        Ok(Self { bwrap, shell })
+        Ok(Self {
+            bwrap,
+            setpriv,
+            shell,
+        })
     }
 
     pub(crate) async fn execute(
@@ -46,6 +53,14 @@ impl PlatformSandbox {
         configure_seccomp_fd(&mut command, &seccomp)?;
         command
             .arg("--")
+            .arg(&self.setpriv)
+            .args([
+                "--bounding-set=-all",
+                "--inh-caps=-all",
+                "--ambient-caps=-all",
+                "--no-new-privs",
+                "--",
+            ])
             .arg(&self.shell)
             .arg("-c")
             .arg(&request.command)
@@ -69,6 +84,8 @@ fn configure_base_arguments(command: &mut Command, policy: &SandboxPolicy) -> Re
         "--disable-userns",
         "--cap-drop",
         "ALL",
+        "--cap-add",
+        "CAP_NET_ADMIN",
         "--ro-bind",
         "/",
         "/",
