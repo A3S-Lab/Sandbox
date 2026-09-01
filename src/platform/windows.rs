@@ -6,10 +6,10 @@ use crate::{CommandOutput, CommandRequest};
 use anyhow::{bail, Context, Result};
 use sha2::{Digest, Sha256};
 use std::collections::{HashMap, HashSet};
-use std::ffi::{c_void, OsStr, OsString};
+use std::ffi::{c_void, OsStr};
 use std::fs::{File, OpenOptions};
 use std::mem::{size_of, zeroed};
-use std::os::windows::ffi::{OsStrExt, OsStringExt};
+use std::os::windows::ffi::OsStrExt;
 use std::os::windows::io::{AsRawHandle, FromRawHandle, OwnedHandle};
 use std::path::{Path, PathBuf};
 use std::ptr::{null, null_mut};
@@ -42,7 +42,6 @@ use windows_sys::Win32::System::JobObjects::{
     JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
 };
 use windows_sys::Win32::System::Pipes::{CreatePipe, PeekNamedPipe};
-use windows_sys::Win32::System::SystemInformation::GetSystemDirectoryW;
 use windows_sys::Win32::System::Threading::{
     CreateProcessW, DeleteProcThreadAttributeList, GetCurrentProcess, GetExitCodeProcess,
     InitializeProcThreadAttributeList, ResumeThread, TerminateProcess, UpdateProcThreadAttribute,
@@ -125,22 +124,13 @@ fn finish_execution(
 }
 
 fn resolve_powershell(workspace: &Path) -> Result<PathBuf> {
-    let mut buffer = vec![0_u16; 32_768];
-    let capacity = u32::try_from(buffer.len()).context("Windows system path buffer overflowed")?;
-    let length = unsafe { GetSystemDirectoryW(buffer.as_mut_ptr(), capacity) };
-    if length == 0 {
-        return Err(last_windows_error("resolve the Windows system directory"));
-    }
-    let length = usize::try_from(length).context("Windows system directory length overflowed")?;
-    if length >= buffer.len() {
-        bail!("Windows system directory exceeds the native sandbox path limit");
-    }
-    let candidate = PathBuf::from(OsString::from_wide(&buffer[..length]))
-        .join("WindowsPowerShell")
-        .join("v1.0")
-        .join("powershell.exe");
+    let program_files = std::env::var_os("ProgramFiles")
+        .filter(|path| !path.is_empty())
+        .map(PathBuf::from)
+        .context("Windows Program Files directory is unavailable")?;
+    let candidate = program_files.join("PowerShell").join("7").join("pwsh.exe");
     resolve_executable(candidate, workspace)
-        .context("trusted Windows PowerShell executable is unavailable")
+        .context("PowerShell 7 is required for the Windows native sandbox")
 }
 
 #[derive(Debug)]

@@ -21,6 +21,10 @@ seccomp on Linux, and AppContainer plus a kill-on-close Job Object on Windows.
 Initialization or capability-probe failures are returned to the caller. The
 crate never falls back to executing the command without isolation.
 
+The Windows launcher is PowerShell 7 from the system Program Files directory.
+Windows PowerShell 5.1 is not used because its .NET Framework initialization is
+not AppContainer-safe under the baseline policy.
+
 On Linux, seccomp rejects `socket`, `socketpair`, `io_uring`, `unshare`, and
 `setns` entry points before Bash starts. Bubblewrap creates a nested user
 namespace with further user-namespace creation disabled, and Bash starts with
