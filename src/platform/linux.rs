@@ -8,7 +8,7 @@ use crate::{CommandOutput, CommandRequest};
 use anyhow::{bail, Context, Result};
 use std::collections::HashMap;
 use std::fs::{File, OpenOptions};
-use std::io::Write;
+use std::io::{Seek, Write};
 use std::os::fd::AsRawFd;
 use std::os::unix::fs::{DirBuilderExt, MetadataExt, OpenOptionsExt};
 use std::os::unix::process::CommandExt;
@@ -258,6 +258,8 @@ fn write_seccomp_filter(scratch: &Path) -> Result<File> {
         file.write_all(&instruction.k.to_ne_bytes())?;
     }
     file.flush()?;
+    file.rewind()
+        .context("failed to rewind the native sandbox seccomp filter")?;
     Ok(file)
 }
 
@@ -550,6 +552,20 @@ mod tests {
         assert_eq!(evaluate_filter(&filter, arch, unshare), permission_denied);
         assert_eq!(evaluate_filter(&filter, arch, setns), permission_denied);
         assert_eq!(evaluate_filter(&filter, arch, u32::MAX), allow);
+    }
+
+    #[test]
+    fn seccomp_filter_file_is_rewound_for_bubblewrap() {
+        let scratch = tempfile::tempdir().unwrap();
+        let mut filter = write_seccomp_filter(scratch.path()).unwrap();
+        assert_eq!(filter.stream_position().unwrap(), 0);
+        assert_eq!(
+            filter.metadata().unwrap().len(),
+            u64::try_from(
+                seccomp_instructions().unwrap().len() * std::mem::size_of::<SockFilter>(),
+            )
+            .unwrap()
+        );
     }
 
     #[test]
