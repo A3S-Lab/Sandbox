@@ -11,7 +11,7 @@ use std::fs::{File, OpenOptions};
 use std::mem::{size_of, zeroed};
 use std::os::windows::ffi::OsStrExt;
 use std::os::windows::io::{AsRawHandle, FromRawHandle, OwnedHandle};
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf, Prefix};
 use std::ptr::{null, null_mut};
 use std::sync::{Mutex, OnceLock};
 use windows_sys::Win32::Foundation::{
@@ -645,7 +645,8 @@ fn spawn_appcontainer_process(
     ];
     let mut command_line = wide_null(OsStr::new(&join_windows_arguments(&arguments)));
     let application = wide_null(powershell.as_os_str());
-    let current_directory = wide_null(workspace.as_os_str());
+    let current_directory_path = win32_process_path(workspace);
+    let current_directory = wide_null(current_directory_path.as_os_str());
     let environment = environment_block(environment)?;
 
     let mut startup = STARTUPINFOEXW::default();
@@ -971,6 +972,29 @@ fn join_windows_arguments(arguments: &[std::ffi::OsString]) -> String {
         .join(" ")
 }
 
+fn win32_process_path(path: &Path) -> PathBuf {
+    let mut components = path.components();
+    let Some(Component::Prefix(prefix)) = components.next() else {
+        return path.to_path_buf();
+    };
+    let mut normalized = match prefix.kind() {
+        Prefix::VerbatimDisk(drive) => PathBuf::from(format!("{}:\\", char::from(drive))),
+        Prefix::VerbatimUNC(server, share) => {
+            let mut path = PathBuf::from(r"\\");
+            path.push(server);
+            path.push(share);
+            path
+        }
+        _ => return path.to_path_buf(),
+    };
+    for component in components {
+        if !matches!(component, Component::RootDir) {
+            normalized.push(component.as_os_str());
+        }
+    }
+    normalized
+}
+
 fn quote_windows_argument(argument: &str) -> String {
     if !argument.is_empty()
         && !argument
@@ -1209,5 +1233,17 @@ mod tests {
         let same = appcontainer_profile_name();
         assert_eq!(first, same);
         assert!(first.starts_with("A3S.Sandbox.Execution."));
+    }
+
+    #[test]
+    fn process_paths_drop_verbatim_prefixes() {
+        assert_eq!(
+            win32_process_path(Path::new(r"\\?\C:\work tree")),
+            PathBuf::from(r"C:\work tree")
+        );
+        assert_eq!(
+            win32_process_path(Path::new(r"\\?\UNC\server\share\work")),
+            PathBuf::from(r"\\server\share\work")
+        );
     }
 }

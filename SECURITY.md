@@ -8,7 +8,7 @@ system launcher, and crate binary are trusted.
 
 Every supported backend applies the same baseline policy:
 
-- deny IPv4, IPv6, and Unix-domain socket creation;
+- deny IPv4, IPv6, and host Unix-domain socket communication;
 - deny reads of known credential locations and workspace secret files;
 - deny writes to A3S, agent, editor, shell, and Git control metadata;
 - deny symbolic-link and hard-link escape paths;

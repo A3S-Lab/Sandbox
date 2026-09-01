@@ -2,6 +2,8 @@ use super::*;
 use std::collections::HashMap;
 
 const TEST_COMMAND_TIMEOUT_MS: u64 = 5_000;
+#[cfg(windows)]
+const WINDOWS_PROBE_MARKER: &str = "a3s-sandbox-probe";
 
 fn create_test_sandbox(workspace: &std::path::Path) -> NativeSandbox {
     NativeSandbox::new(workspace).unwrap()
@@ -154,10 +156,11 @@ async fn windows_backend_blocks_preexisting_hardlink_escape() {
 
     let output = execute_test_command(
         &sandbox,
-        "[IO.File]::WriteAllText((Join-Path (Get-Location) 'outside-hardlink'), 'escaped')",
+        "[Console]::Out.Write('a3s-sandbox-probe'); $ErrorActionPreference = 'Stop'; [IO.File]::WriteAllText((Join-Path (Get-Location) 'outside-hardlink'), 'escaped')",
     )
     .await
     .unwrap();
+    assert_eq!(output.stdout, WINDOWS_PROBE_MARKER, "{}", output.stderr);
     assert_ne!(output.exit_code, 0, "hard-link write escape succeeded");
     assert_eq!(
         std::fs::read_to_string(outside_secret).unwrap(),
@@ -166,14 +169,35 @@ async fn windows_backend_blocks_preexisting_hardlink_escape() {
 }
 
 #[tokio::test]
-async fn native_backend_blocks_ip_binding_and_unix_sockets() {
+async fn native_backend_blocks_ip_and_host_unix_socket_communication() {
     let workspace = tempfile::tempdir().unwrap();
     let sandbox = create_test_sandbox(workspace.path());
 
     #[cfg(windows)]
+    let ipv4_listener = std::net::TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, 0)).unwrap();
+    #[cfg(windows)]
+    let ipv6_listener = std::net::TcpListener::bind((std::net::Ipv6Addr::LOCALHOST, 0)).unwrap();
+    #[cfg(windows)]
+    let unix_parent = tempfile::tempdir().unwrap();
+    #[cfg(windows)]
+    let unix_socket = unix_parent
+        .path()
+        .join("blocked.sock")
+        .to_string_lossy()
+        .replace('\'', "''");
+    #[cfg(windows)]
     let probes = [
-        "$listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, 0); $listener.Start()",
-        "$socket = [System.Net.Sockets.Socket]::new([System.Net.Sockets.AddressFamily]::Unix, [System.Net.Sockets.SocketType]::Stream, [System.Net.Sockets.ProtocolType]::Unspecified)",
+        format!(
+            "[Console]::Out.Write('{WINDOWS_PROBE_MARKER}'); $ErrorActionPreference = 'Stop'; $client = [Net.Sockets.TcpClient]::new(); $client.Connect([Net.IPAddress]::Loopback, {})",
+            ipv4_listener.local_addr().unwrap().port()
+        ),
+        format!(
+            "[Console]::Out.Write('{WINDOWS_PROBE_MARKER}'); $ErrorActionPreference = 'Stop'; $client = [Net.Sockets.TcpClient]::new([Net.Sockets.AddressFamily]::InterNetworkV6); $client.Connect([Net.IPAddress]::IPv6Loopback, {})",
+            ipv6_listener.local_addr().unwrap().port()
+        ),
+        format!(
+            "[Console]::Out.Write('{WINDOWS_PROBE_MARKER}'); $ErrorActionPreference = 'Stop'; $socket = [Net.Sockets.Socket]::new([Net.Sockets.AddressFamily]::Unix, [Net.Sockets.SocketType]::Stream, [Net.Sockets.ProtocolType]::Unspecified); $socket.Bind([Net.Sockets.UnixDomainSocketEndPoint]::new('{unix_socket}'))"
+        ),
     ];
     #[cfg(not(windows))]
     let probes = [
@@ -183,12 +207,16 @@ async fn native_backend_blocks_ip_binding_and_unix_sockets() {
 
     for probe in probes {
         let output = execute_test_command(&sandbox, probe).await.unwrap();
+        #[cfg(windows)]
+        assert_eq!(output.stdout, WINDOWS_PROBE_MARKER, "{}", output.stderr);
         assert_ne!(
             output.exit_code, 0,
-            "socket probe unexpectedly succeeded: {}{}",
+            "network or host IPC probe unexpectedly succeeded: {}{}",
             output.stdout, output.stderr
         );
     }
+    #[cfg(windows)]
+    assert!(!unix_parent.path().join("blocked.sock").exists());
 }
 
 #[cfg(target_os = "linux")]
