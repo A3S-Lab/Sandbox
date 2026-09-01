@@ -16,7 +16,9 @@ mod policy;
 mod process;
 
 pub use policy::{
-    is_protected_workspace_path, PROTECTED_WORKSPACE_DIRECTORIES, PROTECTED_WORKSPACE_FILES,
+    hard_link_count, hard_link_count_for_open_file, is_protected_workspace_path, sensitive_paths,
+    should_skip_workspace_scan_directory, workspace_hardlink_paths, workspace_sensitive_paths,
+    PROTECTED_WORKSPACE_DIRECTORIES, PROTECTED_WORKSPACE_FILES,
 };
 
 const DEFAULT_TIMEOUT_MS: u64 = 120_000;

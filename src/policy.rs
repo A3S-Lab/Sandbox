@@ -350,7 +350,8 @@ fn is_executable(path: &Path) -> bool {
     }
 }
 
-pub(crate) fn sensitive_paths() -> Vec<PathBuf> {
+/// Resolve known host credential and authentication paths.
+pub fn sensitive_paths() -> Vec<PathBuf> {
     let mut paths = dirs::home_dir()
         .map(|home| default_sensitive_paths(&home))
         .unwrap_or_default();
@@ -464,7 +465,8 @@ fn default_sensitive_paths(home: &Path) -> Vec<PathBuf> {
     .collect()
 }
 
-pub(crate) fn workspace_sensitive_paths(workspace: &Path) -> Result<Vec<PathBuf>> {
+/// Discover credential-like files inside a workspace.
+pub fn workspace_sensitive_paths(workspace: &Path) -> Result<Vec<PathBuf>> {
     let mut paths = [
         ".env",
         ".env.local",
@@ -541,7 +543,8 @@ fn workspace_nested_env_paths(workspace: &Path) -> Result<Vec<PathBuf>> {
     Ok(paths)
 }
 
-pub(crate) fn workspace_hardlink_paths(workspace: &Path) -> Result<Vec<PathBuf>> {
+/// Discover workspace files with multiple hard-link aliases.
+pub fn workspace_hardlink_paths(workspace: &Path) -> Result<Vec<PathBuf>> {
     let mut pending = vec![(workspace.to_path_buf(), 0usize)];
     let mut scanned = 0usize;
     let mut hardlinks = Vec::new();
@@ -626,18 +629,24 @@ fn ensure_workspace_scan_depth(depth: usize, path: &Path) -> Result<()> {
     Ok(())
 }
 
-pub(crate) fn should_skip_workspace_scan_directory(name: &OsStr) -> bool {
+/// Return whether recursive security scans should treat a directory as a
+/// package/build store rather than source content.
+pub fn should_skip_workspace_scan_directory(name: &OsStr) -> bool {
     matches!(name.to_str(), Some(".git" | "node_modules" | "target"))
 }
 
 #[cfg(unix)]
-fn hard_link_count(_path: &Path, metadata: &std::fs::Metadata) -> u64 {
+/// Return a file's hard-link count, failing conservatively on platforms where
+/// querying it requires reopening the path.
+pub fn hard_link_count(_path: &Path, metadata: &std::fs::Metadata) -> u64 {
     use std::os::unix::fs::MetadataExt;
     metadata.nlink()
 }
 
 #[cfg(windows)]
-fn hard_link_count(path: &Path, metadata: &std::fs::Metadata) -> u64 {
+/// Return a file's hard-link count, failing conservatively on platforms where
+/// querying it requires reopening the path.
+pub fn hard_link_count(path: &Path, metadata: &std::fs::Metadata) -> u64 {
     let Ok(file) = std::fs::File::open(path) else {
         return u64::MAX;
     };
@@ -645,7 +654,8 @@ fn hard_link_count(path: &Path, metadata: &std::fs::Metadata) -> u64 {
 }
 
 #[cfg(windows)]
-fn hard_link_count_for_open_file<T>(file: &T, _metadata: &std::fs::Metadata) -> u64
+/// Return the hard-link count for an already-open file handle.
+pub fn hard_link_count_for_open_file<T>(file: &T, _metadata: &std::fs::Metadata) -> u64
 where
     T: std::os::windows::io::AsRawHandle,
 {
@@ -661,8 +671,22 @@ where
     u64::from(information.nNumberOfLinks.max(1))
 }
 
+/// Return the hard-link count for an already-open file handle.
+#[cfg(unix)]
+pub fn hard_link_count_for_open_file<T>(_file: &T, metadata: &std::fs::Metadata) -> u64 {
+    use std::os::unix::fs::MetadataExt;
+    metadata.nlink()
+}
+
 #[cfg(not(any(unix, windows)))]
-fn hard_link_count(_path: &Path, _metadata: &std::fs::Metadata) -> u64 {
+/// Return a conservative hard-link count on unsupported filesystems.
+pub fn hard_link_count(_path: &Path, _metadata: &std::fs::Metadata) -> u64 {
+    1
+}
+
+#[cfg(not(any(unix, windows)))]
+/// Return a conservative hard-link count on unsupported filesystems.
+pub fn hard_link_count_for_open_file<T>(_file: &T, _metadata: &std::fs::Metadata) -> u64 {
     1
 }
 
