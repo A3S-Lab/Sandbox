@@ -4,15 +4,7 @@ use std::collections::HashMap;
 const TEST_COMMAND_TIMEOUT_MS: u64 = 5_000;
 
 fn create_test_sandbox(workspace: &std::path::Path) -> NativeSandbox {
-    #[cfg(windows)]
-    eprintln!(
-        "[a3s-sandbox-test] create AppContainer for {}",
-        workspace.display()
-    );
-    let sandbox = NativeSandbox::new(workspace).unwrap();
-    #[cfg(windows)]
-    eprintln!("[a3s-sandbox-test] AppContainer created");
-    sandbox
+    NativeSandbox::new(workspace).unwrap()
 }
 
 async fn execute_test_command(
@@ -20,19 +12,14 @@ async fn execute_test_command(
     command: impl Into<String>,
 ) -> anyhow::Result<CommandOutput> {
     let command = command.into();
-    #[cfg(windows)]
-    eprintln!("[a3s-sandbox-test] execute {command:?}");
-    let result = sandbox
+    sandbox
         .execute(CommandRequest {
             command,
             timeout_ms: TEST_COMMAND_TIMEOUT_MS,
             output_observer: None,
             env: None,
         })
-        .await;
-    #[cfg(windows)]
-    eprintln!("[a3s-sandbox-test] command completed");
-    result
+        .await
 }
 
 #[tokio::test]
@@ -44,11 +31,7 @@ async fn native_backend_starts_and_writes_only_ordinary_workspace_content() {
     std::fs::write(workspace.path().join(".a3s/policy.acl"), "original-policy").unwrap();
     let sandbox = create_test_sandbox(workspace.path());
 
-    #[cfg(windows)]
-    eprintln!("[a3s-sandbox-test] probe AppContainer");
     sandbox.probe().await.unwrap();
-    #[cfg(windows)]
-    eprintln!("[a3s-sandbox-test] AppContainer probe completed");
     #[cfg(not(windows))]
     let ordinary_command = "printf changed > ordinary.txt";
     #[cfg(windows)]

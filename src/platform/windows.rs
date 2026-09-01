@@ -32,8 +32,8 @@ use windows_sys::Win32::Security::{
 };
 use windows_sys::Win32::Storage::FileSystem::{
     CreateFileW, GetFileInformationByHandle, ReadFile, BY_HANDLE_FILE_INFORMATION, DELETE,
-    FILE_ATTRIBUTE_NORMAL, FILE_FLAG_BACKUP_SEMANTICS, FILE_READ_ATTRIBUTES, FILE_READ_EA,
-    FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE, OPEN_EXISTING, READ_CONTROL, SYNCHRONIZE,
+    FILE_ATTRIBUTE_NORMAL, FILE_FLAG_BACKUP_SEMANTICS, FILE_SHARE_DELETE, FILE_SHARE_READ,
+    FILE_SHARE_WRITE, OPEN_EXISTING,
 };
 use windows_sys::Win32::System::JobObjects::{
     AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
@@ -57,29 +57,18 @@ const PIPE_POLL_MS: u64 = 5;
 const PIPE_SETTLEMENT_MS: u64 = 500;
 const PROCESS_LIMIT: u32 = 256;
 const HRESULT_ALREADY_EXISTS: u32 = 0x8007_00b7;
-const SYSTEM_DRIVE_METADATA_ACCESS: u32 =
-    FILE_READ_ATTRIBUTES | FILE_READ_EA | READ_CONTROL | SYNCHRONIZE;
-
 #[derive(Debug)]
 pub(crate) struct PlatformSandbox {
     powershell: PathBuf,
-    system_drive: PathBuf,
     profile: AppContainerProfile,
 }
 
 impl PlatformSandbox {
     pub(crate) fn new(workspace: &Path) -> Result<Self> {
         let powershell = resolve_powershell(workspace)?;
-        let system_drive = powershell
-            .ancestors()
-            .last()
-            .filter(|path| path.is_absolute())
-            .map(Path::to_path_buf)
-            .context("failed to resolve the Windows system-drive root")?;
         let profile = AppContainerProfile::create(workspace)?;
         Ok(Self {
             powershell,
-            system_drive,
             profile,
         })
     }
@@ -89,23 +78,13 @@ impl PlatformSandbox {
         policy: &SandboxPolicy,
         request: CommandRequest,
     ) -> Result<CommandOutput> {
-        // The system-drive and executable DACLs are shared host objects. Keep
-        // their apply/use/revoke lifetime atomic across in-process executions.
-        #[cfg(test)]
-        eprintln!("[a3s-sandbox-test] wait for Windows execution gate");
+        // Workspace DACLs are shared host objects. Keep their
+        // apply/use/restore lifetime atomic across in-process executions.
         let _execution = execution_gate().lock().await;
-        #[cfg(test)]
-        eprintln!("[a3s-sandbox-test] Windows execution gate acquired");
         let pins = WorkspacePins::acquire(policy)?;
-        #[cfg(test)]
-        eprintln!("[a3s-sandbox-test] workspace placeholders pinned");
-        let mut acls = ExecutionAcls::apply(policy, &self.profile.sid, &self.system_drive)?;
-        #[cfg(test)]
-        eprintln!("[a3s-sandbox-test] execution ACLs applied");
+        let mut acls = ExecutionAcls::apply(policy, &self.profile.sid)?;
         let execution = match policy.child_environment(request.env.as_deref()) {
             Ok(environment) => {
-                #[cfg(test)]
-                eprintln!("[a3s-sandbox-test] child environment built");
                 match spawn_appcontainer_process(
                     &self.powershell,
                     &self.profile.sid,
@@ -113,21 +92,13 @@ impl PlatformSandbox {
                     &request.command,
                     environment,
                 ) {
-                    Ok(child) => {
-                        #[cfg(test)]
-                        eprintln!("[a3s-sandbox-test] AppContainer process spawned");
-                        capture_process(child, request).await
-                    }
+                    Ok(child) => capture_process(child, request).await,
                     Err(error) => Err(error),
                 }
             }
             Err(error) => Err(error),
         };
-        #[cfg(test)]
-        eprintln!("[a3s-sandbox-test] AppContainer capture completed");
         let acl_cleanup = acls.restore();
-        #[cfg(test)]
-        eprintln!("[a3s-sandbox-test] execution ACLs restored");
         drop(acls);
         drop(pins);
         finish_execution(execution, acl_cleanup)
@@ -285,7 +256,7 @@ struct ExecutionAcls<'a> {
 }
 
 impl<'a> ExecutionAcls<'a> {
-    fn apply(policy: &SandboxPolicy, sid: &'a SidBuffer, system_drive: &Path) -> Result<Self> {
+    fn apply(policy: &SandboxPolicy, sid: &'a SidBuffer) -> Result<Self> {
         let mut guard = Self {
             sid,
             paths: Vec::new(),
@@ -300,12 +271,6 @@ impl<'a> ExecutionAcls<'a> {
             &policy.scratch,
             GENERIC_READ | GENERIC_WRITE | GENERIC_EXECUTE | DELETE,
             GRANT_ACCESS,
-        )?;
-        guard.modify_with_inheritance(
-            system_drive,
-            SYSTEM_DRIVE_METADATA_ACCESS,
-            GRANT_ACCESS,
-            NO_INHERITANCE,
         )?;
         // Do not recursively mutate arbitrary PATH or toolchain roots. Windows
         // propagates inheritable ACEs through those host trees, which is both
@@ -352,18 +317,12 @@ impl<'a> ExecutionAcls<'a> {
         access_mode: i32,
         inheritance: u32,
     ) -> Result<()> {
-        #[cfg(test)]
-        eprintln!("[a3s-sandbox-test] capture DACL for {}", path.display());
         let snapshot = if self.modified.contains(path) {
             None
         } else {
             Some(capture_path_dacl(path)?)
         };
-        #[cfg(test)]
-        eprintln!("[a3s-sandbox-test] apply DACL for {}", path.display());
         modify_path_acl(path, self.sid, permissions, access_mode, inheritance)?;
-        #[cfg(test)]
-        eprintln!("[a3s-sandbox-test] DACL applied for {}", path.display());
         if let Some(snapshot) = snapshot {
             self.modified.insert(path.to_path_buf());
             self.paths.push((path.to_path_buf(), snapshot));
