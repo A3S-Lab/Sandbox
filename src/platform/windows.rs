@@ -1,11 +1,11 @@
 //! Windows AppContainer and Job Object backend.
 
 use super::windows_shell::{build_powershell_command, encode_powershell_command};
-use crate::policy::{resolve_executable, SandboxPolicy};
+use crate::policy::{requires_directory_placeholder, resolve_executable, SandboxPolicy};
 use crate::{CommandOutput, CommandRequest};
 use anyhow::{bail, Context, Result};
 use sha2::{Digest, Sha256};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::ffi::{c_void, OsStr, OsString};
 use std::fs::{File, OpenOptions};
 use std::mem::{size_of, zeroed};
@@ -22,10 +22,10 @@ use windows_sys::Win32::Foundation::{
 };
 use windows_sys::Win32::Security::Authorization::{
     GetNamedSecurityInfoW, SetEntriesInAclW, SetNamedSecurityInfoW, DENY_ACCESS, EXPLICIT_ACCESS_W,
-    GRANT_ACCESS, SE_FILE_OBJECT, TRUSTEE_IS_SID, TRUSTEE_IS_UNKNOWN,
+    GRANT_ACCESS, REVOKE_ACCESS, SE_FILE_OBJECT, TRUSTEE_IS_SID, TRUSTEE_IS_UNKNOWN,
 };
 use windows_sys::Win32::Security::Isolation::{
-    CreateAppContainerProfile, DeriveAppContainerSidFromAppContainerName,
+    CreateAppContainerProfile, DeleteAppContainerProfile,
 };
 use windows_sys::Win32::Security::{
     FreeSid, GetLengthSid, ACL, DACL_SECURITY_INFORMATION, NO_INHERITANCE, PSID,
@@ -33,7 +33,8 @@ use windows_sys::Win32::Security::{
 };
 use windows_sys::Win32::Storage::FileSystem::{
     CreateFileW, GetFileInformationByHandle, BY_HANDLE_FILE_INFORMATION, DELETE,
-    FILE_ATTRIBUTE_NORMAL, FILE_SHARE_READ, FILE_SHARE_WRITE, OPEN_EXISTING,
+    FILE_ATTRIBUTE_NORMAL, FILE_FLAG_BACKUP_SEMANTICS, FILE_READ_ATTRIBUTES, FILE_READ_EA,
+    FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE, OPEN_EXISTING, READ_CONTROL, SYNCHRONIZE,
 };
 use windows_sys::Win32::System::JobObjects::{
     AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
@@ -52,30 +53,29 @@ use windows_sys::Win32::System::Threading::{
     STARTF_USESTDHANDLES, STARTUPINFOEXW,
 };
 
-const APP_CONTAINER_EXISTS_HRESULT: i32 = 0x8007_00b7_u32 as i32;
 const READ_CHUNK_BYTES: usize = 8 * 1024;
 const PROCESS_LIMIT: u32 = 256;
+const SYSTEM_DRIVE_METADATA_ACCESS: u32 =
+    FILE_READ_ATTRIBUTES | FILE_READ_EA | READ_CONTROL | SYNCHRONIZE;
 
 #[derive(Debug)]
 pub(crate) struct PlatformSandbox {
     powershell: PathBuf,
-    appcontainer_sid: SidBuffer,
+    system_drive: PathBuf,
 }
 
 impl PlatformSandbox {
     pub(crate) fn new(workspace: &Path) -> Result<Self> {
         let powershell = resolve_powershell(workspace)?;
-        let appcontainer_sid = create_or_open_profile(workspace)?;
-        grant_path(
-            workspace,
-            &appcontainer_sid,
-            GENERIC_READ | GENERIC_WRITE | GENERIC_EXECUTE | DELETE,
-            GRANT_ACCESS,
-        )
-        .context("failed to grant the AppContainer access to the workspace")?;
+        let system_drive = powershell
+            .ancestors()
+            .last()
+            .filter(|path| path.is_absolute())
+            .map(Path::to_path_buf)
+            .context("failed to resolve the Windows system-drive root")?;
         Ok(Self {
             powershell,
-            appcontainer_sid,
+            system_drive,
         })
     }
 
@@ -84,17 +84,49 @@ impl PlatformSandbox {
         policy: &SandboxPolicy,
         request: CommandRequest,
     ) -> Result<CommandOutput> {
-        let _pins = WorkspacePins::acquire(policy)?;
-        apply_execution_acls(policy, &self.appcontainer_sid)?;
-        let environment = policy.child_environment(request.env.as_deref())?;
-        let child = spawn_appcontainer_process(
-            &self.powershell,
-            &self.appcontainer_sid,
-            &policy.workspace,
-            &request.command,
-            environment,
-        )?;
-        capture_process(child, request).await
+        let mut profile = AppContainerProfile::create(&policy.scratch)?;
+        let pins = WorkspacePins::acquire(policy)?;
+        let mut acls = ExecutionAcls::apply(policy, &profile.sid, &self.system_drive)?;
+        let execution = match policy.child_environment(request.env.as_deref()) {
+            Ok(environment) => match spawn_appcontainer_process(
+                &self.powershell,
+                &profile.sid,
+                &policy.workspace,
+                &request.command,
+                environment,
+            ) {
+                Ok(child) => capture_process(child, request).await,
+                Err(error) => Err(error),
+            },
+            Err(error) => Err(error),
+        };
+        let acl_cleanup = acls.restore();
+        drop(acls);
+        drop(pins);
+        let profile_cleanup = profile.delete();
+        finish_execution(execution, acl_cleanup, profile_cleanup)
+    }
+}
+
+fn finish_execution(
+    execution: Result<CommandOutput>,
+    acl_cleanup: Result<()>,
+    profile_cleanup: Result<()>,
+) -> Result<CommandOutput> {
+    let cleanup = match (acl_cleanup, profile_cleanup) {
+        (Ok(()), Ok(())) => Ok(()),
+        (Err(error), Ok(())) | (Ok(()), Err(error)) => Err(error),
+        (Err(acl_error), Err(profile_error)) => Err(anyhow::anyhow!(
+            "Windows sandbox cleanup failed: ACL cleanup: {acl_error:#}; AppContainer cleanup: {profile_error:#}"
+        )),
+    };
+    match (execution, cleanup) {
+        (Ok(output), Ok(())) => Ok(output),
+        (Ok(_), Err(error)) => Err(error),
+        (Err(error), Ok(())) => Err(error),
+        (Err(error), Err(cleanup)) => {
+            Err(error.context(format!("Windows sandbox cleanup also failed: {cleanup:#}")))
+        }
     }
 }
 
@@ -156,46 +188,78 @@ impl SidBuffer {
     }
 }
 
-fn create_or_open_profile(workspace: &Path) -> Result<SidBuffer> {
-    let name = appcontainer_profile_name(workspace);
-    let wide = wide_null(OsStr::new(&name));
-    let display = wide_null(OsStr::new("A3S Code Native Sandbox"));
-    let description = wide_null(OsStr::new(
-        "A3S-owned AppContainer for fail-closed local command execution",
-    ));
-    let mut sid = null_mut();
-    let created = unsafe {
-        CreateAppContainerProfile(
-            wide.as_ptr(),
-            display.as_ptr(),
-            description.as_ptr(),
-            null(),
-            0,
-            &mut sid,
-        )
-    };
-    if created >= 0 {
-        return SidBuffer::from_allocated(sid);
-    }
-    if created != APP_CONTAINER_EXISTS_HRESULT {
-        bail!(
-            "CreateAppContainerProfile failed with HRESULT 0x{:08x}",
-            created as u32
-        );
-    }
-    let derived = unsafe { DeriveAppContainerSidFromAppContainerName(wide.as_ptr(), &mut sid) };
-    if derived < 0 {
-        bail!(
-            "DeriveAppContainerSidFromAppContainerName failed with HRESULT 0x{:08x}",
-            derived as u32
-        );
-    }
-    SidBuffer::from_allocated(sid)
+struct AppContainerProfile {
+    name: Vec<u16>,
+    sid: SidBuffer,
+    active: bool,
 }
 
-fn appcontainer_profile_name(workspace: &Path) -> String {
+impl AppContainerProfile {
+    fn create(execution_root: &Path) -> Result<Self> {
+        let name = appcontainer_profile_name(execution_root);
+        let name = wide_null(OsStr::new(&name));
+        let display = wide_null(OsStr::new("A3S Native Sandbox Execution"));
+        let description = wide_null(OsStr::new(
+            "Per-execution AppContainer for fail-closed A3S command execution",
+        ));
+        let mut sid = null_mut();
+        let status = unsafe {
+            CreateAppContainerProfile(
+                name.as_ptr(),
+                display.as_ptr(),
+                description.as_ptr(),
+                null(),
+                0,
+                &mut sid,
+            )
+        };
+        if status < 0 {
+            bail!(
+                "CreateAppContainerProfile failed with HRESULT 0x{:08x}",
+                status as u32
+            );
+        }
+        let sid = match SidBuffer::from_allocated(sid) {
+            Ok(sid) => sid,
+            Err(error) => {
+                unsafe {
+                    DeleteAppContainerProfile(name.as_ptr());
+                }
+                return Err(error);
+            }
+        };
+        Ok(Self {
+            name,
+            sid,
+            active: true,
+        })
+    }
+
+    fn delete(&mut self) -> Result<()> {
+        if !self.active {
+            return Ok(());
+        }
+        let status = unsafe { DeleteAppContainerProfile(self.name.as_ptr()) };
+        if status < 0 {
+            bail!(
+                "DeleteAppContainerProfile failed with HRESULT 0x{:08x}",
+                status as u32
+            );
+        }
+        self.active = false;
+        Ok(())
+    }
+}
+
+impl Drop for AppContainerProfile {
+    fn drop(&mut self) {
+        let _ = self.delete();
+    }
+}
+
+fn appcontainer_profile_name(execution_root: &Path) -> String {
     let mut hasher = Sha256::new();
-    for word in workspace.as_os_str().encode_wide() {
+    for word in execution_root.as_os_str().encode_wide() {
         hasher.update(word.to_le_bytes());
     }
     let digest = hasher.finalize();
@@ -203,56 +267,128 @@ fn appcontainer_profile_name(workspace: &Path) -> String {
         .iter()
         .map(|byte| format!("{byte:02x}"))
         .collect::<String>();
-    format!("A3S.Code.Sandbox.{suffix}")
+    format!("A3S.Sandbox.Execution.{suffix}")
 }
 
-fn apply_execution_acls(policy: &SandboxPolicy, sid: &SidBuffer) -> Result<()> {
-    grant_path(
-        &policy.scratch,
-        sid,
-        GENERIC_READ | GENERIC_WRITE | GENERIC_EXECUTE | DELETE,
-        GRANT_ACCESS,
-    )?;
-    for path in &policy.allow_read {
-        if path == &policy.workspace || path == &policy.scratch || !path.exists() {
-            continue;
+struct ExecutionAcls<'a> {
+    sid: &'a SidBuffer,
+    paths: Vec<PathBuf>,
+    modified: HashSet<PathBuf>,
+}
+
+impl<'a> ExecutionAcls<'a> {
+    fn apply(policy: &SandboxPolicy, sid: &'a SidBuffer, system_drive: &Path) -> Result<Self> {
+        let mut guard = Self {
+            sid,
+            paths: Vec::new(),
+            modified: HashSet::new(),
+        };
+        guard.modify(
+            &policy.workspace,
+            GENERIC_READ | GENERIC_WRITE | GENERIC_EXECUTE | DELETE,
+            GRANT_ACCESS,
+        )?;
+        guard.modify(
+            &policy.scratch,
+            GENERIC_READ | GENERIC_WRITE | GENERIC_EXECUTE | DELETE,
+            GRANT_ACCESS,
+        )?;
+        guard.modify_with_inheritance(
+            system_drive,
+            SYSTEM_DRIVE_METADATA_ACCESS,
+            GRANT_ACCESS,
+            NO_INHERITANCE,
+        )?;
+        for path in &policy.allow_read {
+            if path == &policy.workspace
+                || path == &policy.scratch
+                || path == system_drive
+                || !path.exists()
+            {
+                continue;
+            }
+            if let Err(error) = guard.modify(path, GENERIC_READ | GENERIC_EXECUTE, GRANT_ACCESS) {
+                // System-owned tool paths normally already grant AppContainers
+                // read/execute access. An optional grant failure only narrows
+                // the child and therefore remains fail closed.
+                tracing::debug!(
+                    path = %path.display(),
+                    %error,
+                    "native sandbox could not add optional AppContainer read access"
+                );
+            }
         }
-        if let Err(error) = grant_path(path, sid, GENERIC_READ | GENERIC_EXECUTE, GRANT_ACCESS) {
-            // System and administrator-owned PATH entries commonly reject DACL
-            // mutation while already granting AppContainers read/execute
-            // access. Failing to add this optional allow can only reduce the
-            // child capability; the process itself will fail closed if the
-            // existing ACL is insufficient.
-            tracing::debug!(
-                path = %path.display(),
-                %error,
-                "native sandbox could not add optional AppContainer read access"
-            );
+        for path in &policy.deny_read {
+            if !path.exists()
+                || !policy
+                    .allow_read
+                    .iter()
+                    .any(|allowed| path.starts_with(allowed))
+            {
+                continue;
+            }
+            guard.modify(path, GENERIC_ALL, DENY_ACCESS)?;
+        }
+        for path in &policy.deny_write {
+            if !path.exists()
+                || !policy
+                    .allow_write
+                    .iter()
+                    .any(|allowed| path.starts_with(allowed))
+            {
+                continue;
+            }
+            guard.modify(path, GENERIC_WRITE | DELETE, DENY_ACCESS)?;
+        }
+        Ok(guard)
+    }
+
+    fn modify(&mut self, path: &Path, permissions: u32, access_mode: i32) -> Result<()> {
+        let inheritance = if path.is_dir() {
+            SUB_CONTAINERS_AND_OBJECTS_INHERIT
+        } else {
+            NO_INHERITANCE
+        };
+        self.modify_with_inheritance(path, permissions, access_mode, inheritance)
+    }
+
+    fn modify_with_inheritance(
+        &mut self,
+        path: &Path,
+        permissions: u32,
+        access_mode: i32,
+        inheritance: u32,
+    ) -> Result<()> {
+        modify_path_acl(path, self.sid, permissions, access_mode, inheritance)?;
+        if self.modified.insert(path.to_path_buf()) {
+            self.paths.push(path.to_path_buf());
+        }
+        Ok(())
+    }
+
+    fn restore(&mut self) -> Result<()> {
+        let mut failure = None;
+        for path in self.paths.drain(..).rev() {
+            if let Err(error) = modify_path_acl(&path, self.sid, 0, REVOKE_ACCESS, NO_INHERITANCE) {
+                if failure.is_none() {
+                    failure = Some(
+                        error.context(format!("failed to restore the ACL for {}", path.display())),
+                    );
+                }
+            }
+            self.modified.remove(&path);
+        }
+        match failure {
+            Some(error) => Err(error),
+            None => Ok(()),
         }
     }
-    for path in &policy.deny_read {
-        if !path.exists()
-            || !policy
-                .allow_read
-                .iter()
-                .any(|allowed| path.starts_with(allowed))
-        {
-            continue;
-        }
-        grant_path(path, sid, GENERIC_ALL, DENY_ACCESS)?;
+}
+
+impl Drop for ExecutionAcls<'_> {
+    fn drop(&mut self) {
+        let _ = self.restore();
     }
-    for path in &policy.deny_write {
-        if !path.exists()
-            || !policy
-                .allow_write
-                .iter()
-                .any(|allowed| path.starts_with(allowed))
-        {
-            continue;
-        }
-        grant_path(path, sid, GENERIC_WRITE | DELETE, DENY_ACCESS)?;
-    }
-    Ok(())
 }
 
 struct LocalAllocation(*mut c_void);
@@ -267,7 +403,13 @@ impl Drop for LocalAllocation {
     }
 }
 
-fn grant_path(path: &Path, sid: &SidBuffer, permissions: u32, access_mode: i32) -> Result<()> {
+fn modify_path_acl(
+    path: &Path,
+    sid: &SidBuffer,
+    permissions: u32,
+    access_mode: i32,
+    inheritance: u32,
+) -> Result<()> {
     let wide = wide_null(path.as_os_str());
     let mut old_acl: *mut ACL = null_mut();
     let mut descriptor = null_mut();
@@ -292,11 +434,6 @@ fn grant_path(path: &Path, sid: &SidBuffer, permissions: u32, access_mode: i32) 
     }
     let _descriptor = LocalAllocation(descriptor);
 
-    let inheritance = if path.is_dir() {
-        SUB_CONTAINERS_AND_OBJECTS_INHERIT
-    } else {
-        NO_INHERITANCE
-    };
     let mut access = EXPLICIT_ACCESS_W {
         grfAccessPermissions: permissions,
         grfAccessMode: access_mode,
@@ -785,6 +922,7 @@ struct PinRecord {
     references: usize,
     volume: u32,
     index: u64,
+    directory: bool,
 }
 
 fn pin_registry() -> &'static Mutex<HashMap<PathBuf, PinRecord>> {
@@ -803,12 +941,12 @@ impl WorkspacePins {
             if !path.starts_with(&policy.workspace) {
                 continue;
             }
-            pins.acquire_path(path)?;
+            pins.acquire_path(&policy.workspace, path)?;
         }
         Ok(pins)
     }
 
-    fn acquire_path(&mut self, path: &Path) -> Result<()> {
+    fn acquire_path(&mut self, workspace: &Path, path: &Path) -> Result<()> {
         let mut registry = pin_registry()
             .lock()
             .map_err(|_| anyhow::anyhow!("native sandbox placeholder registry was poisoned"))?;
@@ -827,23 +965,22 @@ impl WorkspacePins {
                 path.display()
             );
         }
-        match OpenOptions::new().create_new(true).write(true).open(path) {
-            Ok(file) => {
-                let (volume, index) = file_identity(&file)?;
+        let directory = requires_directory_placeholder(workspace, path);
+        match create_placeholder(path, directory)? {
+            Some((volume, index)) => {
                 registry.insert(
                     path.to_path_buf(),
                     PinRecord {
                         references: 1,
                         volume,
                         index,
+                        directory,
                     },
                 );
                 self.paths.push(path.to_path_buf());
                 Ok(())
             }
-            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => Ok(()),
-            Err(error) => Err(error)
-                .with_context(|| format!("failed to pin write-denied path {}", path.display())),
+            None => Ok(()),
         }
     }
 }
@@ -863,8 +1000,9 @@ impl Drop for WorkspacePins {
             }
             let volume = record.volume;
             let index = record.index;
+            let directory = record.directory;
             registry.remove(&path);
-            let Ok(file) = File::open(&path) else {
+            let Ok(file) = open_placeholder(&path, directory) else {
                 continue;
             };
             let Ok(metadata) = file.metadata() else {
@@ -873,12 +1011,79 @@ impl Drop for WorkspacePins {
             let Ok(identity) = file_identity(&file) else {
                 continue;
             };
-            if metadata.is_file() && metadata.len() == 0 && identity == (volume, index) {
+            if identity == (volume, index) && directory && metadata.is_dir() {
+                drop(file);
+                let _ = std::fs::remove_dir(path);
+            } else if identity == (volume, index)
+                && !directory
+                && metadata.is_file()
+                && metadata.len() == 0
+            {
                 drop(file);
                 let _ = std::fs::remove_file(path);
             }
         }
     }
+}
+
+fn create_placeholder(path: &Path, directory: bool) -> Result<Option<(u32, u64)>> {
+    if directory {
+        match std::fs::create_dir(path) {
+            Ok(()) => {}
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => return Ok(None),
+            Err(error) => {
+                return Err(error).with_context(|| {
+                    format!("failed to pin write-denied directory {}", path.display())
+                })
+            }
+        }
+        let identity = open_placeholder(path, true).and_then(|handle| file_identity(&handle));
+        return match identity {
+            Ok(identity) => Ok(Some(identity)),
+            Err(error) => {
+                let _ = std::fs::remove_dir(path);
+                Err(error)
+            }
+        };
+    }
+
+    match OpenOptions::new().create_new(true).write(true).open(path) {
+        Ok(file) => match file_identity(&file) {
+            Ok(identity) => Ok(Some(identity)),
+            Err(error) => {
+                drop(file);
+                let _ = std::fs::remove_file(path);
+                Err(error)
+            }
+        },
+        Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => Ok(None),
+        Err(error) => Err(error)
+            .with_context(|| format!("failed to pin write-denied file {}", path.display())),
+    }
+}
+
+fn open_placeholder(path: &Path, directory: bool) -> Result<File> {
+    let wide = wide_null(path.as_os_str());
+    let flags = if directory {
+        FILE_FLAG_BACKUP_SEMANTICS
+    } else {
+        FILE_ATTRIBUTE_NORMAL
+    };
+    let raw = unsafe {
+        CreateFileW(
+            wide.as_ptr(),
+            0,
+            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+            null(),
+            OPEN_EXISTING,
+            flags,
+            null_mut(),
+        )
+    };
+    if raw == INVALID_HANDLE_VALUE {
+        return Err(last_windows_error("open native sandbox placeholder"));
+    }
+    Ok(File::from(unsafe { OwnedHandle::from_raw_handle(raw) }))
 }
 
 fn file_identity(file: &File) -> Result<(u32, u64)> {
@@ -908,12 +1113,12 @@ mod tests {
     }
 
     #[test]
-    fn appcontainer_name_is_stable_and_workspace_scoped() {
+    fn appcontainer_name_is_stable_and_execution_scoped() {
         let first = appcontainer_profile_name(Path::new(r"C:\\work\\one"));
         let same = appcontainer_profile_name(Path::new(r"C:\\work\\one"));
         let second = appcontainer_profile_name(Path::new(r"C:\\work\\two"));
         assert_eq!(first, same);
         assert_ne!(first, second);
-        assert!(first.starts_with("A3S.Code.Sandbox."));
+        assert!(first.starts_with("A3S.Sandbox.Execution."));
     }
 }

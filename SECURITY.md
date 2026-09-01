@@ -21,6 +21,11 @@ seccomp on Linux, and AppContainer plus a kill-on-close Job Object on Windows.
 Initialization or capability-probe failures are returned to the caller. The
 crate never falls back to executing the command without isolation.
 
+On Windows, every command receives a fresh AppContainer identity. Workspace
+ACL entries for that identity are installed only for the command lifetime and
+revoked before its profile is deleted. This prevents concurrent or later
+commands from inheriting another execution's grants or denials.
+
 ## Non-goals
 
 This crate does not provide an HTTP proxy, selective network allow-list, remote

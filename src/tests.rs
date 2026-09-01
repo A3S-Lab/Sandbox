@@ -11,17 +11,20 @@ async fn native_backend_starts_and_writes_only_ordinary_workspace_content() {
     let sandbox = NativeSandbox::new(workspace.path()).unwrap();
 
     sandbox.probe().await.unwrap();
-    let ordinary = sandbox
-        .exec_command("printf changed > ordinary.txt")
-        .await
-        .unwrap();
+    #[cfg(not(windows))]
+    let ordinary_command = "printf changed > ordinary.txt";
+    #[cfg(windows)]
+    let ordinary_command =
+        "[IO.File]::WriteAllText((Join-Path (Get-Location) 'ordinary.txt'), 'changed')";
+    let ordinary = sandbox.exec_command(ordinary_command).await.unwrap();
     assert_eq!(ordinary.exit_code, 0, "{}", ordinary.stderr);
     assert_eq!(
         std::fs::read_to_string(workspace.path().join("ordinary.txt")).unwrap(),
         "changed"
     );
 
-    for (command, path, expected) in [
+    #[cfg(not(windows))]
+    let protected_writes = [
         (
             "printf changed > .git/config",
             ".git/config",
@@ -32,7 +35,21 @@ async fn native_backend_starts_and_writes_only_ordinary_workspace_content() {
             ".a3s/policy.acl",
             "original-policy",
         ),
-    ] {
+    ];
+    #[cfg(windows)]
+    let protected_writes = [
+        (
+            "[IO.File]::WriteAllText((Join-Path (Get-Location) '.git/config'), 'changed')",
+            ".git/config",
+            "original-git",
+        ),
+        (
+            "[IO.File]::WriteAllText((Join-Path (Get-Location) '.a3s/policy.acl'), 'changed')",
+            ".a3s/policy.acl",
+            "original-policy",
+        ),
+    ];
+    for (command, path, expected) in protected_writes {
         let output = sandbox.exec_command(command).await.unwrap();
         assert_ne!(
             output.exit_code, 0,
@@ -44,7 +61,11 @@ async fn native_backend_starts_and_writes_only_ordinary_workspace_content() {
         );
     }
 
-    let create = sandbox.exec_command("mkdir .codex").await.unwrap();
+    #[cfg(not(windows))]
+    let create_command = "mkdir .codex";
+    #[cfg(windows)]
+    let create_command = "New-Item -ItemType Directory -Path '.codex' -ErrorAction Stop";
+    let create = sandbox.exec_command(create_command).await.unwrap();
     assert_ne!(
         create.exit_code, 0,
         "protected directory creation succeeded"

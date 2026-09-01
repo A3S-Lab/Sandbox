@@ -109,6 +109,24 @@ impl SandboxPolicy {
     }
 }
 
+#[cfg(any(target_os = "linux", windows))]
+pub(super) fn requires_directory_placeholder(workspace: &Path, path: &Path) -> bool {
+    let Ok(relative) = path.strip_prefix(workspace) else {
+        return false;
+    };
+    let mut components = relative.components();
+    let Some(component) = components.next() else {
+        return false;
+    };
+    if components.next().is_some() {
+        return false;
+    }
+    let name = component.as_os_str().to_string_lossy();
+    PROTECTED_WORKSPACE_DIRECTORIES
+        .iter()
+        .any(|protected| name.eq_ignore_ascii_case(protected))
+}
+
 fn validate_denied_workspace_entries(workspace: &Path, paths: &[PathBuf]) -> Result<()> {
     for path in paths.iter().filter(|path| path.starts_with(workspace)) {
         match std::fs::symlink_metadata(path) {
@@ -175,9 +193,25 @@ fn compose_child_env(
         "CXX",
         "AR",
         "SYSTEMROOT",
+        "SYSTEMDRIVE",
         "WINDIR",
         "COMSPEC",
         "PATHEXT",
+        "PSMODULEPATH",
+        "PROGRAMDATA",
+        "PROGRAMFILES",
+        "PROGRAMFILES(X86)",
+        "PROGRAMW6432",
+        "COMMONPROGRAMFILES",
+        "COMMONPROGRAMFILES(X86)",
+        "COMMONPROGRAMW6432",
+        "PROCESSOR_ARCHITECTURE",
+        "NUMBER_OF_PROCESSORS",
+        "OS",
+        "HOMEDRIVE",
+        "HOMEPATH",
+        "PUBLIC",
+        "ALLUSERSPROFILE",
     ];
 
     let mut environment = BTreeMap::new();
@@ -814,6 +848,32 @@ mod tests {
         assert!(policy
             .deny_write
             .contains(&workspace.join("hardlink-secret")));
+    }
+
+    #[cfg(any(target_os = "linux", windows))]
+    #[test]
+    fn only_protected_workspace_roots_require_directory_placeholders() {
+        let workspace = Path::new("/workspace");
+        assert!(requires_directory_placeholder(
+            workspace,
+            &workspace.join(".a3s")
+        ));
+        assert!(requires_directory_placeholder(
+            workspace,
+            &workspace.join(".GIT")
+        ));
+        assert!(!requires_directory_placeholder(
+            workspace,
+            &workspace.join(".gitmodules")
+        ));
+        assert!(!requires_directory_placeholder(
+            workspace,
+            &workspace.join(".a3s/os-auth.json")
+        ));
+        assert!(!requires_directory_placeholder(
+            workspace,
+            Path::new("/outside/.a3s")
+        ));
     }
 
     #[cfg(unix)]

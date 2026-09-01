@@ -1,6 +1,8 @@
 //! Linux namespace, mount, and seccomp backend.
 
-use crate::policy::{path_ancestors, resolve_executable, SandboxPolicy};
+use crate::policy::{
+    path_ancestors, requires_directory_placeholder, resolve_executable, SandboxPolicy,
+};
 use crate::process::run_tokio_command;
 use crate::{CommandOutput, CommandRequest};
 use anyhow::{bail, Context, Result};
@@ -8,7 +10,7 @@ use std::collections::HashMap;
 use std::fs::{File, OpenOptions};
 use std::io::Write;
 use std::os::fd::AsRawFd;
-use std::os::unix::fs::{MetadataExt, OpenOptionsExt};
+use std::os::unix::fs::{DirBuilderExt, MetadataExt, OpenOptionsExt};
 use std::os::unix::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
@@ -142,7 +144,14 @@ fn ensure_mount_destination(command: &mut Command, path: &Path) {
 fn mask_read_path(command: &mut Command, path: &Path) -> Result<()> {
     let metadata = match std::fs::symlink_metadata(path) {
         Ok(metadata) => metadata,
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+        Err(error)
+            if matches!(
+                error.kind(),
+                std::io::ErrorKind::NotFound | std::io::ErrorKind::NotADirectory
+            ) =>
+        {
+            return Ok(())
+        }
         Err(error) => {
             return Err(error)
                 .with_context(|| format!("failed to inspect read-denied path {}", path.display()))
@@ -168,7 +177,14 @@ fn mask_read_path(command: &mut Command, path: &Path) -> Result<()> {
 fn bind_read_only(command: &mut Command, path: &Path) -> Result<()> {
     let metadata = match std::fs::symlink_metadata(path) {
         Ok(metadata) => metadata,
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+        Err(error)
+            if matches!(
+                error.kind(),
+                std::io::ErrorKind::NotFound | std::io::ErrorKind::NotADirectory
+            ) =>
+        {
+            return Ok(())
+        }
         Err(error) => {
             return Err(error)
                 .with_context(|| format!("failed to inspect write-denied path {}", path.display()))
@@ -351,6 +367,7 @@ struct PinRecord {
     references: usize,
     device: u64,
     inode: u64,
+    directory: bool,
 }
 
 fn pin_registry() -> &'static Mutex<HashMap<PathBuf, PinRecord>> {
@@ -369,12 +386,12 @@ impl WorkspacePins {
             if !path.starts_with(&policy.workspace) {
                 continue;
             }
-            guard.acquire_path(path)?;
+            guard.acquire_path(&policy.workspace, path)?;
         }
         Ok(guard)
     }
 
-    fn acquire_path(&mut self, path: &Path) -> Result<()> {
+    fn acquire_path(&mut self, workspace: &Path, path: &Path) -> Result<()> {
         let mut registry = pin_registry()
             .lock()
             .map_err(|_| anyhow::anyhow!("native sandbox placeholder registry was poisoned"))?;
@@ -393,20 +410,39 @@ impl WorkspacePins {
                 path.display()
             );
         }
-        match OpenOptions::new()
-            .create_new(true)
-            .write(true)
-            .mode(0o600)
-            .open(path)
-        {
-            Ok(file) => {
-                let metadata = file.metadata()?;
+        let directory = requires_directory_placeholder(workspace, path);
+        let created = if directory {
+            std::fs::DirBuilder::new().mode(0o700).create(path)
+        } else {
+            OpenOptions::new()
+                .create_new(true)
+                .write(true)
+                .mode(0o600)
+                .open(path)
+                .map(drop)
+        };
+        match created {
+            Ok(()) => {
+                let metadata = match std::fs::symlink_metadata(path) {
+                    Ok(metadata) => metadata,
+                    Err(error) => {
+                        if directory {
+                            let _ = std::fs::remove_dir(path);
+                        } else {
+                            let _ = std::fs::remove_file(path);
+                        }
+                        return Err(error).with_context(|| {
+                            format!("failed to inspect sandbox placeholder {}", path.display())
+                        });
+                    }
+                };
                 registry.insert(
                     path.to_path_buf(),
                     PinRecord {
                         references: 1,
                         device: metadata.dev(),
                         inode: metadata.ino(),
+                        directory,
                     },
                 );
                 self.paths.push(path.to_path_buf());
@@ -434,16 +470,17 @@ impl Drop for WorkspacePins {
             }
             let device = record.device;
             let inode = record.inode;
+            let directory = record.directory;
             registry.remove(&path);
             let Ok(metadata) = std::fs::symlink_metadata(&path) else {
                 continue;
             };
-            if metadata.is_file()
-                && metadata.len() == 0
-                && metadata.dev() == device
-                && metadata.ino() == inode
-            {
-                let _ = std::fs::remove_file(path);
+            if metadata.dev() == device && metadata.ino() == inode {
+                if directory && metadata.is_dir() {
+                    let _ = std::fs::remove_dir(path);
+                } else if !directory && metadata.is_file() && metadata.len() == 0 {
+                    let _ = std::fs::remove_file(path);
+                }
             }
         }
     }
@@ -477,7 +514,7 @@ mod tests {
         assert!(!protected.exists());
         {
             let _pins = WorkspacePins::acquire(&policy).unwrap();
-            assert!(protected.is_file());
+            assert!(protected.is_dir());
         }
         assert!(!protected.exists());
     }
