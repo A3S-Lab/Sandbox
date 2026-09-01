@@ -1,6 +1,22 @@
 use super::*;
 use std::collections::HashMap;
 
+const TEST_COMMAND_TIMEOUT_MS: u64 = 5_000;
+
+async fn execute_test_command(
+    sandbox: &NativeSandbox,
+    command: impl Into<String>,
+) -> anyhow::Result<CommandOutput> {
+    sandbox
+        .execute(CommandRequest {
+            command: command.into(),
+            timeout_ms: TEST_COMMAND_TIMEOUT_MS,
+            output_observer: None,
+            env: None,
+        })
+        .await
+}
+
 #[tokio::test]
 async fn native_backend_starts_and_writes_only_ordinary_workspace_content() {
     let workspace = tempfile::tempdir().unwrap();
@@ -16,7 +32,9 @@ async fn native_backend_starts_and_writes_only_ordinary_workspace_content() {
     #[cfg(windows)]
     let ordinary_command =
         "[IO.File]::WriteAllText((Join-Path (Get-Location) 'ordinary.txt'), 'changed')";
-    let ordinary = sandbox.exec_command(ordinary_command).await.unwrap();
+    let ordinary = execute_test_command(&sandbox, ordinary_command)
+        .await
+        .unwrap();
     assert_eq!(ordinary.exit_code, 0, "{}", ordinary.stderr);
     assert_eq!(
         std::fs::read_to_string(workspace.path().join("ordinary.txt")).unwrap(),
@@ -50,7 +68,7 @@ async fn native_backend_starts_and_writes_only_ordinary_workspace_content() {
         ),
     ];
     for (command, path, expected) in protected_writes {
-        let output = sandbox.exec_command(command).await.unwrap();
+        let output = execute_test_command(&sandbox, command).await.unwrap();
         assert_ne!(
             output.exit_code, 0,
             "write unexpectedly succeeded: {command}"
@@ -65,7 +83,9 @@ async fn native_backend_starts_and_writes_only_ordinary_workspace_content() {
     let create_command = "mkdir .codex";
     #[cfg(windows)]
     let create_command = "New-Item -ItemType Directory -Path '.codex' -ErrorAction Stop";
-    let create = sandbox.exec_command(create_command).await.unwrap();
+    let create = execute_test_command(&sandbox, create_command)
+        .await
+        .unwrap();
     assert_ne!(
         create.exit_code, 0,
         "protected directory creation succeeded"
@@ -96,7 +116,7 @@ async fn native_backend_blocks_symlink_hardlink_and_credential_escape() {
         "printf escaped > outside-hardlink",
         "printf escaped > outside-link/symlink-escape",
     ] {
-        let output = sandbox.exec_command(command).await.unwrap();
+        let output = execute_test_command(&sandbox, command).await.unwrap();
         assert_ne!(
             output.exit_code, 0,
             "escape unexpectedly succeeded: {command}"
@@ -110,8 +130,7 @@ async fn native_backend_blocks_symlink_hardlink_and_credential_escape() {
     assert!(!outside.path().join("symlink-escape").exists());
 
     std::fs::write(workspace.path().join("link-source"), "ordinary").unwrap();
-    let output = sandbox
-        .exec_command("ln link-source new-hardlink")
+    let output = execute_test_command(&sandbox, "ln link-source new-hardlink")
         .await
         .unwrap();
     assert_ne!(output.exit_code, 0, "runtime hard-link creation succeeded");
@@ -128,12 +147,12 @@ async fn windows_backend_blocks_preexisting_hardlink_escape() {
     std::fs::hard_link(&outside_secret, workspace.path().join("outside-hardlink")).unwrap();
     let sandbox = NativeSandbox::new(workspace.path()).unwrap();
 
-    let output = sandbox
-        .exec_command(
-            "[IO.File]::WriteAllText((Join-Path (Get-Location) 'outside-hardlink'), 'escaped')",
-        )
-        .await
-        .unwrap();
+    let output = execute_test_command(
+        &sandbox,
+        "[IO.File]::WriteAllText((Join-Path (Get-Location) 'outside-hardlink'), 'escaped')",
+    )
+    .await
+    .unwrap();
     assert_ne!(output.exit_code, 0, "hard-link write escape succeeded");
     assert_eq!(
         std::fs::read_to_string(outside_secret).unwrap(),
@@ -158,7 +177,7 @@ async fn native_backend_blocks_ip_binding_and_unix_sockets() {
     ];
 
     for probe in probes {
-        let output = sandbox.exec_command(probe).await.unwrap();
+        let output = execute_test_command(&sandbox, probe).await.unwrap();
         assert_ne!(
             output.exit_code, 0,
             "socket probe unexpectedly succeeded: {}{}",
@@ -172,10 +191,12 @@ async fn native_backend_blocks_ip_binding_and_unix_sockets() {
 async fn linux_backend_drops_all_process_capabilities_before_bash() {
     let workspace = tempfile::tempdir().unwrap();
     let sandbox = NativeSandbox::new(workspace.path()).unwrap();
-    let output = sandbox
-        .exec_command("grep '^Cap\\(Inh\\|Prm\\|Eff\\|Bnd\\|Amb\\):' /proc/self/status")
-        .await
-        .unwrap();
+    let output = execute_test_command(
+        &sandbox,
+        "grep '^Cap\\(Inh\\|Prm\\|Eff\\|Bnd\\|Amb\\):' /proc/self/status",
+    )
+    .await
+    .unwrap();
     assert_eq!(output.exit_code, 0, "{}", output.stderr);
     let capabilities = output.stdout.lines().collect::<Vec<_>>();
     assert_eq!(capabilities.len(), 5, "{}", output.stdout);
