@@ -33,7 +33,7 @@ use windows_sys::Win32::Security::{
 use windows_sys::Win32::Storage::FileSystem::{
     CreateFileW, GetFileInformationByHandle, ReadFile, BY_HANDLE_FILE_INFORMATION, DELETE,
     FILE_ATTRIBUTE_NORMAL, FILE_FLAG_BACKUP_SEMANTICS, FILE_SHARE_DELETE, FILE_SHARE_READ,
-    FILE_SHARE_WRITE, FILE_TRAVERSE, OPEN_EXISTING,
+    FILE_SHARE_WRITE, OPEN_EXISTING,
 };
 use windows_sys::Win32::System::JobObjects::{
     AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
@@ -249,8 +249,6 @@ impl<'a> ExecutionAcls<'a> {
             paths: Vec::new(),
             modified: HashSet::new(),
         };
-        guard.grant_ancestor_traversal(&policy.workspace)?;
-        guard.grant_ancestor_traversal(&policy.scratch)?;
         guard.modify(
             &policy.workspace,
             GENERIC_READ | GENERIC_WRITE | GENERIC_EXECUTE | DELETE,
@@ -288,18 +286,6 @@ impl<'a> ExecutionAcls<'a> {
             guard.modify(path, GENERIC_WRITE | DELETE, DENY_ACCESS)?;
         }
         Ok(guard)
-    }
-
-    fn grant_ancestor_traversal(&mut self, path: &Path) -> Result<()> {
-        let ancestors = path
-            .ancestors()
-            .skip(1)
-            .filter(|ancestor| ancestor.parent().is_some())
-            .collect::<Vec<_>>();
-        for ancestor in ancestors.into_iter().rev() {
-            self.modify_with_inheritance(ancestor, FILE_TRAVERSE, GRANT_ACCESS, NO_INHERITANCE)?;
-        }
-        Ok(())
     }
 
     fn modify(&mut self, path: &Path, permissions: u32, access_mode: i32) -> Result<()> {
@@ -648,7 +634,13 @@ fn spawn_appcontainer_process(
         size_of_val(&inherited),
     )?;
 
-    let wrapped = build_powershell_command(script);
+    let workspace_literal = win32_process_path(workspace)
+        .to_string_lossy()
+        .replace('\'', "''");
+    let wrapped = format!(
+        "Set-Location -LiteralPath '{workspace_literal}' -ErrorAction Stop\n{}",
+        build_powershell_command(script)
+    );
     let encoded = encode_powershell_command(&wrapped);
     let arguments = [
         powershell.as_os_str().to_os_string(),

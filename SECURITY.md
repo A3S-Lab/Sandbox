@@ -37,16 +37,15 @@ setup is not available under every unprivileged Linux host policy.
 
 On Windows, all workspaces in one host process share one process-scoped
 AppContainer identity with no network capabilities. Workspace ACL entries for
-that identity and traverse-only ACL entries on its parent directories are
-installed only for the command lifetime and then restored from exact snapshots.
-Executions are serialized inside one host process because these DACL updates are
-shared mutable state. The profile remains inert after ACL restoration and is
-reused only by the same sandbox process, avoiding unsafe profile deletion while
-container brokers may still hold profile resources. The backend does not add an
-ACE to the system-drive root or inheritable ACEs to arbitrary PATH, Cargo,
-Rustup, or other user toolchain roots. System tools retain their host-provided
-AppContainer grants, workspace-local tools are covered by the workspace grant,
-and inaccessible user-private tools fail closed.
+that identity are installed only for the command lifetime and then restored from
+exact snapshots. Executions are serialized inside one host process because
+workspace DACL updates are shared mutable state. The profile remains inert after
+ACL restoration and is reused only by the same sandbox process, avoiding unsafe
+profile deletion while container brokers may still hold profile resources. The
+backend does not modify parent, system-drive, PATH, Cargo, Rustup, or other user
+toolchain directories. System tools retain their host-provided AppContainer
+grants, workspace-local tools are covered by the workspace grant, and
+inaccessible user-private tools fail closed.
 
 ## Non-goals
 
