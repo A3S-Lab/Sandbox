@@ -6,7 +6,7 @@ use crate::{CommandOutput, CommandRequest};
 use anyhow::{bail, Context, Result};
 use sha2::{Digest, Sha256};
 use std::collections::{HashMap, HashSet};
-use std::ffi::{c_void, OsStr};
+use std::ffi::{c_void, OsStr, OsString};
 use std::fs::{File, OpenOptions};
 use std::mem::{size_of, zeroed};
 use std::os::windows::ffi::OsStrExt;
@@ -31,9 +31,11 @@ use windows_sys::Win32::Security::{
     SECURITY_ATTRIBUTES, SECURITY_CAPABILITIES, SUB_CONTAINERS_AND_OBJECTS_INHERIT,
 };
 use windows_sys::Win32::Storage::FileSystem::{
-    CreateFileW, GetFileInformationByHandle, ReadFile, BY_HANDLE_FILE_INFORMATION, DELETE,
-    FILE_ATTRIBUTE_NORMAL, FILE_FLAG_BACKUP_SEMANTICS, FILE_SHARE_DELETE, FILE_SHARE_READ,
-    FILE_SHARE_WRITE, FILE_TRAVERSE, OPEN_EXISTING,
+    CreateFileW, DefineDosDeviceW, GetFileInformationByHandle, GetLogicalDrives, ReadFile,
+    BY_HANDLE_FILE_INFORMATION, DDD_EXACT_MATCH_ON_REMOVE, DDD_NO_BROADCAST_SYSTEM,
+    DDD_RAW_TARGET_PATH, DDD_REMOVE_DEFINITION, DELETE, FILE_ATTRIBUTE_NORMAL,
+    FILE_FLAG_BACKUP_SEMANTICS, FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE,
+    FILE_TRAVERSE, OPEN_EXISTING,
 };
 use windows_sys::Win32::System::JobObjects::{
     AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
@@ -611,6 +613,79 @@ struct WindowsChild {
     job: JobGuard,
     stdout: OwnedHandle,
     stderr: OwnedHandle,
+    workspace_drive: WorkspaceDrive,
+}
+
+struct WorkspaceDrive {
+    name: Vec<u16>,
+    target: Vec<u16>,
+    root: PathBuf,
+    active: bool,
+}
+
+impl WorkspaceDrive {
+    fn create(workspace: &Path) -> Result<Self> {
+        let workspace = win32_process_path(workspace);
+        if !matches!(
+            workspace.components().next(),
+            Some(Component::Prefix(prefix))
+                if matches!(prefix.kind(), Prefix::Disk(_) | Prefix::VerbatimDisk(_))
+        ) {
+            bail!(
+                "Windows native sandbox requires a workspace on a local drive: {}",
+                workspace.display()
+            );
+        }
+
+        let mut target = OsString::from(r"\??\");
+        target.push(workspace.as_os_str());
+        let target = wide_null(&target);
+        let occupied = unsafe { GetLogicalDrives() };
+        let mut last_error = 0;
+        for letter in (b'D'..=b'Z').rev() {
+            let bit = 1_u32 << u32::from(letter - b'A');
+            if occupied & bit != 0 {
+                continue;
+            }
+            let name = wide_null(OsStr::new(&format!("{}:", char::from(letter))));
+            let flags = DDD_RAW_TARGET_PATH | DDD_NO_BROADCAST_SYSTEM;
+            if unsafe { DefineDosDeviceW(flags, name.as_ptr(), target.as_ptr()) } != 0 {
+                return Ok(Self {
+                    name,
+                    target,
+                    root: PathBuf::from(format!("{}:\\", char::from(letter))),
+                    active: true,
+                });
+            }
+            last_error = unsafe { GetLastError() };
+        }
+        bail!("failed to reserve a Windows sandbox drive with error {last_error}")
+    }
+
+    fn root(&self) -> &Path {
+        &self.root
+    }
+
+    fn remove(&mut self) -> Result<()> {
+        if !self.active {
+            return Ok(());
+        }
+        let flags = DDD_REMOVE_DEFINITION
+            | DDD_EXACT_MATCH_ON_REMOVE
+            | DDD_RAW_TARGET_PATH
+            | DDD_NO_BROADCAST_SYSTEM;
+        if unsafe { DefineDosDeviceW(flags, self.name.as_ptr(), self.target.as_ptr()) } == 0 {
+            return Err(last_windows_error("remove temporary Windows sandbox drive"));
+        }
+        self.active = false;
+        Ok(())
+    }
+}
+
+impl Drop for WorkspaceDrive {
+    fn drop(&mut self) {
+        let _ = self.remove();
+    }
 }
 
 fn spawn_appcontainer_process(
@@ -620,6 +695,7 @@ fn spawn_appcontainer_process(
     script: &str,
     environment: std::collections::BTreeMap<std::ffi::OsString, std::ffi::OsString>,
 ) -> Result<WindowsChild> {
+    let workspace_drive = WorkspaceDrive::create(workspace)?;
     let job = JobGuard::new()?;
     let (stdout_read, stdout_write) = create_pipe()?;
     let (stderr_read, stderr_write) = create_pipe()?;
@@ -648,12 +724,9 @@ fn spawn_appcontainer_process(
         size_of_val(&inherited),
     )?;
 
-    let workspace_literal = win32_process_path(workspace)
-        .to_string_lossy()
-        .replace('\'', "''");
+    let workspace_literal = workspace_drive.root().to_string_lossy().replace('\'', "''");
     let wrapped = format!(
-        "$null = New-PSDrive -Name A3SWorkspace -PSProvider FileSystem -Root '{workspace_literal}' -Scope Global -ErrorAction Stop\n\
-         Set-Location -LiteralPath 'A3SWorkspace:\\' -ErrorAction Stop\n{}",
+        "Set-Location -LiteralPath '{workspace_literal}' -ErrorAction Stop\n{}",
         build_powershell_command(script)
     );
     let encoded = encode_powershell_command(&wrapped);
@@ -669,11 +742,7 @@ fn spawn_appcontainer_process(
     ];
     let mut command_line = wide_null(OsStr::new(&join_windows_arguments(&arguments)));
     let application = wide_null(powershell.as_os_str());
-    let current_directory_path = powershell
-        .parent()
-        .map(win32_process_path)
-        .context("PowerShell executable has no installation directory")?;
-    let current_directory = wide_null(current_directory_path.as_os_str());
+    let current_directory = wide_null(workspace_drive.root().as_os_str());
     let environment = environment_block(environment)?;
 
     let mut startup = STARTUPINFOEXW::default();
@@ -732,6 +801,7 @@ fn spawn_appcontainer_process(
         job,
         stdout: stdout_read,
         stderr: stderr_read,
+        workspace_drive,
     })
 }
 
@@ -788,6 +858,7 @@ async fn capture_process(child: WindowsChild, request: CommandRequest) -> Result
         job,
         stdout,
         stderr,
+        mut workspace_drive,
     } = child;
     let wait_handle = duplicate_handle(&process)?;
     let mut wait = tokio::task::spawn_blocking(move || {
@@ -888,6 +959,7 @@ async fn capture_process(child: WindowsChild, request: CommandRequest) -> Result
         i32::try_from(code).unwrap_or(-1)
     };
     drop(job);
+    workspace_drive.remove()?;
     Ok(CommandOutput {
         stdout: capture.render_stream(OutputStream::Stdout),
         stderr: capture.render_stream(OutputStream::Stderr),
