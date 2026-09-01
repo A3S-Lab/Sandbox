@@ -91,23 +91,43 @@ impl PlatformSandbox {
     ) -> Result<CommandOutput> {
         // The system-drive and executable DACLs are shared host objects. Keep
         // their apply/use/revoke lifetime atomic across in-process executions.
+        #[cfg(test)]
+        eprintln!("[a3s-sandbox-test] wait for Windows execution gate");
         let _execution = execution_gate().lock().await;
+        #[cfg(test)]
+        eprintln!("[a3s-sandbox-test] Windows execution gate acquired");
         let pins = WorkspacePins::acquire(policy)?;
+        #[cfg(test)]
+        eprintln!("[a3s-sandbox-test] workspace placeholders pinned");
         let mut acls = ExecutionAcls::apply(policy, &self.profile.sid, &self.system_drive)?;
+        #[cfg(test)]
+        eprintln!("[a3s-sandbox-test] execution ACLs applied");
         let execution = match policy.child_environment(request.env.as_deref()) {
-            Ok(environment) => match spawn_appcontainer_process(
-                &self.powershell,
-                &self.profile.sid,
-                &policy.workspace,
-                &request.command,
-                environment,
-            ) {
-                Ok(child) => capture_process(child, request).await,
-                Err(error) => Err(error),
-            },
+            Ok(environment) => {
+                #[cfg(test)]
+                eprintln!("[a3s-sandbox-test] child environment built");
+                match spawn_appcontainer_process(
+                    &self.powershell,
+                    &self.profile.sid,
+                    &policy.workspace,
+                    &request.command,
+                    environment,
+                ) {
+                    Ok(child) => {
+                        #[cfg(test)]
+                        eprintln!("[a3s-sandbox-test] AppContainer process spawned");
+                        capture_process(child, request).await
+                    }
+                    Err(error) => Err(error),
+                }
+            }
             Err(error) => Err(error),
         };
+        #[cfg(test)]
+        eprintln!("[a3s-sandbox-test] AppContainer capture completed");
         let acl_cleanup = acls.restore();
+        #[cfg(test)]
+        eprintln!("[a3s-sandbox-test] execution ACLs restored");
         drop(acls);
         drop(pins);
         finish_execution(execution, acl_cleanup)
@@ -332,12 +352,18 @@ impl<'a> ExecutionAcls<'a> {
         access_mode: i32,
         inheritance: u32,
     ) -> Result<()> {
+        #[cfg(test)]
+        eprintln!("[a3s-sandbox-test] capture DACL for {}", path.display());
         let snapshot = if self.modified.contains(path) {
             None
         } else {
             Some(capture_path_dacl(path)?)
         };
+        #[cfg(test)]
+        eprintln!("[a3s-sandbox-test] apply DACL for {}", path.display());
         modify_path_acl(path, self.sid, permissions, access_mode, inheritance)?;
+        #[cfg(test)]
+        eprintln!("[a3s-sandbox-test] DACL applied for {}", path.display());
         if let Some(snapshot) = snapshot {
             self.modified.insert(path.to_path_buf());
             self.paths.push((path.to_path_buf(), snapshot));

@@ -169,11 +169,15 @@ impl NativeSandbox {
         if request.command.contains('\0') {
             bail!("native sandbox command contains a NUL byte");
         }
+        #[cfg(all(test, windows))]
+        eprintln!("[a3s-sandbox-test] build execution policy");
         let scratch = tempfile::Builder::new()
             .prefix("a3s-sandbox-")
             .tempdir()
             .context("failed to create native sandbox scratch directory")?;
         let policy = policy::SandboxPolicy::for_execution(&self.workspace, scratch.path())?;
+        #[cfg(all(test, windows))]
+        eprintln!("[a3s-sandbox-test] execution policy built");
         self.platform.execute(&policy, request).await
     }
 }
