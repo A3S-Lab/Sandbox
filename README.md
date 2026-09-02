@@ -52,6 +52,8 @@ sandbox never grants parent-directory listing or data access and never rewrites
 the system-drive root, PATH, or toolchain trees.
 
 See [SECURITY.md](SECURITY.md) for the threat model and fail-closed guarantees.
+See [ROADMAP.md](ROADMAP.md) for the full SRT capability plan and release
+gates.
 
 ## Development
 
