@@ -336,10 +336,13 @@ fn spawn_appcontainer_process(
     )?;
 
     let workspace_literal = workspace_drive.root().to_string_lossy().replace('\'', "''");
-    let wrapped = format!(
-        "Set-Location -LiteralPath '{workspace_literal}' -ErrorAction Stop\n{}",
-        build_powershell_command(script)
-    );
+    // Install the compatibility shim before invoking any cmdlet. In an
+    // AppContainer, resolving Set-Location can make PowerShell scan its module
+    // paths and emit progress records as CLIXML on stderr. The shim disables
+    // progress output, but it cannot suppress records produced before it runs.
+    let workspace_script =
+        format!("Set-Location -LiteralPath '{workspace_literal}' -ErrorAction Stop\n{script}");
+    let wrapped = build_powershell_command(&workspace_script);
     let encoded = encode_powershell_command(&wrapped);
     let arguments = [
         powershell.as_os_str().to_os_string(),

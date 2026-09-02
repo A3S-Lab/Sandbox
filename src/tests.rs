@@ -188,6 +188,24 @@ async fn windows_backend_blocks_preexisting_hardlink_escape() {
     );
 }
 
+#[cfg(windows)]
+#[tokio::test]
+async fn windows_backend_suppresses_powershell_startup_progress() {
+    let workspace = tempfile::tempdir().unwrap();
+    let sandbox = create_test_sandbox(workspace.path());
+
+    let output = execute_test_command(&sandbox, "[Console]::Out.Write('a3s-sandbox-probe')")
+        .await
+        .unwrap();
+
+    assert_eq!(output.exit_code, 0, "{}", output.stderr);
+    assert_eq!(output.stdout, WINDOWS_PROBE_MARKER);
+    assert_eq!(
+        output.stderr, "",
+        "PowerShell startup diagnostics leaked into command output"
+    );
+}
+
 #[tokio::test]
 async fn native_backend_blocks_ip_and_host_unix_socket_communication() {
     let workspace = tempfile::tempdir().unwrap();
