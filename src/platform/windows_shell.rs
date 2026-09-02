@@ -406,6 +406,13 @@ pub(super) fn preprocess_windows_command(command: &str) -> String {
             },
             rewrite_curl_json_literals(rest, true)
         )
+    } else if matches!(token, "curl" | "curl.exe" | "wget" | "wget.exe")
+        && rest.trim_start().starts_with("--%")
+    {
+        // PowerShell's stop-parsing token makes the remainder literal. Do
+        // not normalize or quote payloads that the caller explicitly marked
+        // as verbatim.
+        command.to_owned()
     } else {
         rewrite_curl_json_literals(command, false)
     }
@@ -536,6 +543,13 @@ fn extract_unquoted_json_like_literal(command: &str, start: usize) -> Option<(St
 
 #[cfg(windows)]
 pub(super) fn normalize_json_like_literal(input: &str) -> Option<String> {
+    // Let the standards-compliant parser handle already-valid JSON first.
+    // Besides producing a compact representation, this preserves escapes
+    // such as UTF-16 surrogate pairs that the PowerShell compatibility parser
+    // should not reinterpret.
+    if let Ok(value) = serde_json::from_str::<serde_json::Value>(input) {
+        return serde_json::to_string(&value).ok();
+    }
     let mut parser = JsonLikeParser::new(input);
     let value = parser.parse_value()?;
     parser.skip_ws();
@@ -543,6 +557,75 @@ pub(super) fn normalize_json_like_literal(input: &str) -> Option<String> {
         Some(value)
     } else {
         None
+    }
+}
+
+#[cfg(all(test, windows))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn normalizes_scalars_and_nested_json_like_values() {
+        assert_eq!(
+            normalize_json_like_literal("'hello'"),
+            Some("\"hello\"".into())
+        );
+        assert_eq!(normalize_json_like_literal("true"), Some("true".into()));
+        assert_eq!(normalize_json_like_literal("42.5"), Some("42.5".into()));
+        assert_eq!(
+            normalize_json_like_literal("{name: 'A3S', enabled: true, items: [1, null]}"),
+            Some(r#"{"name":"A3S","enabled":true,"items":[1,null]}"#.into())
+        );
+        assert_eq!(
+            normalize_json_like_literal(r#"{message: "line\n\ud83d\ude00"}"#),
+            Some(r#"{"message":"line\n😀"}"#.into())
+        );
+    }
+
+    #[test]
+    fn preserves_valid_json_escaping_and_rejects_malformed_literals() {
+        assert_eq!(
+            normalize_json_like_literal(r#"{"message":"line\n\ud83d\ude00"}"#),
+            Some(r#"{"message":"line\n😀"}"#.into())
+        );
+        for malformed in ["{name:}", "[1,]", "{name 'missing-colon'}"] {
+            assert_eq!(normalize_json_like_literal(malformed), None, "{malformed}");
+        }
+    }
+
+    #[test]
+    fn rewrites_curl_json_payloads_without_touching_unrelated_arguments() {
+        assert_eq!(
+            preprocess_windows_command("curl -sS -d {name: 'A3S'} https://example.test"),
+            "curl --% -sS -d {\"name\":\"A3S\"} https://example.test"
+        );
+        assert_eq!(
+            preprocess_windows_command("  wget --data={ok:true} https://example.test"),
+            "  curl.exe --% --data={\"ok\":true} https://example.test"
+        );
+        assert_eq!(
+            preprocess_windows_command("curl --% -d {already:json} https://example.test"),
+            "curl --% -d {already:json} https://example.test"
+        );
+        assert_eq!(
+            preprocess_windows_command("echo --data {not:curl}"),
+            "echo --data '{\"not\":\"curl\"}'"
+        );
+    }
+
+    #[test]
+    fn encoded_commands_round_trip_utf16() {
+        let command = "Write-Output '你好 🌍'";
+        let encoded = encode_powershell_command(command);
+        let bytes = BASE64_STANDARD.decode(encoded).unwrap();
+        let units = bytes
+            .chunks(2)
+            .map(|pair| {
+                assert_eq!(pair.len(), 2);
+                u16::from_le_bytes([pair[0], pair[1]])
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(String::from_utf16(&units).unwrap(), command);
     }
 }
 
@@ -665,12 +748,34 @@ impl<'a> JsonLikeParser<'a> {
         while let Some(ch) = self.next() {
             if ch == '\\' {
                 let escaped = self.next()?;
-                out.push(match escaped {
-                    'n' => '\n',
-                    'r' => '\r',
-                    't' => '\t',
-                    other => other,
-                });
+                match escaped {
+                    'n' => out.push('\n'),
+                    'r' => out.push('\r'),
+                    't' => out.push('\t'),
+                    'b' => out.push('\u{0008}'),
+                    'f' => out.push('\u{000c}'),
+                    'u' => {
+                        let first = self.parse_hex_u16()?;
+                        let code_point = if (0xd800..=0xdbff).contains(&first) {
+                            if self.next()? != '\\' || self.next()? != 'u' {
+                                return None;
+                            }
+                            let second = self.parse_hex_u16()?;
+                            if !(0xdc00..=0xdfff).contains(&second) {
+                                return None;
+                            }
+                            0x1_0000
+                                + ((u32::from(first) - 0xd800) << 10)
+                                + (u32::from(second) - 0xdc00)
+                        } else if (0xdc00..=0xdfff).contains(&first) {
+                            return None;
+                        } else {
+                            u32::from(first)
+                        };
+                        out.push(char::from_u32(code_point)?);
+                    }
+                    other => out.push(other),
+                }
                 continue;
             }
             if ch == quote {
@@ -679,6 +784,17 @@ impl<'a> JsonLikeParser<'a> {
             out.push(ch);
         }
         None
+    }
+
+    fn parse_hex_u16(&mut self) -> Option<u16> {
+        let mut value = 0_u16;
+        for _ in 0..4 {
+            let digit = self.next()?.to_digit(16)?;
+            value = value
+                .checked_mul(16)?
+                .checked_add(u16::try_from(digit).ok()?)?;
+        }
+        Some(value)
     }
 
     fn parse_bare_key(&mut self) -> Option<String> {

@@ -194,10 +194,6 @@ impl ProcessGroupGuard {
             }
         }
     }
-
-    pub(crate) fn disarm(&mut self) {
-        self.process_group = None;
-    }
 }
 
 #[cfg(unix)]
@@ -279,7 +275,11 @@ pub(crate) async fn read_process_output(
 
     let (status, timed_out, wait_error) = match execution {
         Ok(Ok(status)) => {
-            process_group.disarm();
+            // A shell can exit successfully while a background descendant
+            // keeps running after closing both inherited pipes.  Tear down
+            // the complete process group before returning so a successful
+            // command cannot leak work beyond the sandbox lifetime.
+            process_group.kill();
             (Some(status), false, None)
         }
         Ok(Err(error)) => (None, false, Some(error)),
@@ -396,6 +396,36 @@ mod tests {
         assert!(rendered_stderr.contains("stderr truncated"));
     }
 
+    #[test]
+    fn bounded_capture_at_exact_limit_is_not_marked_truncated() {
+        let mut capture = BoundedCapture::new();
+        let input = vec![b'x'; MAX_OUTPUT_SIZE];
+        capture.push(OutputStream::Stdout, &input);
+
+        let summary = capture.summary(false);
+        assert_eq!(summary.total_bytes, MAX_OUTPUT_SIZE);
+        assert_eq!(summary.captured_bytes, MAX_OUTPUT_SIZE);
+        assert!(!summary.truncated);
+        assert_eq!(
+            capture.render_stream(OutputStream::Stdout).len(),
+            MAX_OUTPUT_SIZE
+        );
+        assert!(!capture
+            .render_stream(OutputStream::Stdout)
+            .contains("truncated"));
+    }
+
+    #[test]
+    fn bounded_capture_replaces_invalid_utf8_per_stream() {
+        let mut capture = BoundedCapture::new();
+        capture.push(OutputStream::Stdout, &[0xff, b'o', 0xfe]);
+        capture.push(OutputStream::Stderr, &[0x80, b'e']);
+
+        assert_eq!(capture.render_stream(OutputStream::Stdout), "�o�");
+        assert_eq!(capture.render_stream(OutputStream::Stderr), "�e");
+        assert_eq!(capture.summary(false).total_bytes, 5);
+    }
+
     #[cfg(unix)]
     fn spawn_test_shell(directory: &std::path::Path, script: &str) -> Child {
         let mut command = Command::new("/bin/sh");
@@ -457,6 +487,24 @@ mod tests {
         assert!(
             !directory.path().join("cancellation-leak").exists(),
             "dropping process capture must kill every descendant"
+        );
+    }
+
+    #[cfg(unix)]
+    #[tokio::test]
+    async fn successful_root_exit_does_not_leave_detached_descendants() {
+        let directory = tempfile::tempdir().unwrap();
+        let mut child = spawn_test_shell(
+            directory.path(),
+            "(touch descendant-started; exec 1>&- 2>&-; sleep 0.80; touch normal-exit-leak) & exit 0",
+        );
+
+        let output = read_process_output(&mut child, 5_000, None).await.unwrap();
+        assert_eq!(output.status.unwrap().code(), Some(0));
+        tokio::time::sleep(std::time::Duration::from_millis(1_000)).await;
+        assert!(
+            !directory.path().join("normal-exit-leak").exists(),
+            "a successful command must not leave detached descendants running"
         );
     }
 }

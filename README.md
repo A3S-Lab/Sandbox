@@ -21,12 +21,12 @@ embedded by a CLI, an agent, or a future SDK.
 
 ## Quick start
 
-Add the library from GitHub. This is the tested Gate 0 revision; update it
-intentionally when adopting a newer release:
+Add the published crate from crates.io. Crate versions are immutable; update
+the version intentionally when adopting a newer release:
 
 ```toml
 [dependencies]
-a3s-sandbox = { git = "https://github.com/A3S-Lab/Sandbox", rev = "09c46aaf18e4be2c881459fa71ece8a9d8c45283" }
+a3s-sandbox = "0.1.1"
 ```
 
 Run a command through the native boundary:

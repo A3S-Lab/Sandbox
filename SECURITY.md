@@ -15,6 +15,9 @@ Every supported backend applies the same baseline policy:
 - expose only a sanitized environment with state and temporary paths redirected
   into a private scratch directory;
 - bound captured output and terminate the command process tree at its deadline.
+- protect case-variant control metadata on case-sensitive filesystems and scan
+  writable dependency/build trees for hard-link aliases;
+- tear down detached descendants even when the root shell exits successfully.
 
 Platform enforcement is native: Seatbelt on macOS, Bubblewrap namespaces plus
 seccomp on Linux, and AppContainer plus a kill-on-close Job Object on Windows.

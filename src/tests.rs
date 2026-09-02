@@ -1,5 +1,8 @@
 use super::*;
+use async_trait::async_trait;
 use std::collections::HashMap;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 const TEST_COMMAND_TIMEOUT_MS: u64 = 5_000;
 #[cfg(windows)]
@@ -22,6 +25,229 @@ async fn execute_test_command(
             env: None,
         })
         .await
+}
+
+#[derive(Default)]
+struct RecordingObserver {
+    deltas: Mutex<Vec<String>>,
+    summary: Mutex<Option<OutputSummary>>,
+}
+
+#[async_trait]
+impl OutputObserver for RecordingObserver {
+    async fn on_output_delta(&self, delta: &str) {
+        self.deltas.lock().await.push(delta.to_owned());
+    }
+
+    async fn on_output_complete(&self, summary: &OutputSummary) {
+        *self.summary.lock().await = Some(*summary);
+    }
+}
+
+#[test]
+fn native_sandbox_canonicalizes_workspace_and_reports_backend() {
+    let parent = tempfile::tempdir().unwrap();
+    let workspace = parent.path().join("workspace");
+    std::fs::create_dir(&workspace).unwrap();
+    let sandbox = create_test_sandbox(&workspace.join("."));
+
+    assert_eq!(sandbox.workspace(), workspace.canonicalize().unwrap());
+    assert_eq!(sandbox.backend(), NATIVE_SANDBOX_BACKEND);
+}
+
+#[tokio::test]
+async fn native_sandbox_rejects_invalid_workspaces_and_requests() {
+    let file = tempfile::NamedTempFile::new().unwrap();
+    let file_error = NativeSandbox::new(file.path()).unwrap_err();
+    assert!(file_error.to_string().contains("not a directory"));
+
+    let missing = file.path().with_extension("missing");
+    let missing_error = NativeSandbox::new(&missing).unwrap_err();
+    assert!(missing_error.to_string().contains("canonicalize"));
+
+    let workspace = tempfile::tempdir().unwrap();
+    let sandbox = create_test_sandbox(workspace.path());
+    let timeout_error = sandbox
+        .execute(CommandRequest {
+            command: "echo never".to_string(),
+            timeout_ms: 0,
+            output_observer: None,
+            env: None,
+        })
+        .await
+        .unwrap_err();
+    assert!(timeout_error.to_string().contains("timeout"));
+
+    let nul_error = sandbox
+        .execute(CommandRequest {
+            command: "echo\0never".to_string(),
+            timeout_ms: TEST_COMMAND_TIMEOUT_MS,
+            output_observer: None,
+            env: None,
+        })
+        .await
+        .unwrap_err();
+    assert!(nul_error.to_string().contains("NUL"));
+}
+
+#[tokio::test]
+async fn native_backend_preserves_exit_code_and_stream_identity() {
+    let workspace = tempfile::tempdir().unwrap();
+    let sandbox = create_test_sandbox(workspace.path());
+    #[cfg(not(windows))]
+    let command = "printf stdout; printf stderr >&2; exit 17";
+    #[cfg(windows)]
+    let command = "[Console]::Out.Write('stdout'); [Console]::Error.Write('stderr'); exit 17";
+
+    let output = execute_test_command(&sandbox, command).await.unwrap();
+    assert_eq!(output.stdout, "stdout", "{}", output.stderr);
+    assert_eq!(output.stderr, "stderr", "{}", output.stdout);
+    assert_eq!(output.exit_code, 17);
+    assert!(!output.timed_out);
+}
+
+#[tokio::test]
+async fn native_backend_notifies_observer_and_accounts_each_stream() {
+    let workspace = tempfile::tempdir().unwrap();
+    let sandbox = create_test_sandbox(workspace.path());
+    #[cfg(not(windows))]
+    let command = "printf one; printf two >&2";
+    #[cfg(windows)]
+    let command = "[Console]::Out.Write('one'); [Console]::Error.Write('two')";
+    let observer = Arc::new(RecordingObserver::default());
+
+    let output = sandbox
+        .execute(CommandRequest {
+            command: command.to_string(),
+            timeout_ms: TEST_COMMAND_TIMEOUT_MS,
+            output_observer: Some(observer.clone()),
+            env: None,
+        })
+        .await
+        .unwrap();
+
+    let deltas = observer.deltas.lock().await.join("");
+    assert!(deltas.contains("one"), "observer missed stdout: {deltas:?}");
+    assert!(deltas.contains("two"), "observer missed stderr: {deltas:?}");
+    assert_eq!(deltas.len(), output.stdout.len() + output.stderr.len());
+    let summary = observer
+        .summary
+        .lock()
+        .await
+        .expect("observer completion callback was not invoked");
+    assert_eq!(summary.total_bytes, 6);
+    assert_eq!(summary.captured_bytes, 6);
+    assert!(!summary.truncated);
+    assert!(!summary.timed_out);
+}
+
+#[tokio::test]
+async fn native_backend_enforces_the_global_output_limit() {
+    let workspace = tempfile::tempdir().unwrap();
+    let sandbox = create_test_sandbox(workspace.path());
+    #[cfg(not(windows))]
+    let command = "dd if=/dev/zero bs=110000 count=1 2>/dev/null | tr '\\0' x";
+    #[cfg(windows)]
+    let command = "[Console]::Out.Write([string]::new('x', 110000))";
+    let observer = Arc::new(RecordingObserver::default());
+
+    let output = sandbox
+        .execute(CommandRequest {
+            command: command.to_string(),
+            timeout_ms: TEST_COMMAND_TIMEOUT_MS,
+            output_observer: Some(observer.clone()),
+            env: None,
+        })
+        .await
+        .unwrap();
+
+    let summary = observer
+        .summary
+        .lock()
+        .await
+        .expect("observer completion callback was not invoked");
+    assert!(summary.total_bytes >= 110_000, "{summary:?}");
+    assert_eq!(summary.captured_bytes, MAX_OUTPUT_SIZE);
+    assert!(summary.truncated);
+    assert!(output.stdout.contains("truncated"));
+}
+
+#[tokio::test]
+async fn native_backend_handles_workspace_paths_with_spaces() {
+    let parent = tempfile::tempdir().unwrap();
+    let workspace_path = parent.path().join("workspace with spaces");
+    std::fs::create_dir(&workspace_path).unwrap();
+    let sandbox = create_test_sandbox(&workspace_path);
+    #[cfg(not(windows))]
+    let command = "printf path-ok > 'space file.txt'";
+    #[cfg(windows)]
+    let command = "[IO.File]::WriteAllText('space file.txt', 'path-ok')";
+
+    let output = execute_test_command(&sandbox, command).await.unwrap();
+    assert_eq!(output.exit_code, 0, "{}", output.stderr);
+    assert_eq!(
+        std::fs::read_to_string(workspace_path.join("space file.txt")).unwrap(),
+        "path-ok"
+    );
+}
+
+#[tokio::test]
+async fn native_backend_keeps_concurrent_workspaces_isolated() {
+    let left_workspace = tempfile::tempdir().unwrap();
+    let right_workspace = tempfile::tempdir().unwrap();
+    let left = create_test_sandbox(left_workspace.path());
+    let right = create_test_sandbox(right_workspace.path());
+    #[cfg(not(windows))]
+    let left_command = "printf left > left.txt";
+    #[cfg(windows)]
+    let left_command = "[IO.File]::WriteAllText('left.txt', 'left')";
+    #[cfg(not(windows))]
+    let right_command = "printf right > right.txt";
+    #[cfg(windows)]
+    let right_command = "[IO.File]::WriteAllText('right.txt', 'right')";
+
+    let (left_output, right_output) = tokio::join!(
+        execute_test_command(&left, left_command),
+        execute_test_command(&right, right_command),
+    );
+    assert_eq!(left_output.unwrap().exit_code, 0);
+    assert_eq!(right_output.unwrap().exit_code, 0);
+    assert_eq!(
+        std::fs::read_to_string(left_workspace.path().join("left.txt")).unwrap(),
+        "left"
+    );
+    assert_eq!(
+        std::fs::read_to_string(right_workspace.path().join("right.txt")).unwrap(),
+        "right"
+    );
+    assert!(!left_workspace.path().join("right.txt").exists());
+    assert!(!right_workspace.path().join("left.txt").exists());
+}
+
+#[tokio::test]
+async fn native_backend_rejects_invalid_explicit_environment_entries() {
+    let workspace = tempfile::tempdir().unwrap();
+    let sandbox = create_test_sandbox(workspace.path());
+    for (key, value) in [("BAD=KEY", "value"), ("BAD_VALUE", "bad\0value")] {
+        let error = sandbox
+            .execute(CommandRequest {
+                command: "echo never".to_string(),
+                timeout_ms: TEST_COMMAND_TIMEOUT_MS,
+                output_observer: None,
+                env: Some(Arc::new(HashMap::from([(
+                    key.to_string(),
+                    value.to_string(),
+                )]))),
+            })
+            .await
+            .unwrap_err();
+        assert!(
+            error
+                .to_string()
+                .contains("invalid explicit command environment"),
+            "unexpected error for {key}: {error:#}"
+        );
+    }
 }
 
 #[tokio::test]
@@ -162,6 +388,76 @@ async fn native_backend_blocks_symlink_hardlink_and_credential_escape() {
         .unwrap();
     assert_ne!(output.exit_code, 0, "runtime hard-link creation succeeded");
     assert!(!workspace.path().join("new-hardlink").exists());
+}
+
+#[cfg(any(unix, windows))]
+#[tokio::test]
+async fn native_backend_blocks_hardlinks_inside_writable_dependency_trees() {
+    let workspace = tempfile::tempdir().unwrap();
+    let outside = tempfile::tempdir().unwrap();
+    let outside_secret = outside.path().join("dependency-secret");
+    std::fs::write(&outside_secret, "outside-secret").unwrap();
+    for directory in ["node_modules", "target"] {
+        std::fs::create_dir_all(workspace.path().join(directory)).unwrap();
+        std::fs::hard_link(
+            &outside_secret,
+            workspace.path().join(directory).join("linked-secret"),
+        )
+        .unwrap();
+    }
+    let sandbox = create_test_sandbox(workspace.path());
+
+    #[cfg(unix)]
+    let commands = [
+        "printf escaped > node_modules/linked-secret",
+        "printf escaped > target/linked-secret",
+    ];
+    #[cfg(windows)]
+    let commands = [
+        "[IO.File]::WriteAllText('node_modules\\linked-secret', 'escaped')",
+        "[IO.File]::WriteAllText('target\\linked-secret', 'escaped')",
+    ];
+    for command in commands {
+        let output = execute_test_command(&sandbox, command).await.unwrap();
+        assert_ne!(
+            output.exit_code, 0,
+            "hard-link escape unexpectedly succeeded: {command}"
+        );
+    }
+    assert_eq!(
+        std::fs::read_to_string(outside_secret).unwrap(),
+        "outside-secret"
+    );
+}
+
+#[cfg(any(unix, windows))]
+#[tokio::test]
+async fn native_backend_protects_case_variant_control_metadata() {
+    let workspace = tempfile::tempdir().unwrap();
+    std::fs::create_dir(workspace.path().join(".GIT")).unwrap();
+    std::fs::write(workspace.path().join(".MCP.JSON"), "original").unwrap();
+    let sandbox = create_test_sandbox(workspace.path());
+
+    #[cfg(unix)]
+    let commands = ["printf changed > .GIT/config", "printf changed > .MCP.JSON"];
+    #[cfg(windows)]
+    let commands = [
+        "[IO.File]::WriteAllText('.GIT\\config', 'changed')",
+        "[IO.File]::WriteAllText('.MCP.JSON', 'changed')",
+    ];
+
+    for command in commands {
+        let output = execute_test_command(&sandbox, command).await.unwrap();
+        assert_ne!(
+            output.exit_code, 0,
+            "control metadata write succeeded: {command}"
+        );
+    }
+    assert!(!workspace.path().join(".GIT/config").exists());
+    assert_eq!(
+        std::fs::read_to_string(workspace.path().join(".MCP.JSON")).unwrap(),
+        "original"
+    );
 }
 
 #[cfg(windows)]
@@ -347,16 +643,23 @@ async fn native_backend_sanitizes_environment_and_kills_timed_out_descendants() 
     let command = "(sleep 0.30; touch timeout-leak) & wait";
     #[cfg(windows)]
     let command = "Start-Job { Start-Sleep -Milliseconds 300; New-Item timeout-leak } | Wait-Job";
+    let observer = Arc::new(RecordingObserver::default());
     let output = sandbox
         .execute(CommandRequest {
             command: command.to_string(),
             timeout_ms: 50,
-            output_observer: None,
+            output_observer: Some(observer.clone()),
             env: None,
         })
         .await
         .unwrap();
     assert!(output.timed_out);
+    let summary = observer
+        .summary
+        .lock()
+        .await
+        .expect("observer completion callback was not invoked");
+    assert!(summary.timed_out);
     tokio::time::sleep(std::time::Duration::from_millis(450)).await;
     assert!(!workspace.path().join("timeout-leak").exists());
 }

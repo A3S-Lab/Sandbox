@@ -68,7 +68,7 @@ impl SandboxPolicy {
             .canonicalize()
             .context("failed to resolve the native sandbox scratch directory")?;
 
-        let mut protected = protected_workspace_paths(&workspace);
+        let mut protected = protected_workspace_paths(&workspace)?;
         if let Some(git_dir) = resolved_git_dir(&workspace) {
             protected.push(git_dir);
         }
@@ -290,9 +290,20 @@ pub(super) fn resolve_executable(
     binary: impl Into<PathBuf>,
     excluded_root: &Path,
 ) -> Result<PathBuf> {
+    // Normalize the excluded root before comparing it with the canonical
+    // executable path.  Temporary directories and user-provided workspaces
+    // can be reached through aliases such as `/var` -> `/private/var` on
+    // macOS; comparing unlike representations would otherwise allow a tool
+    // that physically lives inside the workspace.
+    let excluded_root = excluded_root.canonicalize().with_context(|| {
+        format!(
+            "failed to resolve native sandbox workspace while validating executable: {}",
+            excluded_root.display()
+        )
+    })?;
     let binary = binary.into();
     let candidate = if binary.components().count() == 1 {
-        find_executable_on_path(&binary, excluded_root).ok_or_else(|| {
+        find_executable_on_path(&binary, &excluded_root).ok_or_else(|| {
             anyhow::anyhow!(
                 "required native sandbox executable was not found on PATH: {}",
                 binary.display()
@@ -310,7 +321,7 @@ pub(super) fn resolve_executable(
             candidate.display()
         );
     }
-    if candidate.starts_with(excluded_root) {
+    if candidate.starts_with(&excluded_root) {
         bail!(
             "refusing native sandbox executable from inside the active workspace: {}",
             candidate.display()
@@ -559,11 +570,10 @@ fn workspace_nested_env_paths(workspace: &Path) -> Result<Vec<PathBuf>> {
             else {
                 continue;
             };
-            if entry
-                .file_name()
-                .to_str()
-                .is_some_and(|name| name.starts_with(".env"))
-            {
+            if entry.file_name().to_str().is_some_and(|name| {
+                name.get(..4)
+                    .is_some_and(|prefix| prefix.eq_ignore_ascii_case(".env"))
+            }) {
                 paths.push(path);
             } else if file_type.is_dir() {
                 if should_skip_workspace_scan_directory(&entry.file_name()) {
@@ -618,7 +628,7 @@ pub fn workspace_hardlink_paths(workspace: &Path) -> Result<Vec<PathBuf>> {
                 continue;
             }
             if metadata.is_dir() {
-                if should_skip_workspace_scan_directory(&entry.file_name()) {
+                if should_skip_hardlink_scan_directory(&entry.file_name()) {
                     continue;
                 }
                 ensure_workspace_scan_depth(depth, &path)?;
@@ -666,7 +676,19 @@ fn ensure_workspace_scan_depth(depth: usize, path: &Path) -> Result<()> {
 /// Return whether recursive security scans should treat a directory as a
 /// package/build store rather than source content.
 pub fn should_skip_workspace_scan_directory(name: &OsStr) -> bool {
-    matches!(name.to_str(), Some(".git" | "node_modules" | "target"))
+    name.to_str().is_some_and(|name| {
+        [".git", "node_modules", "target"]
+            .iter()
+            .any(|skipped| name.eq_ignore_ascii_case(skipped))
+    })
+}
+
+fn should_skip_hardlink_scan_directory(name: &OsStr) -> bool {
+    name.to_str().is_some_and(|name| {
+        PROTECTED_WORKSPACE_DIRECTORIES
+            .iter()
+            .any(|protected| name.eq_ignore_ascii_case(protected))
+    })
 }
 
 #[cfg(unix)]
@@ -738,17 +760,62 @@ fn extend_configured_secret(paths: &mut Vec<PathBuf>, variable: &str, suffix: Op
     });
 }
 
-fn protected_workspace_paths(workspace: &Path) -> Vec<PathBuf> {
-    PROTECTED_WORKSPACE_DIRECTORIES
+fn protected_workspace_paths(workspace: &Path) -> Result<Vec<PathBuf>> {
+    let mut paths = PROTECTED_WORKSPACE_DIRECTORIES
         .iter()
         .chain(PROTECTED_WORKSPACE_FILES)
         .copied()
         .map(|path| workspace.join(path))
-        .collect()
+        .collect::<Vec<_>>();
+
+    // Linux permits names that differ only by case even when the host's
+    // default filesystem does not. Discover those aliases explicitly so the
+    // policy remains consistent across platforms instead of protecting only
+    // the lowercase spelling of control metadata.
+    let entries = std::fs::read_dir(workspace).with_context(|| {
+        format!(
+            "failed to scan protected workspace roots {}",
+            workspace.display()
+        )
+    })?;
+    for entry in entries {
+        let entry = entry.with_context(|| {
+            format!(
+                "failed to enumerate protected workspace roots {}",
+                workspace.display()
+            )
+        })?;
+        let name = entry.file_name();
+        if PROTECTED_WORKSPACE_DIRECTORIES
+            .iter()
+            .chain(PROTECTED_WORKSPACE_FILES)
+            .any(|protected| {
+                name.to_str()
+                    .is_some_and(|name| name.eq_ignore_ascii_case(protected))
+            })
+        {
+            paths.push(entry.path());
+        }
+    }
+    Ok(paths)
 }
 
 fn resolved_git_dir(workspace: &Path) -> Option<PathBuf> {
     let dot_git = workspace.join(".git");
+    let dot_git = if dot_git.exists() {
+        dot_git
+    } else {
+        std::fs::read_dir(workspace)
+            .ok()?
+            .filter_map(Result::ok)
+            .find(|entry| {
+                entry
+                    .file_name()
+                    .to_str()
+                    .is_some_and(|name| name.eq_ignore_ascii_case(".git"))
+            })
+            .map(|entry| entry.path())?
+    };
     if dot_git.is_dir() {
         return dot_git.canonicalize().ok();
     }
@@ -827,6 +894,98 @@ mod tests {
     }
 
     #[test]
+    fn child_environment_removes_case_insensitive_bootstrap_variables() {
+        let scratch = tempfile::tempdir().unwrap();
+        let explicit = HashMap::from([
+            ("bash_env".to_string(), "attack".to_string()),
+            ("Ld_PreLoad".to_string(), "attack.so".to_string()),
+            ("LUA_INIT_script".to_string(), "attack.lua".to_string()),
+            ("SAFE_VALUE".to_string(), "visible".to_string()),
+        ]);
+        let environment = compose_child_env(Some(&explicit), scratch.path()).unwrap();
+
+        assert!(!environment.keys().any(|key| {
+            matches!(
+                key.to_string_lossy().to_ascii_uppercase().as_str(),
+                "BASH_ENV" | "LD_PRELOAD"
+            ) || key
+                .to_string_lossy()
+                .to_ascii_uppercase()
+                .starts_with("LUA_INIT_")
+        }));
+        assert_eq!(
+            environment.get(OsStr::new("SAFE_VALUE")),
+            Some(&OsString::from("visible"))
+        );
+    }
+
+    #[test]
+    fn protected_path_matching_is_case_insensitive_and_traversal_safe() {
+        for path in [
+            ".git/config",
+            ".GIT/HEAD",
+            r".a3s\policy.acl",
+            ".mcp.json",
+            ".zshrc",
+        ] {
+            assert!(is_protected_workspace_path(path), "{path}");
+        }
+        for path in [
+            "src/.git/config",
+            "../.git/config",
+            ".gitignore",
+            "src/main.rs",
+        ] {
+            assert!(!is_protected_workspace_path(path), "{path}");
+        }
+    }
+
+    #[test]
+    fn policy_discovers_case_variant_control_metadata() {
+        let workspace = tempfile::tempdir().unwrap();
+        let scratch = tempfile::tempdir().unwrap();
+        std::fs::create_dir(workspace.path().join(".GIT")).unwrap();
+        std::fs::write(workspace.path().join(".MCP.JSON"), "control").unwrap();
+
+        let policy = SandboxPolicy::for_execution(workspace.path(), scratch.path()).unwrap();
+        let workspace = workspace.path().canonicalize().unwrap();
+        assert!(policy.deny_write.contains(&workspace.join(".GIT")));
+        assert!(policy.deny_write.contains(&workspace.join(".MCP.JSON")));
+    }
+
+    #[test]
+    fn git_worktree_pointer_is_resolved_for_case_variant_gitfiles() {
+        let parent = tempfile::tempdir().unwrap();
+        let workspace = parent.path().join("workspace");
+        let git_dir = parent.path().join("git-dir");
+        std::fs::create_dir(&workspace).unwrap();
+        std::fs::create_dir(&git_dir).unwrap();
+        std::fs::write(workspace.join(".GIT"), "gitdir: ../git-dir\n").unwrap();
+        let scratch = tempfile::tempdir().unwrap();
+
+        let policy = SandboxPolicy::for_execution(&workspace, scratch.path()).unwrap();
+        assert!(policy.deny_write.contains(&git_dir.canonicalize().unwrap()));
+    }
+
+    #[test]
+    fn nested_secret_scan_matches_case_variant_environment_files() {
+        let workspace = tempfile::tempdir().unwrap();
+        std::fs::create_dir_all(workspace.path().join("src/config")).unwrap();
+        std::fs::write(workspace.path().join("src/config/.ENV.local"), "secret").unwrap();
+
+        let paths = workspace_sensitive_paths(workspace.path()).unwrap();
+        assert!(paths.contains(&workspace.path().join("src/config/.ENV.local")));
+    }
+
+    #[test]
+    fn scan_directory_filter_handles_case_variants() {
+        for name in [".git", ".GIT", "Node_Modules", "TARGET"] {
+            assert!(should_skip_workspace_scan_directory(OsStr::new(name)));
+        }
+        assert!(!should_skip_workspace_scan_directory(OsStr::new("src")));
+    }
+
+    #[test]
     fn nested_environment_files_and_hardlinks_enter_the_deny_set() {
         let workspace = tempfile::tempdir().unwrap();
         let scratch = tempfile::tempdir().unwrap();
@@ -848,6 +1007,86 @@ mod tests {
         assert!(policy
             .deny_write
             .contains(&workspace.join("hardlink-secret")));
+    }
+
+    #[cfg(any(unix, windows))]
+    #[test]
+    fn hardlink_scan_does_not_skip_writable_dependency_trees() {
+        let workspace = tempfile::tempdir().unwrap();
+        let outside = tempfile::tempdir().unwrap();
+        let source = outside.path().join("source");
+        std::fs::write(&source, "outside").unwrap();
+        for directory in ["node_modules", "target"] {
+            let directory = workspace.path().join(directory);
+            std::fs::create_dir_all(&directory).unwrap();
+            std::fs::hard_link(&source, directory.join("linked")).unwrap();
+        }
+
+        let hardlinks = workspace_hardlink_paths(workspace.path()).unwrap();
+        assert_eq!(hardlinks.len(), 2);
+        assert!(hardlinks
+            .iter()
+            .any(|path| path.ends_with("node_modules/linked")));
+        assert!(hardlinks.iter().any(|path| path.ends_with("target/linked")));
+    }
+
+    #[test]
+    fn nested_secret_scan_skips_control_and_build_stores() {
+        let workspace = tempfile::tempdir().unwrap();
+        std::fs::create_dir_all(workspace.path().join("src/config")).unwrap();
+        std::fs::create_dir_all(workspace.path().join("node_modules/package")).unwrap();
+        std::fs::create_dir_all(workspace.path().join("target/debug")).unwrap();
+        std::fs::create_dir_all(workspace.path().join(".git")).unwrap();
+        for path in [
+            "src/config/.env.secret",
+            "node_modules/package/.env.secret",
+            "target/debug/.env.secret",
+            ".git/.env.secret",
+        ] {
+            std::fs::write(workspace.path().join(path), "secret").unwrap();
+        }
+
+        let paths = workspace_sensitive_paths(workspace.path()).unwrap();
+        assert!(paths.contains(&workspace.path().join("src/config/.env.secret")));
+        assert!(!paths.contains(&workspace.path().join("node_modules/package/.env.secret")));
+        assert!(!paths.contains(&workspace.path().join("target/debug/.env.secret")));
+        assert!(!paths.contains(&workspace.path().join(".git/.env.secret")));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn nested_secret_scan_fails_closed_at_depth_limit() {
+        let workspace = tempfile::tempdir().unwrap();
+        let mut current = workspace.path().to_path_buf();
+        for index in 0..=MAX_WORKSPACE_SCAN_DEPTH {
+            current.push(format!("level-{index}"));
+            std::fs::create_dir(&current).unwrap();
+        }
+
+        let error = workspace_sensitive_paths(workspace.path()).unwrap_err();
+        assert!(error.to_string().contains("depth"), "{error:#}");
+    }
+
+    #[test]
+    fn executable_resolution_rejects_workspace_tools() {
+        let workspace = tempfile::tempdir().unwrap();
+        let candidate = workspace.path().join("untrusted-tool");
+        std::fs::write(&candidate, "#!/bin/sh\nexit 0\n").unwrap();
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            std::fs::set_permissions(&candidate, std::fs::Permissions::from_mode(0o755)).unwrap();
+        }
+
+        let error = resolve_executable(&candidate, workspace.path()).unwrap_err();
+        assert!(error.to_string().contains("inside the active workspace"));
+    }
+
+    #[cfg(any(target_os = "linux", target_os = "macos"))]
+    #[test]
+    fn path_ancestors_exclude_the_filesystem_root() {
+        let ancestors = path_ancestors(Path::new("/a/b/c"));
+        assert_eq!(ancestors, vec![PathBuf::from("/a"), PathBuf::from("/a/b")]);
     }
 
     #[cfg(any(target_os = "linux", windows))]

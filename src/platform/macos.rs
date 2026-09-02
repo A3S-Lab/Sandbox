@@ -252,4 +252,35 @@ mod tests {
         assert!(profile.matches(&workspace_rule).count() >= 2);
         assert!(profile.matches(&secret_rule).count() >= 2);
     }
+
+    #[test]
+    fn escaped_path_quotes_special_characters() {
+        let path = Path::new("/tmp/a3s sandbox/quote\"file");
+        assert_eq!(
+            escaped_path(path).unwrap(),
+            r#""/tmp/a3s sandbox/quote\"file""#
+        );
+    }
+
+    #[test]
+    fn escaped_path_rejects_nul_and_oversized_values() {
+        let nul = Path::new("/tmp/with\0nul");
+        assert!(escaped_path(nul).unwrap_err().to_string().contains("NUL"));
+
+        let oversized = PathBuf::from(format!("/tmp/{}", "x".repeat(MAX_SBPL_STRING_BYTES)));
+        let error = escaped_path(&oversized).unwrap_err();
+        assert!(error.to_string().contains("exceeds"));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn escaped_path_rejects_non_utf8_values() {
+        use std::os::unix::ffi::OsStringExt;
+
+        let path = PathBuf::from(std::ffi::OsString::from_vec(vec![
+            b'/', b't', b'm', b'p', 0xff,
+        ]));
+        let error = escaped_path(&path).unwrap_err();
+        assert!(error.to_string().contains("not UTF-8"));
+    }
 }
