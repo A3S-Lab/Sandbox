@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200" height="500" viewBox="0 0 1200 500"
+     role="img" aria-labelledby="title desc">
+  <title id="title">a3s-sandbox native command boundary</title>
+  <desc id="desc">A command enters one policy boundary and is isolated by a native macOS, Linux, or Windows backend before bounded output returns.</desc>
+
+  <rect width="1200" height="500" rx="28" fill="#0b0d0f"/>
+  <path d="M56 64H1144" stroke="#343a40" stroke-width="2"/>
+  <path d="M56 370H1144" stroke="#343a40" stroke-width="2"/>
+
+  <g id="title-block" transform="translate(58 92)">
+    <text x="0" y="0" fill="#d6a85f" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" letter-spacing="2">A3S / NATIVE SECURITY BOUNDARY</text>
+    <text x="0" y="70" fill="#f4f1ea" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="58" font-weight="700">a3s-sandbox</text>
+    <text x="0" y="116" fill="#c7ccd1" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="26">Untrusted commands, contained by the OS.</text>
+    <text x="0" y="164" fill="#c7ccd1" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="22">Rust library · fail-closed · no Node.js runtime</text>
+    <g transform="translate(0 214)">
+      <rect width="18" height="18" rx="4" fill="#d6a85f"/>
+      <text x="34" y="16" fill="#f4f1ea" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19">workspace writes + scratch</text>
+      <rect x="296" width="18" height="18" rx="4" fill="#7fb6a4"/>
+      <text x="330" y="16" fill="#f4f1ea" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19">network denied</text>
+    </g>
+  </g>
+
+  <g id="boundary-diagram" transform="translate(704 88)">
+    <rect x="0" y="0" width="438" height="72" rx="14" fill="#15191d" stroke="#d6a85f" stroke-width="2"/>
+    <text x="24" y="31" fill="#d6a85f" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" letter-spacing="1">INPUT</text>
+    <text x="24" y="57" fill="#f4f1ea" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="23">$ untrusted command</text>
+
+    <path d="M219 72V96" stroke="#d6a85f" stroke-width="3"/>
+    <path d="M211 88L219 99L227 88" fill="none" stroke="#d6a85f" stroke-width="3"/>
+
+    <rect x="0" y="100" width="438" height="76" rx="14" fill="#111518" stroke="#7fb6a4" stroke-width="2"/>
+    <text x="24" y="132" fill="#7fb6a4" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" letter-spacing="1">POLICY</text>
+    <text x="24" y="160" fill="#f4f1ea" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="22">paths · processes · environment</text>
+
+    <path d="M219 176V200" stroke="#7fb6a4" stroke-width="3"/>
+    <path d="M211 192L219 203L227 192" fill="none" stroke="#7fb6a4" stroke-width="3"/>
+
+    <g transform="translate(0 204)">
+      <rect width="438" height="150" rx="14" fill="#15191d" stroke="#343a40" stroke-width="2"/>
+      <text x="24" y="33" fill="#f4f1ea" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" letter-spacing="1">NATIVE BACKENDS</text>
+      <g transform="translate(24 54)">
+        <rect width="126" height="76" rx="10" fill="#20262b"/>
+        <text x="14" y="28" fill="#d6a85f" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19">macOS</text>
+        <text x="14" y="51" fill="#c7ccd1" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18">Seatbelt</text>
+      </g>
+      <g transform="translate(156 54)">
+        <rect width="126" height="76" rx="10" fill="#20262b"/>
+        <text x="14" y="28" fill="#7fb6a4" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19">Linux</text>
+        <text x="14" y="51" fill="#c7ccd1" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18">bwrap +</text>
+        <text x="14" y="71" fill="#c7ccd1" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18">seccomp</text>
+      </g>
+      <g transform="translate(288 54)">
+        <rect width="126" height="76" rx="10" fill="#20262b"/>
+        <text x="14" y="28" fill="#d6a85f" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19">Windows</text>
+        <text x="14" y="51" fill="#c7ccd1" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="17">AppContainer</text>
+      </g>
+    </g>
+  </g>
+
+  <g id="footer" transform="translate(58 470)">
+    <text x="0" y="0" fill="#8d969e" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" letter-spacing="1">PROCESS TREE  /  BOUNDED OUTPUT  /  EXPLICIT FAILURE</text>
+    <text x="1084" y="0" text-anchor="end" fill="#d6a85f" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">A3S</text>
+  </g>
+</svg>

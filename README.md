@@ -1,67 +1,138 @@
 # A3S Sandbox
 
-`a3s-sandbox` is the A3S-owned, fail-closed native command isolation boundary.
-It is intentionally independent of the A3S Code runtime and exposes a small
-Rust library contract that other A3S products can embed without Node.js or a
-third-party runtime wrapper.
+<p align="center">
+  <img src="./assets/readme/boundary.svg" width="100%" alt="a3s-sandbox sends an untrusted command through a policy boundary and a native macOS, Linux, or Windows backend before returning bounded output">
+</p>
 
-## Platform boundaries
+<p align="center">
+  <a href="https://github.com/A3S-Lab/Sandbox/actions/workflows/ci.yml"><img src="https://github.com/A3S-Lab/Sandbox/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  <a href="https://github.com/A3S-Lab/Sandbox/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-d6a85f.svg" alt="MIT license"></a>
+  <a href="https://github.com/A3S-Lab/Sandbox/releases"><img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-7fb6a4.svg" alt="macOS, Linux, and Windows"></a>
+</p>
 
-| Platform | Isolation boundary |
-| --- | --- |
-| macOS | Seatbelt profile and process-group lifecycle |
-| Linux | User, mount, PID, IPC, and UTS namespaces with seccomp |
-| Windows | AppContainer, restricted ACLs, and kill-on-close Job Object |
+`a3s-sandbox` is a Rust-native, fail-closed command boundary for A3S Bash and
+other A3S products. It turns an untrusted command into a bounded process tree
+with explicit workspace, credential, environment, network, and lifecycle
+limits enforced by the host operating system.
 
-The baseline policy denies network access, protects credentials and A3S control
-metadata, allows workspace writes only outside protected paths, and uses a
-private temporary directory. Unsupported platforms return an error instead of
-executing on the host.
+There is no Node.js runtime, npm package, or SRT process in the execution
+path. The library is deliberately independent of A3S Code so it can be
+embedded by a CLI, an agent, or a future SDK.
 
-## Usage
+## Quick start
+
+Add the library from GitHub. This is the tested Gate 0 revision; update it
+intentionally when adopting a newer release:
+
+```toml
+[dependencies]
+a3s-sandbox = { git = "https://github.com/A3S-Lab/Sandbox", rev = "09c46aaf18e4be2c881459fa71ece8a9d8c45283" }
+```
+
+Run a command through the native boundary:
 
 ```rust,no_run
 use a3s_sandbox::NativeSandbox;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let sandbox = NativeSandbox::new("/path/to/workspace")?;
+    let workspace = std::env::current_dir()?;
+    let sandbox = NativeSandbox::new(workspace)?;
+
+    // Fail before running a tool when the host cannot provide the boundary.
     sandbox.probe().await?;
 
-    let output = sandbox.exec_command("cargo test").await?;
+    let output = sandbox.exec_command("echo inside sandbox").await?;
     println!("{}", output.stdout);
     Ok(())
 }
 ```
 
-Linux hosts must provide Bubblewrap at `/usr/bin/bwrap` and permit Bubblewrap to
-create an unprivileged user namespace; initialization fails closed when the host
-policy forbids that boundary. macOS uses the system `/usr/bin/sandbox-exec`.
-Windows requires PowerShell 7 in the system Program Files directory and runs it
-inside an AppContainer token. One process-scoped profile identity is reused
-across all workspace sandboxes in the host process. Temporary workspace access
-ACL entries are restored after every command. Protected workspace paths replace
-that identity's inherited access mask under a protected DACL, then restore both
-the exact DACL and its original inheritance state. The launcher grants only
-non-inheriting traverse access to workspace and scratch ancestors, excluding the
-volume root, and exposes the workspace through a temporary local DOS drive that
-is removed during child cleanup. Tools and system paths use only their existing
-AppContainer access. A tool stored in a private user directory must be copied
-into the workspace or pre-authorized for AppContainer access by the host; the
-sandbox never grants parent-directory listing or data access and never rewrites
-the system-drive root, PATH, or toolchain trees.
+`CommandOutput` contains separate `stdout` and `stderr`, an exit code, and a
+`timed_out` flag. Captured output is bounded to 100 KiB, while an optional
+`OutputObserver` can receive live deltas and final accounting.
 
-See [SECURITY.md](SECURITY.md) for the threat model and fail-closed guarantees.
-See [ROADMAP.md](ROADMAP.md) for the full SRT capability plan and release
-gates.
+## What is enforced now
+
+The default A3S Bash profile is intentionally strict:
+
+- network access and host Unix-domain sockets are denied;
+- writes are limited to the canonical workspace and a private scratch
+  directory;
+- credentials, secret files, `.git`, `.a3s`, agent metadata, and shell/tool
+  bootstrap files are protected;
+- symbolic-link and hard-link escape paths are rejected;
+- child environments are sanitized, temporary state is redirected, and shell
+  injection variables are removed;
+- deadlines terminate the complete descendant tree, and output capture stays
+  bounded;
+- a missing launcher, unavailable namespace, or failed capability probe returns
+  an error instead of executing on the host.
+
+These guarantees apply to the process tree, not only to the first shell.
+Read the [security model](SECURITY.md) for the threat model, platform caveats,
+and the exact protected paths.
+
+## Native boundaries
+
+| Host | Boundary | Host requirement |
+| --- | --- | --- |
+| macOS | Seatbelt profile plus process-group lifecycle | System `/usr/bin/sandbox-exec` |
+| Linux | Bubblewrap user/mount/PID/IPC/UTS namespaces plus seccomp | `/usr/bin/bwrap` and an unprivileged user namespace |
+| Windows | PowerShell 7 inside an AppContainer, restricted workspace ACLs, temporary drive, and kill-on-close Job Object | PowerShell 7 under system Program Files |
+| Other targets | Explicit unsupported-platform error | No host fallback |
+
+The backend is selected at compile time, while policy construction and command
+output stay platform-neutral. Windows executions are serialized because
+temporary ACL and device-map changes are shared process state; cleanup restores
+the exact prior ACL state.
+
+## Execution model
+
+```text
+CommandRequest
+    │
+    ├── canonical workspace + private scratch directory
+    ├── sanitized environment + protected path set
+    └── native backend
+          ├── macOS  → Seatbelt
+          ├── Linux  → Bubblewrap + seccomp
+          └── Windows → AppContainer + Job Object
+                    │
+                    └── bounded CommandOutput + observer events
+```
+
+The policy layer is the single source of truth. Platform modules enforce its
+decisions; they do not silently broaden them when a host feature is missing.
+
+## Scope and roadmap
+
+Gate 0—the complete A3S Bash baseline—is shipped and tested on macOS, Linux,
+and Windows. The next stages add opt-in, mediated HTTP/HTTPS and SOCKS5
+networking, Unix-socket policy, TLS handling, dynamic policy snapshots,
+structured violation monitoring, nested-sandbox negotiation, and release
+migration tooling.
+
+See [ROADMAP.md](ROADMAP.md) for the capability matrix, staged delivery plan,
+acceptance gates, cross-architecture test matrix, and security-release risks.
+
+The goal is SRT-level security outcomes and controls with an A3S-owned Rust
+API—not a line-for-line clone of SRT's internal TypeScript implementation.
 
 ## Development
+
+Install the platform prerequisites, then run the same gates used by CI:
 
 ```bash
 cargo fmt --all -- --check
 cargo clippy --all-targets -- -D warnings
 cargo test --all-targets
 ```
+
+The CI matrix covers `ubuntu-latest`, `macos-14`, and `windows-latest`.
+Security-sensitive changes should include a negative test proving that a
+denied operation cannot reach the host through a descendant, inherited handle,
+environment variable, symlink, hard link, socket, or alternate network path.
 
 ## License
 
