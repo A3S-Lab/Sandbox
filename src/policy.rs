@@ -1,12 +1,16 @@
 //! Platform-neutral A3S sandbox policy construction.
 
 use anyhow::{bail, Context, Result};
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::ffi::{OsStr, OsString};
 use std::path::{Path, PathBuf};
 
 const MAX_WORKSPACE_SCAN_ENTRIES: usize = 1_000_000;
 const MAX_WORKSPACE_SCAN_DEPTH: usize = 64;
+/// Separate budget for rare credential-inode hunts inside package/build stores.
+/// Ordinary monorepos never enter this path because discovered secrets keep
+/// `nlink == 1`.
+const MAX_CREDENTIAL_ALIAS_SCAN_ENTRIES: usize = 5_000_000;
 
 /// Workspace-relative directories that can alter the agent, repository, or
 /// surrounding tool control plane.
@@ -75,8 +79,13 @@ impl SandboxPolicy {
         expand_existing_canonical_paths(&mut protected);
 
         let mut sensitive = sensitive_paths();
-        sensitive.extend(workspace_sensitive_paths(&workspace)?);
-        sensitive.extend(workspace_hardlink_paths(&workspace)?);
+        let scan = scan_workspace_security(&workspace)?;
+        sensitive.extend(fixed_workspace_secret_paths(&workspace));
+        sensitive.extend(scan.nested_env);
+        sensitive.extend(scan.source_hardlinks);
+        sensitive.extend(workspace_credential_hardlink_aliases(
+            &workspace, &sensitive,
+        )?);
         expand_existing_canonical_paths(&mut sensitive);
 
         let mut deny_read = sensitive.clone();
@@ -510,36 +519,61 @@ fn default_sensitive_paths(home: &Path) -> Vec<PathBuf> {
     .collect()
 }
 
+const FIXED_WORKSPACE_SECRET_FILES: &[&str] = &[
+    ".env",
+    ".env.local",
+    ".env.development",
+    ".env.production",
+    ".env.test",
+    ".netrc",
+    ".npmrc",
+    ".pypirc",
+    ".git-credentials",
+    ".a3s/os-auth.json",
+    ".codex/auth.json",
+    ".claude/.credentials.json",
+    ".claude.json",
+];
+
+fn fixed_workspace_secret_paths(workspace: &Path) -> Vec<PathBuf> {
+    FIXED_WORKSPACE_SECRET_FILES
+        .iter()
+        .map(|path| workspace.join(path))
+        .collect()
+}
+
 /// Discover credential-like files inside a workspace.
 pub fn workspace_sensitive_paths(workspace: &Path) -> Result<Vec<PathBuf>> {
-    let mut paths = [
-        ".env",
-        ".env.local",
-        ".env.development",
-        ".env.production",
-        ".env.test",
-        ".netrc",
-        ".npmrc",
-        ".pypirc",
-        ".git-credentials",
-        ".a3s/os-auth.json",
-        ".codex/auth.json",
-        ".claude/.credentials.json",
-        ".claude.json",
-    ]
-    .into_iter()
-    .map(|path| workspace.join(path))
-    .collect::<Vec<_>>();
-    paths.extend(workspace_nested_env_paths(workspace)?);
+    let mut paths = fixed_workspace_secret_paths(workspace);
+    paths.extend(scan_workspace_security(workspace)?.nested_env);
     Ok(paths)
 }
 
-fn workspace_nested_env_paths(workspace: &Path) -> Result<Vec<PathBuf>> {
-    let mut pending = vec![(workspace.to_path_buf(), 0usize)];
-    let mut scanned = 0usize;
-    let mut paths = Vec::new();
+/// Discover source-tree files with multiple hard-link aliases.
+///
+/// Package/build stores (`node_modules`, `target`) and protected control-plane
+/// directories are skipped: bulk multi-link artifacts there blow Seatbelt
+/// profile limits, while credential aliases inside those trees are recovered
+/// separately via [`workspace_credential_hardlink_aliases`].
+pub fn workspace_hardlink_paths(workspace: &Path) -> Result<Vec<PathBuf>> {
+    let mut hardlinks = scan_workspace_security(workspace)?.source_hardlinks;
+    deduplicate_paths(&mut hardlinks);
+    Ok(hardlinks)
+}
 
-    while let Some((directory, depth)) = pending.pop() {
+#[derive(Debug, Default)]
+struct WorkspaceSecurityScan {
+    nested_env: Vec<PathBuf>,
+    source_hardlinks: Vec<PathBuf>,
+}
+
+/// Single walk that collects nested `.env*` paths and source-tree hardlinks.
+fn scan_workspace_security(workspace: &Path) -> Result<WorkspaceSecurityScan> {
+    let mut pending = vec![(workspace.to_path_buf(), 0usize, true)];
+    let mut scanned = 0usize;
+    let mut scan = WorkspaceSecurityScan::default();
+
+    while let Some((directory, depth, collect_hardlinks)) = pending.pop() {
         let Some(entries) = workspace_scan_result(std::fs::read_dir(&directory), || {
             format!(
                 "failed to scan native sandbox workspace {}",
@@ -559,8 +593,9 @@ fn workspace_nested_env_paths(workspace: &Path) -> Result<Vec<PathBuf>> {
             else {
                 continue;
             };
-            scanned = next_workspace_scan_entry(scanned)?;
+            scanned = next_workspace_scan_entry(scanned, MAX_WORKSPACE_SCAN_ENTRIES)?;
             let path = entry.path();
+            let file_name = entry.file_name();
             let Some(file_type) = workspace_scan_result(entry.file_type(), || {
                 format!(
                     "failed to inspect native sandbox workspace path {}",
@@ -570,51 +605,30 @@ fn workspace_nested_env_paths(workspace: &Path) -> Result<Vec<PathBuf>> {
             else {
                 continue;
             };
-            if entry.file_name().to_str().is_some_and(|name| {
+
+            if file_name.to_str().is_some_and(|name| {
                 name.get(..4)
                     .is_some_and(|prefix| prefix.eq_ignore_ascii_case(".env"))
             }) {
-                paths.push(path);
-            } else if file_type.is_dir() {
-                if should_skip_workspace_scan_directory(&entry.file_name()) {
+                scan.nested_env.push(path.clone());
+            }
+
+            if file_type.is_symlink() {
+                continue;
+            }
+            if file_type.is_dir() {
+                if should_skip_workspace_scan_directory(&file_name) {
                     continue;
                 }
                 ensure_workspace_scan_depth(depth, &path)?;
-                pending.push((path, depth + 1));
-            }
-        }
-    }
-    Ok(paths)
-}
-
-/// Discover workspace files with multiple hard-link aliases.
-pub fn workspace_hardlink_paths(workspace: &Path) -> Result<Vec<PathBuf>> {
-    let mut pending = vec![(workspace.to_path_buf(), 0usize)];
-    let mut scanned = 0usize;
-    let mut hardlinks = Vec::new();
-
-    while let Some((directory, depth)) = pending.pop() {
-        let Some(entries) = workspace_scan_result(std::fs::read_dir(&directory), || {
-            format!(
-                "failed to scan native sandbox workspace {}",
-                directory.display()
-            )
-        })?
-        else {
-            continue;
-        };
-        for entry in entries {
-            let Some(entry) = workspace_scan_result(entry, || {
-                format!(
-                    "failed to enumerate native sandbox workspace {}",
-                    directory.display()
-                )
-            })?
-            else {
+                let child_collect_hardlinks =
+                    collect_hardlinks && !is_protected_workspace_directory(&file_name);
+                pending.push((path, depth + 1, child_collect_hardlinks));
                 continue;
-            };
-            scanned = next_workspace_scan_entry(scanned)?;
-            let path = entry.path();
+            }
+            if !collect_hardlinks || !file_type.is_file() {
+                continue;
+            }
             let Some(metadata) = workspace_scan_result(std::fs::symlink_metadata(&path), || {
                 format!(
                     "failed to inspect native sandbox workspace path {}",
@@ -624,22 +638,137 @@ pub fn workspace_hardlink_paths(workspace: &Path) -> Result<Vec<PathBuf>> {
             else {
                 continue;
             };
-            if metadata.file_type().is_symlink() {
+            if metadata.file_type().is_symlink() || !metadata.is_file() {
                 continue;
             }
-            if metadata.is_dir() {
-                if should_skip_hardlink_scan_directory(&entry.file_name()) {
-                    continue;
-                }
-                ensure_workspace_scan_depth(depth, &path)?;
-                pending.push((path, depth + 1));
-            } else if metadata.is_file() && hard_link_count(&path, &metadata) > 1 {
-                hardlinks.push(path);
+            if hard_link_count(&path, &metadata) > 1 {
+                scan.source_hardlinks.push(path);
             }
         }
     }
-    deduplicate_paths(&mut hardlinks);
-    Ok(hardlinks)
+    Ok(scan)
+}
+
+/// Find workspace paths that hard-link to already-discovered credential files.
+///
+/// Ordinary package/build multi-link artifacts are ignored. Only inodes that
+/// already belong to a sensitive path are collected, matching the Core local
+/// credential boundary: package-store hardlinks stay usable unless they alias
+/// a discovered credential identity.
+pub fn workspace_credential_hardlink_aliases(
+    workspace: &Path,
+    sensitive: &[PathBuf],
+) -> Result<Vec<PathBuf>> {
+    let mut wanted = HashSet::new();
+    for path in sensitive {
+        let Some(metadata) = workspace_scan_result(std::fs::symlink_metadata(path), || {
+            format!(
+                "failed to inspect native sandbox credential path {}",
+                path.display()
+            )
+        })?
+        else {
+            continue;
+        };
+        if metadata.file_type().is_symlink() || !metadata.is_file() {
+            continue;
+        }
+        if hard_link_count(path, &metadata) <= 1 {
+            continue;
+        }
+        let Some(identity) = FileIdentity::from_path(path, &metadata) else {
+            continue;
+        };
+        wanted.insert(identity);
+    }
+    if wanted.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let mut pending = vec![(workspace.to_path_buf(), 0usize, false)];
+    let mut scanned = 0usize;
+    let mut aliases = Vec::new();
+    let sensitive_set: HashSet<&Path> = sensitive.iter().map(PathBuf::as_path).collect();
+
+    while let Some((directory, depth, in_package_store)) = pending.pop() {
+        let Some(entries) = workspace_scan_result(std::fs::read_dir(&directory), || {
+            format!(
+                "failed to scan native sandbox package stores under {}",
+                directory.display()
+            )
+        })?
+        else {
+            continue;
+        };
+        for entry in entries {
+            let Some(entry) = workspace_scan_result(entry, || {
+                format!(
+                    "failed to enumerate native sandbox package stores under {}",
+                    directory.display()
+                )
+            })?
+            else {
+                continue;
+            };
+            scanned = next_workspace_scan_entry(scanned, MAX_CREDENTIAL_ALIAS_SCAN_ENTRIES)?;
+            let path = entry.path();
+            let file_name = entry.file_name();
+            let Some(file_type) = workspace_scan_result(entry.file_type(), || {
+                format!(
+                    "failed to inspect native sandbox package-store path {}",
+                    path.display()
+                )
+            })?
+            else {
+                continue;
+            };
+            if file_type.is_symlink() {
+                continue;
+            }
+            if file_type.is_dir() {
+                if !in_package_store && is_git_directory(&file_name) {
+                    continue;
+                }
+                let child_in_store =
+                    in_package_store || is_package_or_build_store_directory(&file_name);
+                if !child_in_store && is_protected_workspace_directory(&file_name) {
+                    continue;
+                }
+                ensure_workspace_scan_depth(depth, &path)?;
+                pending.push((path, depth + 1, child_in_store));
+                continue;
+            }
+            if !in_package_store || !file_type.is_file() {
+                continue;
+            }
+            if sensitive_set.contains(path.as_path()) {
+                continue;
+            }
+            let Some(metadata) = workspace_scan_result(std::fs::symlink_metadata(&path), || {
+                format!(
+                    "failed to inspect native sandbox package-store path {}",
+                    path.display()
+                )
+            })?
+            else {
+                continue;
+            };
+            if metadata.file_type().is_symlink() || !metadata.is_file() {
+                continue;
+            }
+            if hard_link_count(&path, &metadata) <= 1 {
+                continue;
+            }
+            let Some(identity) = FileIdentity::from_path(&path, &metadata) else {
+                continue;
+            };
+            if wanted.contains(&identity) {
+                aliases.push(path);
+            }
+        }
+    }
+    deduplicate_paths(&mut aliases);
+    Ok(aliases)
 }
 
 fn workspace_scan_result<T>(
@@ -653,12 +782,12 @@ fn workspace_scan_result<T>(
     }
 }
 
-fn next_workspace_scan_entry(scanned: usize) -> Result<usize> {
+fn next_workspace_scan_entry(scanned: usize, limit: usize) -> Result<usize> {
     let scanned = scanned
         .checked_add(1)
         .context("native sandbox workspace scan entry count overflowed")?;
-    if scanned > MAX_WORKSPACE_SCAN_ENTRIES {
-        bail!("native sandbox workspace exceeds the {MAX_WORKSPACE_SCAN_ENTRIES} entry scan limit");
+    if scanned > limit {
+        bail!("native sandbox workspace exceeds the {limit} entry scan limit");
     }
     Ok(scanned)
 }
@@ -674,21 +803,88 @@ fn ensure_workspace_scan_depth(depth: usize, path: &Path) -> Result<()> {
 }
 
 /// Return whether recursive security scans should treat a directory as a
-/// package/build store rather than source content.
+/// package/build store or VCS object store rather than source content.
 pub fn should_skip_workspace_scan_directory(name: &OsStr) -> bool {
+    is_git_directory(name) || is_package_or_build_store_directory(name)
+}
+
+fn is_package_or_build_store_directory(name: &OsStr) -> bool {
     name.to_str().is_some_and(|name| {
-        [".git", "node_modules", "target"]
+        ["node_modules", "target"]
             .iter()
             .any(|skipped| name.eq_ignore_ascii_case(skipped))
     })
 }
 
-fn should_skip_hardlink_scan_directory(name: &OsStr) -> bool {
+fn is_git_directory(name: &OsStr) -> bool {
+    name.to_str()
+        .is_some_and(|name| name.eq_ignore_ascii_case(".git"))
+}
+
+fn is_protected_workspace_directory(name: &OsStr) -> bool {
     name.to_str().is_some_and(|name| {
         PROTECTED_WORKSPACE_DIRECTORIES
             .iter()
             .any(|protected| name.eq_ignore_ascii_case(protected))
     })
+}
+
+#[cfg(unix)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+struct FileIdentity {
+    device: u64,
+    inode: u64,
+}
+
+#[cfg(unix)]
+impl FileIdentity {
+    fn from_path(_path: &Path, metadata: &std::fs::Metadata) -> Option<Self> {
+        use std::os::unix::fs::MetadataExt;
+        Some(Self {
+            device: metadata.dev(),
+            inode: metadata.ino(),
+        })
+    }
+}
+
+#[cfg(windows)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+struct FileIdentity {
+    volume: u32,
+    index: u64,
+}
+
+#[cfg(windows)]
+impl FileIdentity {
+    fn from_path(path: &Path, _metadata: &std::fs::Metadata) -> Option<Self> {
+        use std::os::windows::io::AsRawHandle;
+        use windows_sys::Win32::Storage::FileSystem::{
+            GetFileInformationByHandle, BY_HANDLE_FILE_INFORMATION,
+        };
+
+        let file = std::fs::File::open(path).ok()?;
+        let mut information = unsafe { std::mem::zeroed::<BY_HANDLE_FILE_INFORMATION>() };
+        // SAFETY: `file` owns a valid handle and `information` is writable.
+        if unsafe { GetFileInformationByHandle(file.as_raw_handle(), &mut information) } == 0 {
+            return None;
+        }
+        Some(Self {
+            volume: information.dwVolumeSerialNumber,
+            index: (u64::from(information.nFileIndexHigh) << 32)
+                | u64::from(information.nFileIndexLow),
+        })
+    }
+}
+
+#[cfg(not(any(unix, windows)))]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+struct FileIdentity;
+
+#[cfg(not(any(unix, windows)))]
+impl FileIdentity {
+    fn from_path(_path: &Path, _metadata: &std::fs::Metadata) -> Option<Self> {
+        None
+    }
 }
 
 #[cfg(unix)]
@@ -978,6 +1174,23 @@ mod tests {
     }
 
     #[test]
+    fn monorepo_workspace_scan_stays_under_entry_limit() {
+        let workspace = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let workspace = workspace.canonicalize().unwrap();
+        let scratch = tempfile::tempdir().unwrap();
+        let start = std::time::Instant::now();
+        let result = SandboxPolicy::for_execution(&workspace, scratch.path());
+        let elapsed = start.elapsed();
+        match result {
+            Ok(_) => eprintln!("monorepo_scan_ok elapsed_ms={}", elapsed.as_millis()),
+            Err(error) => panic!(
+                "monorepo_scan_failed elapsed_ms={}: {error:#}",
+                elapsed.as_millis()
+            ),
+        }
+    }
+
+    #[test]
     fn scan_directory_filter_handles_case_variants() {
         for name in [".git", ".GIT", "Node_Modules", "TARGET"] {
             assert!(should_skip_workspace_scan_directory(OsStr::new(name)));
@@ -1011,23 +1224,59 @@ mod tests {
 
     #[cfg(any(unix, windows))]
     #[test]
-    fn hardlink_scan_does_not_skip_writable_dependency_trees() {
+    fn hardlink_scan_skips_build_and_package_stores() {
         let workspace = tempfile::tempdir().unwrap();
         let outside = tempfile::tempdir().unwrap();
         let source = outside.path().join("source");
         std::fs::write(&source, "outside").unwrap();
-        for directory in ["node_modules", "target"] {
+        for directory in ["node_modules", "target", ".a3s"] {
             let directory = workspace.path().join(directory);
             std::fs::create_dir_all(&directory).unwrap();
             std::fs::hard_link(&source, directory.join("linked")).unwrap();
         }
+        std::fs::create_dir_all(workspace.path().join("src")).unwrap();
+        std::fs::hard_link(&source, workspace.path().join("src/linked")).unwrap();
 
         let hardlinks = workspace_hardlink_paths(workspace.path()).unwrap();
-        assert_eq!(hardlinks.len(), 2);
-        assert!(hardlinks
+        assert_eq!(hardlinks.len(), 1);
+        assert!(hardlinks[0].ends_with("src/linked"));
+        assert!(!hardlinks
             .iter()
             .any(|path| path.ends_with("node_modules/linked")));
-        assert!(hardlinks.iter().any(|path| path.ends_with("target/linked")));
+        assert!(!hardlinks.iter().any(|path| path.ends_with("target/linked")));
+        assert!(!hardlinks.iter().any(|path| path.ends_with(".a3s/linked")));
+    }
+
+    #[cfg(any(unix, windows))]
+    #[test]
+    fn credential_hardlink_aliases_inside_package_stores_enter_the_deny_set() {
+        let workspace = tempfile::tempdir().unwrap();
+        let scratch = tempfile::tempdir().unwrap();
+        let env_path = workspace.path().join(".env");
+        std::fs::write(&env_path, "SECRET=1").unwrap();
+        for directory in ["node_modules", "target"] {
+            let directory = workspace.path().join(directory);
+            std::fs::create_dir_all(&directory).unwrap();
+            std::fs::hard_link(&env_path, directory.join("linked-secret")).unwrap();
+        }
+        // Non-credential outside hardlinks in package stores stay out of the
+        // bulk deny set (Seatbelt cannot name every Cargo object hardlink).
+        let outside = scratch.path().join("ordinary");
+        std::fs::write(&outside, "ordinary").unwrap();
+        std::fs::hard_link(&outside, workspace.path().join("node_modules/ordinary")).unwrap();
+
+        let policy = SandboxPolicy::for_execution(workspace.path(), scratch.path()).unwrap();
+        let workspace = workspace.path().canonicalize().unwrap();
+
+        assert!(policy
+            .deny_write
+            .contains(&workspace.join("node_modules/linked-secret")));
+        assert!(policy
+            .deny_write
+            .contains(&workspace.join("target/linked-secret")));
+        assert!(!policy
+            .deny_write
+            .contains(&workspace.join("node_modules/ordinary")));
     }
 
     #[test]

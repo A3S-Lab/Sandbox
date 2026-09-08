@@ -14,10 +14,21 @@ Every supported backend applies the same baseline policy:
 - deny symbolic-link and hard-link escape paths;
 - expose only a sanitized environment with state and temporary paths redirected
   into a private scratch directory;
-- bound captured output and terminate the command process tree at its deadline.
-- protect case-variant control metadata on case-sensitive filesystems and scan
-  writable dependency/build trees for hard-link aliases;
+- bound captured output and terminate the command process tree at its deadline;
+- protect case-variant control metadata on case-sensitive filesystems;
+- deny source-tree multi-link files and any package/build-store hardlink that
+  aliases a discovered credential inode, without bulk-enumerating ordinary
+  dependency or build hardlinks into the native profile;
 - tear down detached descendants even when the root shell exits successfully.
+
+Hard-link policy detail: `node_modules` and `target` routinely contain tens of
+thousands of legitimate multi-link artifacts. Naming each path in a Seatbelt
+profile exceeds macOS compilation limits and trips the workspace entry scan
+ceiling on large monorepos. The sandbox therefore skips those trees for bulk
+hardlink denial, keeps a full source-tree hardlink scan, and separately recovers
+workspace aliases of already-discovered credential identities. Creating new
+hardlinks at runtime remains denied. Residual risk: a pre-planted package-store
+hardlink to an arbitrary non-credential outside file is not bulk-denied.
 
 Platform enforcement is native: Seatbelt on macOS, Bubblewrap namespaces plus
 seccomp on Linux, and AppContainer plus a kill-on-close Job Object on Windows.

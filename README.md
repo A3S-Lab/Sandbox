@@ -33,7 +33,7 @@ the version intentionally when adopting a newer release:
 
 ```toml
 [dependencies]
-a3s-sandbox = "0.1.1"
+a3s-sandbox = "0.1.2"
 ```
 
 Run a command through the native boundary:
@@ -68,7 +68,9 @@ The default A3S Bash profile is intentionally strict:
   directory;
 - credentials, secret files, `.git`, `.a3s`, agent metadata, and shell/tool
   bootstrap files are protected;
-- symbolic-link and hard-link escape paths are rejected;
+- symbolic-link escapes and source-tree hard-link aliases are rejected;
+  package/build-store hardlinks stay usable unless they alias a discovered
+  credential inode;
 - child environments are sanitized, temporary state is redirected, and shell
   injection variables are removed;
 - deadlines terminate the complete descendant tree, and output capture stays

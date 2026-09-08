@@ -392,15 +392,14 @@ async fn native_backend_blocks_symlink_hardlink_and_credential_escape() {
 
 #[cfg(any(unix, windows))]
 #[tokio::test]
-async fn native_backend_blocks_hardlinks_inside_writable_dependency_trees() {
+async fn native_backend_blocks_credential_hardlinks_inside_writable_dependency_trees() {
     let workspace = tempfile::tempdir().unwrap();
-    let outside = tempfile::tempdir().unwrap();
-    let outside_secret = outside.path().join("dependency-secret");
-    std::fs::write(&outside_secret, "outside-secret").unwrap();
+    let env_path = workspace.path().join(".env");
+    std::fs::write(&env_path, "outside-secret").unwrap();
     for directory in ["node_modules", "target"] {
         std::fs::create_dir_all(workspace.path().join(directory)).unwrap();
         std::fs::hard_link(
-            &outside_secret,
+            &env_path,
             workspace.path().join(directory).join("linked-secret"),
         )
         .unwrap();
@@ -421,13 +420,10 @@ async fn native_backend_blocks_hardlinks_inside_writable_dependency_trees() {
         let output = execute_test_command(&sandbox, command).await.unwrap();
         assert_ne!(
             output.exit_code, 0,
-            "hard-link escape unexpectedly succeeded: {command}"
+            "credential hard-link escape unexpectedly succeeded: {command}"
         );
     }
-    assert_eq!(
-        std::fs::read_to_string(outside_secret).unwrap(),
-        "outside-secret"
-    );
+    assert_eq!(std::fs::read_to_string(env_path).unwrap(), "outside-secret");
 }
 
 #[cfg(any(unix, windows))]
