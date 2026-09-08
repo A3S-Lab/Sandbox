@@ -1,7 +1,7 @@
 # A3S Sandbox
 
 <p align="center">
-  <strong>Language / 语言:</strong>
+  <strong>语言 / Language:</strong>
   <a href="README.md">English</a> ·
   <a href="README.zh-CN.md">中文</a>
 </p>
