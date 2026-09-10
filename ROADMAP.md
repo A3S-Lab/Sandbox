@@ -5,6 +5,16 @@ production-grade, Rust-native alternative to the feature set exposed by
 Anthropic's Sandbox Runtime (SRT). It is intentionally an A3S product plan,
 not a promise to copy SRT's internal TypeScript APIs.
 
+## A3S Cloud substrate obligations
+
+**Status as of 2026-09-10.**
+
+Sandbox is on the Cloud Wave 1 `BX0.3` critical path as the host command
+boundary Box/Code may require. Fail closed when a platform cannot provide the
+requested isolation. Softening required isolation to “ship Cloud” is forbidden.
+See
+[cloud-substrate-dependency-roadmap.md](https://github.com/A3S-Lab/a3s/blob/main/docs/cloud-substrate-dependency-roadmap.md).
+
 ## Product decision
 
 `a3s-sandbox` is the single native sandbox library used by A3S products. The
