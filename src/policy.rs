@@ -31,6 +31,14 @@ pub const PROTECTED_WORKSPACE_FILES: &[&str] = &[
     ".profile",
 ];
 
+/// Extension surfaces under `.a3s` that agents are expected to install into.
+///
+/// Control-plane files such as `config.acl` / `os-auth.json` remain protected
+/// because they share the `.a3s` root; these subtrees are the documented
+/// Skill / agent install targets and must stay writable through ordinary
+/// `write` / `edit` / `patch` tools under non-interactive `--force` runs.
+const A3S_EXTENSION_SUBDIRECTORIES: &[&str] = &["skills", "agents"];
+
 /// Return whether a normalized workspace-relative path targets protected
 /// control metadata.
 pub fn is_protected_workspace_path(path: &str) -> bool {
@@ -43,6 +51,18 @@ pub fn is_protected_workspace_path(path: &str) -> bool {
     };
     if first == ".." || components.clone().any(|component| component == "..") {
         return false;
+    }
+
+    if first.eq_ignore_ascii_case(".a3s") {
+        if let Some(second) = components.next() {
+            if A3S_EXTENSION_SUBDIRECTORIES
+                .iter()
+                .any(|name| second.eq_ignore_ascii_case(name))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     PROTECTED_WORKSPACE_DIRECTORIES
@@ -500,6 +520,7 @@ fn default_sensitive_paths(home: &Path) -> Vec<PathBuf> {
         ".git-credentials",
         ".config/git/credentials",
         ".workbuddy",
+        ".workbuddy-ai",
         "credentials/kimi-code.json",
         ".kimi-code/credentials/kimi-code.json",
         ".kimi/credentials/kimi-code.json",
@@ -1121,6 +1142,8 @@ mod tests {
             ".git/config",
             ".GIT/HEAD",
             r".a3s\policy.acl",
+            ".a3s/config.acl",
+            ".a3s/os-auth.json",
             ".mcp.json",
             ".zshrc",
         ] {
@@ -1131,6 +1154,9 @@ mod tests {
             "../.git/config",
             ".gitignore",
             "src/main.rs",
+            ".a3s/skills/self-probe.md",
+            r".a3s\agents\worker.md",
+            ".A3S/Skills/nested/tool.md",
         ] {
             assert!(!is_protected_workspace_path(path), "{path}");
         }
