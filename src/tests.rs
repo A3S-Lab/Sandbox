@@ -210,13 +210,21 @@ async fn native_backend_keeps_concurrent_workspaces_isolated() {
         left.execute(CommandRequest {
             command: left_command.to_string(),
             // AppContainer cold start on GHA is multi-second; concurrent pairs need headroom.
-            timeout_ms: if cfg!(windows) { 60_000 } else { TEST_COMMAND_TIMEOUT_MS },
+            timeout_ms: if cfg!(windows) {
+                60_000
+            } else {
+                TEST_COMMAND_TIMEOUT_MS
+            },
             output_observer: None,
             env: None,
         }),
         right.execute(CommandRequest {
             command: right_command.to_string(),
-            timeout_ms: if cfg!(windows) { 60_000 } else { TEST_COMMAND_TIMEOUT_MS },
+            timeout_ms: if cfg!(windows) {
+                60_000
+            } else {
+                TEST_COMMAND_TIMEOUT_MS
+            },
             output_observer: None,
             env: None,
         }),
