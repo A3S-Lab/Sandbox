@@ -54,7 +54,9 @@ impl PlatformSandbox {
         configure_environment(&mut command, policy, request.env.as_deref())?;
         configure_seccomp_fd(&mut command, &seccomp)?;
         let guest_command = if let Some(sock) = &policy.mediator_unix_path {
-            crate::wrap_command_with_guest_relay(sock, &request.command)
+            let relay_bin = crate::stage_relay_into_scratch(&policy.scratch)
+                .context("failed to stage guest CONNECT relay into scratch")?;
+            crate::wrap_command_with_guest_relay(&relay_bin, sock, &request.command)
                 .context("failed to wrap guest command with CONNECT relay")?
         } else {
             request.command.clone()
@@ -115,9 +117,15 @@ fn configure_base_arguments(command: &mut Command, policy: &EnforcedPolicy) -> R
         if policy.session_write == crate::policy::SessionWriteMode::Ephemeral
             && writable == &policy.scratch
         {
-            // Ephemeral scratch: tmpfs replaces the host bind so guest writes
-            // do not persist on the host after the sandbox exits.
-            command.arg("--tmpfs").arg(writable);
+            if policy.mediator_unix_path.is_some() {
+                // Mediation needs a host↔guest Unix socket under scratch; tmpfs
+                // would hide the host-bound socket and the staged relay binary.
+                command.arg("--bind").arg(writable).arg(writable);
+            } else {
+                // Ephemeral scratch: tmpfs replaces the host bind so guest writes
+                // do not persist on the host after the sandbox exits.
+                command.arg("--tmpfs").arg(writable);
+            }
             continue;
         }
         command.arg("--bind").arg(writable).arg(writable);
@@ -709,6 +717,42 @@ mod tests {
                 .windows(3)
                 .any(|pair| { pair[0] == "--bind" && pair[1] == scratch && pair[2] == scratch }),
             "ephemeral scratch must not host-bind; args={args:?}"
+        );
+    }
+
+    #[test]
+    fn ephemeral_scratch_with_mediation_keeps_host_bind_for_socket() {
+        let workspace = tempfile::tempdir().unwrap();
+        let scratch = tempfile::tempdir().unwrap();
+        let mut document = crate::policy::SandboxPolicy::a3s_bash_baseline();
+        document.filesystem.session_write = crate::policy::SessionWriteMode::Ephemeral;
+        let mut policy = EnforcedPolicy::compile(
+            &document,
+            workspace.path(),
+            scratch.path(),
+            crate::policy::BackendCapabilities::native_gate2(),
+        )
+        .unwrap();
+        policy.mediator_unix_path = Some(scratch.path().join("mediator.sock"));
+        let mut command =
+            Command::new(resolve_executable("/usr/bin/bwrap", workspace.path()).unwrap());
+        configure_base_arguments(&mut command, &policy).unwrap();
+        let args: Vec<String> = command
+            .as_std()
+            .get_args()
+            .map(|arg| arg.to_string_lossy().into_owned())
+            .collect();
+        let scratch = policy.scratch.to_string_lossy().into_owned();
+        assert!(
+            args.windows(3)
+                .any(|pair| pair[0] == "--bind" && pair[1] == scratch && pair[2] == scratch),
+            "mediation requires host-bound scratch; args={args:?}"
+        );
+        assert!(
+            !args
+                .windows(2)
+                .any(|pair| pair[0] == "--tmpfs" && pair[1] == scratch),
+            "mediation must not hide scratch behind tmpfs; args={args:?}"
         );
     }
 

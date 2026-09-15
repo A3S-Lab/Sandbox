@@ -56,7 +56,7 @@ fn gate5_linux_bridge_residual_checklist_is_documented() {
         "mediated_socks requires a SOCKS relay path (not yet claimed)",
         "unix-socket allowlists (if claimed) cannot reach host docker.sock",
         "missing bwrap/userns still fails closed (no host fallback)",
-        "A3S_SANDBOX_RELAY / sibling a3s-sandbox-relay required for mediation",
+        "A3S_SANDBOX_RELAY / sibling a3s-sandbox-relay staged into scratch for guest exec",
     ];
     assert_eq!(residual.len(), 4);
     for item in residual {

@@ -166,14 +166,56 @@ pub fn posix_shell_single_quote(value: &str) -> String {
     out
 }
 
+/// Copy the host relay binary into `scratch` so the guest can execute it.
+///
+/// Linux bwrap masks `$HOME` / temp roots with tmpfs and only re-binds explicit
+/// allow_read paths. The cargo `target/debug` tree is usually invisible inside
+/// that mount namespace, so mediation must stage a guest-visible copy under
+/// session scratch (which is always allow_read + allow_write).
+pub fn stage_relay_into_scratch(scratch: &Path) -> Result<PathBuf> {
+    let host = resolve_relay_executable()?;
+    let guest = scratch.join("a3s-sandbox-relay");
+    std::fs::copy(&host, &guest).with_context(|| {
+        format!(
+            "failed to stage relay {} into {}",
+            host.display(),
+            guest.display()
+        )
+    })?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mut perms = std::fs::metadata(&guest)
+            .with_context(|| format!("failed to stat staged relay {}", guest.display()))?
+            .permissions();
+        perms.set_mode(0o755);
+        std::fs::set_permissions(&guest, perms).with_context(|| {
+            format!("failed to mark staged relay executable {}", guest.display())
+        })?;
+    }
+    Ok(guest)
+}
+
 /// Wrap a guest command so the TCP→Unix CONNECT relay starts before it.
 ///
 /// Brings loopback up inside an unshared netns, backgrounds the relay, and
 /// tears it down on exit. `user_command` is interpolated as a shell fragment
 /// (same contract as the outer `bash -c`).
-pub fn wrap_command_with_guest_relay(unix_socket: &Path, user_command: &str) -> Result<String> {
-    let relay = resolve_relay_executable()?;
-    let relay_q = posix_shell_single_quote(&relay.to_string_lossy());
+///
+/// `relay_bin` must be a path the guest can execute (typically the result of
+/// [`stage_relay_into_scratch`]).
+pub fn wrap_command_with_guest_relay(
+    relay_bin: &Path,
+    unix_socket: &Path,
+    user_command: &str,
+) -> Result<String> {
+    if !relay_bin.is_file() {
+        bail!(
+            "guest CONNECT relay binary missing at {}",
+            relay_bin.display()
+        );
+    }
+    let relay_q = posix_shell_single_quote(&relay_bin.to_string_lossy());
     let sock_q = posix_shell_single_quote(&unix_socket.to_string_lossy());
     let listen = format!("127.0.0.1:{GUEST_HTTP_CONNECT_RELAY_PORT}");
     Ok(format!(
@@ -287,13 +329,39 @@ mod tests {
             perms.set_mode(0o755);
             std::fs::set_permissions(&relay, perms).unwrap();
         }
-        std::env::set_var("A3S_SANDBOX_RELAY", &relay);
         let sock = dir.path().join("m.sock");
-        let wrapped = wrap_command_with_guest_relay(&sock, "echo hi").unwrap();
-        std::env::remove_var("A3S_SANDBOX_RELAY");
+        let wrapped = wrap_command_with_guest_relay(&relay, &sock, "echo hi").unwrap();
         assert!(wrapped.contains("ip link set lo up"));
         assert!(wrapped.contains("--unix"));
         assert!(wrapped.contains("echo hi"));
         assert!(wrapped.contains(&format!("127.0.0.1:{GUEST_HTTP_CONNECT_RELAY_PORT}")));
+    }
+
+    #[test]
+    fn stage_relay_into_scratch_copies_executable() {
+        let dir = tempfile::tempdir().unwrap();
+        let host = dir.path().join("host-relay");
+        std::fs::write(&host, b"relay-bytes").unwrap();
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mut perms = std::fs::metadata(&host).unwrap().permissions();
+            perms.set_mode(0o700);
+            std::fs::set_permissions(&host, perms).unwrap();
+        }
+        std::env::set_var("A3S_SANDBOX_RELAY", &host);
+        let scratch = tempfile::tempdir().unwrap();
+        let staged = stage_relay_into_scratch(scratch.path()).unwrap();
+        std::env::remove_var("A3S_SANDBOX_RELAY");
+        assert_eq!(staged, scratch.path().join("a3s-sandbox-relay"));
+        assert_eq!(std::fs::read(&staged).unwrap(), b"relay-bytes");
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            assert_eq!(
+                std::fs::metadata(&staged).unwrap().permissions().mode() & 0o111,
+                0o111
+            );
+        }
     }
 }

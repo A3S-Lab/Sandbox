@@ -19,8 +19,9 @@ mod process;
 
 pub use network::{
     default_guest_relay_addr, posix_shell_single_quote, resolve_relay_executable,
-    wrap_command_with_guest_relay, ConnectMediator, ConnectMediatorHandle, Socks5Mediator,
-    Socks5MediatorHandle, TcpUnixRelay, TcpUnixRelayHandle, GUEST_HTTP_CONNECT_RELAY_PORT,
+    stage_relay_into_scratch, wrap_command_with_guest_relay, ConnectMediator,
+    ConnectMediatorHandle, Socks5Mediator, Socks5MediatorHandle, TcpUnixRelay, TcpUnixRelayHandle,
+    GUEST_HTTP_CONNECT_RELAY_PORT,
 };
 pub use observability::{AuditEvent, AuditEventParts, AuditLog, AuditSurface, ReasonCode};
 pub use policy::{
