@@ -171,6 +171,28 @@ impl<'a> ExecutionAcls<'a> {
         // propagates inheritable ACEs through those host trees, which is both
         // expensive and too broad. System/package tools retain their existing
         // AppContainer grants; workspace-local tools are covered above.
+        // Typed policy mounts (Gate 3 RO/RW knowledge trees) are granted
+        // explicitly — they sit outside workspace/scratch and otherwise stay
+        // invisible to the AppContainer.
+        for path in &policy.mount_roots {
+            if !path.exists() {
+                continue;
+            }
+            guard.grant_ancestor_traversal(path)?;
+            if policy.allow_write.iter().any(|writable| writable == path) {
+                guard.modify(
+                    path,
+                    FILE_GENERIC_READ
+                        | FILE_GENERIC_WRITE
+                        | FILE_GENERIC_EXECUTE
+                        | DELETE
+                        | FILE_DELETE_CHILD,
+                    GRANT_ACCESS,
+                )?;
+            } else {
+                guard.modify(path, FILE_GENERIC_READ | FILE_GENERIC_EXECUTE, GRANT_ACCESS)?;
+            }
+        }
         for path in &policy.deny_read {
             if !path.exists()
                 || !policy
@@ -512,10 +534,11 @@ fn query_path_dacl(path: &Path, wide: &[u16]) -> Result<(*mut ACL, LocalAllocati
     Ok((acl, LocalAllocation(descriptor)))
 }
 
-/// Create a duplex overlapped named pipe whose DACL grants only `sid`.
+/// Create a duplex overlapped named pipe whose DACL grants AppContainer clients.
 ///
-/// The host keeps the server handle from creation; AppContainer clients may
-/// open the pipe name. Other callers should receive `ERROR_ACCESS_DENIED`.
+/// The host keeps the server handle from creation. The DACL allows the
+/// execution AppContainer SID and All Application Packages (`AC`); other
+/// callers should receive `ERROR_ACCESS_DENIED`.
 ///
 /// The security descriptor also carries a Low mandatory integrity label so
 /// AppContainer guests (Low IL) can open a pipe created by the Medium-IL host.
@@ -560,9 +583,12 @@ pub(super) fn create_appcontainer_named_pipe(
         LocalFree(sid_string.cast());
     }
 
-    // DACL: AppContainer SID only. SACL: Low mandatory label so Low-IL guests
-    // can open a pipe created by the Medium-IL host process.
-    let sddl = format!("D:(A;;GA;;;{sid_text})S:(ML;;NW;;;LW)");
+    // DACL: execution AppContainer SID + All Application Packages (AC). The
+    // package SID alone has still produced ERROR_ACCESS_DENIED from live
+    // AppContainer guests on GHA; AC is the well-known group every
+    // AppContainer token carries. Non-AppContainer hosts remain denied
+    // (covered by unit test). SACL: Low mandatory label for Low-IL guests.
+    let sddl = format!("D:(A;;GA;;;{sid_text})(A;;GA;;;AC)S:(ML;;NW;;;LW)");
     let mut descriptor: *mut c_void = null_mut();
     let ok = unsafe {
         ConvertStringSecurityDescriptorToSecurityDescriptorW(

@@ -91,6 +91,10 @@ pub(crate) struct EnforcedPolicy {
     pub(crate) socks_mediator_port: Option<u16>,
     /// Exact Unix-domain socket paths allowed for outbound connect (Gate 5).
     pub(crate) allow_unix_sockets: Vec<PathBuf>,
+    /// Typed filesystem mount roots from the policy document (Gate 3).
+    /// Windows AppContainer ACLs grant these explicitly; toolchain PATH roots
+    /// in `allow_read` are intentionally not mutated.
+    pub(crate) mount_roots: Vec<PathBuf>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -196,6 +200,7 @@ impl EnforcedPolicy {
             mediator_pipe_name: None,
             socks_mediator_port: None,
             allow_unix_sockets: Vec::new(),
+            mount_roots: Vec::new(),
         })
     }
 
@@ -236,12 +241,14 @@ impl EnforcedPolicy {
         remove_redundant_descendants(&mut self.deny_write);
         deduplicate_paths(&mut self.write_exceptions);
         deduplicate_paths(&mut self.allow_unix_sockets);
+        deduplicate_paths(&mut self.mount_roots);
         Ok(())
     }
 
     fn apply_mount(&mut self, mount: &crate::policy::FilesystemMount) -> Result<()> {
         use crate::policy::MountMode;
         let path = self.resolve_overlay_path(&mount.root, OverlayKind::Allow)?;
+        self.mount_roots.push(path.clone());
         match mount.mode {
             MountMode::ReadOnly => {
                 // Outside workspace/scratch is allowed for RO knowledge trees.
