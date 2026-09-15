@@ -1,6 +1,7 @@
 //! Gate 4: mediated HTTP policy shape — fail closed until a real mediator ships.
 
 use crate::policy::{BackendCapabilities, NetworkAllowRule, SandboxPolicy, SessionWriteMode};
+#[cfg(not(windows))]
 use crate::NativeSandbox;
 
 #[test]
