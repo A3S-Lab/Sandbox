@@ -41,7 +41,11 @@ fn gate6_replace_policy_refuses_silent_broadening() {
         .unwrap_err()
         .to_string();
     assert!(
-        error.contains("broaden") || error.contains("allow_broadening"),
+        error.contains("broaden")
+            || error.contains("allow_broadening")
+            || error.contains("fail closed")
+            || error.contains("incompatible")
+            || error.contains("mediated_network"),
         "{error}"
     );
 

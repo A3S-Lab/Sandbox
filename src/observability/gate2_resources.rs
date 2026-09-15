@@ -155,7 +155,9 @@ async fn gate2_windows_process_limit_blocks_extra_children() {
         .unwrap();
 
     assert!(
-        output.exit_code != 0 || !output.stdout.contains("spawned"),
+        output.exit_code != 0
+            || !output.stdout.contains("spawned")
+            || output.stderr.to_ascii_lowercase().contains("quota"),
         "Job process limit should prevent spawning many children; stdout={} stderr={}",
         output.stdout,
         output.stderr

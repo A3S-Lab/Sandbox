@@ -517,6 +517,9 @@ fn query_path_dacl(path: &Path, wide: &[u16]) -> Result<(*mut ACL, LocalAllocati
 /// The host keeps the server handle from creation; AppContainer clients may
 /// open the pipe name. Other callers should receive `ERROR_ACCESS_DENIED`.
 ///
+/// The security descriptor also carries a Low mandatory integrity label so
+/// AppContainer guests (Low IL) can open a pipe created by the Medium-IL host.
+///
 /// Used by the Windows execute path to create every named-pipe instance with
 /// the same AppContainer-only DACL. Capability claim still requires live guest
 /// tunnel proof.
@@ -524,67 +527,63 @@ pub(super) fn create_appcontainer_named_pipe(
     pipe_name: &str,
     sid: &SidBuffer,
 ) -> Result<OwnedHandle> {
-    use windows_sys::Win32::Foundation::{GENERIC_READ, GENERIC_WRITE};
-    use windows_sys::Win32::Security::{
-        InitializeSecurityDescriptor, SetSecurityDescriptorDacl, SECURITY_ATTRIBUTES,
-        SECURITY_DESCRIPTOR,
+    use windows_sys::Win32::Security::Authorization::{
+        ConvertSidToStringSidW, ConvertStringSecurityDescriptorToSecurityDescriptorW,
     };
-    use windows_sys::Win32::Storage::FileSystem::{
-        FILE_FLAG_OVERLAPPED, PIPE_ACCESS_DUPLEX, SYNCHRONIZE,
-    };
+    use windows_sys::Win32::Security::SECURITY_ATTRIBUTES;
+    use windows_sys::Win32::Storage::FileSystem::{FILE_FLAG_OVERLAPPED, PIPE_ACCESS_DUPLEX};
     use windows_sys::Win32::System::Pipes::{
         CreateNamedPipeW, PIPE_READMODE_BYTE, PIPE_REJECT_REMOTE_CLIENTS, PIPE_TYPE_BYTE,
         PIPE_UNLIMITED_INSTANCES, PIPE_WAIT,
     };
-    use windows_sys::Win32::System::SystemServices::SECURITY_DESCRIPTOR_REVISION;
 
     if !pipe_name.starts_with(r"\\.\pipe\") {
         bail!("AppContainer named pipe requires a \\\\.\\pipe\\... path");
     }
 
-    let mut access = EXPLICIT_ACCESS_W {
-        grfAccessPermissions: GENERIC_READ | GENERIC_WRITE | SYNCHRONIZE,
-        grfAccessMode: GRANT_ACCESS,
-        grfInheritance: NO_INHERITANCE,
-        Trustee: Default::default(),
-    };
-    access.Trustee.TrusteeForm = TRUSTEE_IS_SID;
-    access.Trustee.TrusteeType = TRUSTEE_IS_UNKNOWN;
-    access.Trustee.ptstrName = sid.as_ptr().cast::<u16>();
-
-    let mut acl: *mut ACL = null_mut();
-    let status = unsafe { SetEntriesInAclW(1, &access, null_mut(), &mut acl) };
-    if status != 0 {
-        bail!("SetEntriesInAclW failed while building named pipe DACL: {status}");
+    let mut sid_string: *mut u16 = null_mut();
+    let ok = unsafe { ConvertSidToStringSidW(sid.as_ptr(), &mut sid_string) };
+    if ok == 0 || sid_string.is_null() {
+        bail!(
+            "ConvertSidToStringSidW failed: {}",
+            std::io::Error::last_os_error()
+        );
     }
-    let _acl_guard = LocalAllocation(acl.cast::<c_void>());
+    let sid_text = unsafe {
+        let mut len = 0usize;
+        while *sid_string.add(len) != 0 {
+            len += 1;
+        }
+        String::from_utf16_lossy(std::slice::from_raw_parts(sid_string, len))
+    };
+    unsafe {
+        LocalFree(sid_string.cast());
+    }
 
-    let mut descriptor: SECURITY_DESCRIPTOR = unsafe { std::mem::zeroed() };
+    // DACL: AppContainer SID only. SACL: Low mandatory label so Low-IL guests
+    // can open a pipe created by the Medium-IL host process.
+    let sddl = format!("D:(A;;GA;;;{sid_text})S:(ML;;NW;;;LW)");
+    let mut descriptor: *mut c_void = null_mut();
     let ok = unsafe {
-        InitializeSecurityDescriptor(
-            (&raw mut descriptor).cast::<c_void>(),
-            SECURITY_DESCRIPTOR_REVISION,
+        ConvertStringSecurityDescriptorToSecurityDescriptorW(
+            wide_null(OsStr::new(&sddl)).as_ptr(),
+            1, // SDDL_REVISION_1
+            &mut descriptor,
+            null_mut(),
         )
     };
-    if ok == 0 {
+    if ok == 0 || descriptor.is_null() {
         bail!(
-            "InitializeSecurityDescriptor failed: {}",
+            "ConvertStringSecurityDescriptorToSecurityDescriptorW failed: {}",
             std::io::Error::last_os_error()
         );
     }
-    let ok =
-        unsafe { SetSecurityDescriptorDacl((&raw mut descriptor).cast::<c_void>(), 1, acl, 0) };
-    if ok == 0 {
-        bail!(
-            "SetSecurityDescriptorDacl failed: {}",
-            std::io::Error::last_os_error()
-        );
-    }
+    let _descriptor_guard = LocalAllocation(descriptor);
 
     let attributes = SECURITY_ATTRIBUTES {
         nLength: u32::try_from(size_of::<SECURITY_ATTRIBUTES>())
             .context("SECURITY_ATTRIBUTES size overflowed")?,
-        lpSecurityDescriptor: (&raw mut descriptor).cast::<c_void>(),
+        lpSecurityDescriptor: descriptor,
         bInheritHandle: 0,
     };
     let wide = wide_null(OsStr::new(pipe_name));
