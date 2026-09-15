@@ -142,12 +142,12 @@ fn gate4_native_sandbox_refuses_mediated_network_policies() {
 async fn gate4_linux_sandbox_mediator_tunnels_allowed_connect() {
     use crate::CommandRequest;
     use std::net::SocketAddr;
-    use std::sync::Mutex;
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
     use tokio::net::TcpListener;
+    use tokio::sync::Mutex;
 
-    static RELAY_ENV_LOCK: Mutex<()> = Mutex::new(());
-    let _guard = RELAY_ENV_LOCK.lock().unwrap();
+    static RELAY_ENV_LOCK: Mutex<()> = Mutex::const_new(());
+    let _guard = RELAY_ENV_LOCK.lock().await;
 
     let upstream = TcpListener::bind(SocketAddr::from(([127, 0, 0, 1], 0)))
         .await

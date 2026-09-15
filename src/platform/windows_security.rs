@@ -581,7 +581,7 @@ pub(super) fn create_appcontainer_named_pipe(
         );
     }
 
-    let mut attributes = SECURITY_ATTRIBUTES {
+    let attributes = SECURITY_ATTRIBUTES {
         nLength: u32::try_from(size_of::<SECURITY_ATTRIBUTES>())
             .context("SECURITY_ATTRIBUTES size overflowed")?,
         lpSecurityDescriptor: (&raw mut descriptor).cast::<c_void>(),
@@ -597,7 +597,7 @@ pub(super) fn create_appcontainer_named_pipe(
             64 * 1024,
             64 * 1024,
             0,
-            &mut attributes,
+            &attributes,
         )
     };
     if handle.is_null() || handle == windows_sys::Win32::Foundation::INVALID_HANDLE_VALUE {

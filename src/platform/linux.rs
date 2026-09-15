@@ -691,7 +691,7 @@ mod tests {
         )
         .unwrap();
         let mut command =
-            Command::new(&resolve_executable("/usr/bin/bwrap", workspace.path()).unwrap());
+            Command::new(resolve_executable("/usr/bin/bwrap", workspace.path()).unwrap());
         configure_base_arguments(&mut command, &policy).unwrap();
         let args: Vec<String> = command
             .as_std()
@@ -720,7 +720,7 @@ mod tests {
         policy.mediator_unix_path = Some(scratch.path().join("mediator.sock"));
         policy.mediator_port = Some(crate::GUEST_HTTP_CONNECT_RELAY_PORT);
         let mut command =
-            Command::new(&resolve_executable("/usr/bin/bwrap", workspace.path()).unwrap());
+            Command::new(resolve_executable("/usr/bin/bwrap", workspace.path()).unwrap());
         configure_base_arguments(&mut command, &policy).unwrap();
         if policy.mediator_unix_path.is_some() {
             command.arg("--unshare-net");
@@ -740,12 +740,12 @@ mod tests {
     async fn linux_bridge_wire_tunnels_allowed_connect_via_unix_mediator() {
         use crate::network::ConnectMediator;
         use crate::policy::NetworkAllowRule;
-        use std::sync::Mutex;
         use tokio::io::{AsyncReadExt, AsyncWriteExt};
         use tokio::net::TcpListener;
+        use tokio::sync::Mutex;
 
-        static RELAY_ENV_LOCK: Mutex<()> = Mutex::new(());
-        let _guard = RELAY_ENV_LOCK.lock().unwrap();
+        static RELAY_ENV_LOCK: Mutex<()> = Mutex::const_new(());
+        let _guard = RELAY_ENV_LOCK.lock().await;
 
         let workspace = tempfile::tempdir().unwrap();
         let scratch = tempfile::tempdir().unwrap();
@@ -843,10 +843,10 @@ print(s.recv(4).decode())\n",
     async fn linux_bridge_wire_denies_forbidden_connect_and_raw_egress() {
         use crate::network::ConnectMediator;
         use crate::policy::NetworkAllowRule;
-        use std::sync::Mutex;
+        use tokio::sync::Mutex;
 
-        static RELAY_ENV_LOCK: Mutex<()> = Mutex::new(());
-        let _guard = RELAY_ENV_LOCK.lock().unwrap();
+        static RELAY_ENV_LOCK: Mutex<()> = Mutex::const_new(());
+        let _guard = RELAY_ENV_LOCK.lock().await;
 
         let workspace = tempfile::tempdir().unwrap();
         let scratch = tempfile::tempdir().unwrap();
