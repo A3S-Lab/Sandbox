@@ -73,21 +73,14 @@ ACL + live proof — see `policy/gate5_windows_bridge.rs`.
 | No network capability | Guest cannot open network | Gate 0 network test |
 | Job process/memory limits | Enforceable quotas | Gate 2 |
 | Same-workspace ACL serialization | Per-workspace gate; drive alloc short lock | unit + concurrent isolation tests |
-| Mediated HTTP / SOCKS | **Not claimed** | capabilities false; fail-closed |
+| Mediated HTTP | Claimed (named-pipe CONNECT) | `windows_appcontainer_named_pipe_*` live proof |
+| Mediated SOCKS | **Not claimed** | capabilities false; fail-closed |
 
-**Foundation (unclaimed):** `ConnectMediator::bind_named_pipe_acl` plus
-`PlatformSandbox::mediator_named_pipe_factory` create every pipe instance with
-an AppContainer-only DACL (`create_appcontainer_named_pipe`; host client open
-denied). Guest contract is `A3S_SANDBOX_MEDIATOR_PIPE` — not `HTTP_PROXY` —
-because zero-net AppContainers cannot reach loopback TCP. Live guest tunnel
-proof is still required before any claim.
-
-**Residual:** live AppContainer guest CONNECT allow/deny/egress evidence from
-`windows_appcontainer_named_pipe_connect_allow_deny_and_blocks_raw_egress` on
-Windows CI/hardware (test is in-tree, unclaimed until green); guest-side
-clients that speak CONNECT over the named pipe for real tools; WFP ALE remains
-an alternative with higher privilege cost. Further parallelism only if ACL
-ancestor updates are proven race-free.
+**Bridge:** `create_appcontainer_mediation_pipe` +
+`ConnectMediator::bind_named_pipe_connected` create a connected pipe pair;
+the guest inherits the client handle as `A3S_SANDBOX_MEDIATOR_PIPE_HANDLE`
+(not `HTTP_PROXY`). Name-open alone stays Access Denied under AppContainer
+on GHA. SOCKS and Unix-socket allowlists remain fail-closed.
 
 ## Mediator protocol (host-supervised)
 

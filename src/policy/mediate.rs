@@ -1,8 +1,9 @@
 //! Gate 4 HTTP(S) allowlist matching and mediator contracts.
 //!
-//! The native backend keeps `mediated_http: false` until a host-supervised
-//! mediator is fenced by the OS. These helpers define the decision surface
-//! that the future mediator must enforce without silent broadening.
+//! `BackendCapabilities::mediated_http` is claimed only where OS fences plus
+//! live guest proofs exist (macOS Seatbelt, Linux netns+relay, Windows
+//! AppContainer inherited named pipe). These helpers define the decision
+//! surface the mediator must enforce without silent broadening.
 
 use super::model::{NetworkAllowRule, SandboxPolicy};
 use super::AccessDecision;

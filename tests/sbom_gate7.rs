@@ -1,4 +1,9 @@
 //! Gate 7: SBOM generation must name this crate and its direct graph.
+//!
+//! The checked-in generator is a bash script; run it on Unix CI/builders.
+//! Windows release SBOMs are produced on a Unix host (see RELEASE_CHECKLIST).
+
+#![cfg(unix)]
 
 use std::process::Command;
 

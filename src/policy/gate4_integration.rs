@@ -8,12 +8,12 @@ fn gate4_mediated_http_capability_is_platform_scoped() {
     let caps = BackendCapabilities::native_gate2();
     assert_eq!(
         caps.mediated_http,
-        cfg!(any(target_os = "macos", target_os = "linux")),
+        cfg!(any(target_os = "macos", target_os = "linux", windows)),
         "only claim HTTP mediation where OS fences + live proofs exist"
     );
 }
 
-#[cfg(not(any(target_os = "macos", target_os = "linux")))]
+#[cfg(not(any(target_os = "macos", target_os = "linux", windows)))]
 #[test]
 fn gate4_allowlist_requires_backend_capability() {
     let mut policy = SandboxPolicy::a3s_bash_baseline();
@@ -34,7 +34,7 @@ fn gate4_allowlist_requires_backend_capability() {
     );
 }
 
-#[cfg(any(target_os = "macos", target_os = "linux"))]
+#[cfg(any(target_os = "macos", target_os = "linux", windows))]
 #[test]
 fn gate4_claiming_platforms_accept_mediated_network_capability() {
     let mut policy = SandboxPolicy::a3s_bash_baseline();
@@ -116,7 +116,7 @@ fn gate4_rejects_path_prefix_with_dotdot() {
     assert!(error.contains("path_prefix"), "{error}");
 }
 
-#[cfg(not(any(target_os = "macos", target_os = "linux")))]
+#[cfg(not(any(target_os = "macos", target_os = "linux", windows)))]
 #[test]
 fn gate4_native_sandbox_refuses_mediated_network_policies() {
     let workspace = tempfile::tempdir().unwrap();

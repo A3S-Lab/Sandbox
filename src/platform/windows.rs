@@ -1088,10 +1088,10 @@ mod tests {
 
     /// Live AppContainer guest proof for the named-pipe CONNECT bridge.
     ///
-    /// Runs only on Windows. Passing this (allow + deny + raw egress blocked)
-    /// is the remaining evidence required before flipping `mediated_http`.
-    /// Guest opens via inherited `A3S_SANDBOX_MEDIATOR_PIPE_HANDLE` — name-open
-    /// remains Access Denied under AppContainer even with package SID DACLs.
+    /// Runs only on Windows. Green on Windows CI is the evidence behind
+    /// `BackendCapabilities::mediated_http` on this platform. Guest opens via
+    /// inherited `A3S_SANDBOX_MEDIATOR_PIPE_HANDLE` — name-open remains Access
+    /// Denied under AppContainer even with package SID DACLs.
     #[tokio::test]
     async fn windows_appcontainer_named_pipe_connect_allow_deny_and_blocks_raw_egress() {
         use crate::network::ConnectMediator;

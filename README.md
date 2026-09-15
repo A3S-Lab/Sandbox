@@ -145,9 +145,8 @@ cargo test --all-targets
 
 `a3s-sandbox-relay` is the guest TCP→Unix CONNECT helper used by the Linux
 netns mediation bridge. It is built alongside `a3s-sandbox`. Place it next to
-the host executable or set `A3S_SANDBOX_RELAY`. Linux claims `mediated_http`
-when that relay path is available; SOCKS and Windows mediation remain
-fail-closed.
+the host executable or set `A3S_SANDBOX_RELAY`. macOS, Linux, and Windows claim
+`mediated_http` after live guest proof; SOCKS remains macOS-only.
 
 Release packaging helpers:
 

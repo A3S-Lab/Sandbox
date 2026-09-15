@@ -255,8 +255,8 @@ macOS Seatbelt `localhost:<port>` fence, Linux `--unshare-net` + TCP→Unix
 relay (`a3s-sandbox-relay`) with live guest allow/deny evidence
 (`gate4_macos_sandbox_mediator_tunnels_allowed_connect`,
 `gate4_linux_sandbox_mediator_tunnels_allowed_connect`,
-`linux_bridge_wire_*`). `mediated_http` is true on macOS and Linux.
-Windows still fail closed.
+`linux_bridge_wire_*`). `mediated_http` is true on macOS, Linux, and Windows
+(Windows: inherited named-pipe CONNECT).
 Evidence: `network::connect`, `policy::gate4_integration`, `policy::mediate`,
 `platform::linux` bridge tests.
 
@@ -294,13 +294,11 @@ Linux/Windows fail closed. Evidence: `policy::gate5_integration`,
 `network::socks`, plus full `cargo test --all-targets` (137 lib tests on macOS
 plus CLI suite).
 
-**Residual:** Linux host-supervised HTTP CONNECT bridge is **claimed**
-(`mediated_http`) after live guest proof. SOCKS and Unix-socket allowlists
-remain fail-closed on Linux. Windows execute path wires
-`ConnectMediator::bind_named_pipe_acl` + AppContainer SID DACL factory and
-sets `A3S_SANDBOX_MEDIATOR_PIPE` (not `HTTP_PROXY`), but `mediated_http`
-stays false until live AppContainer guest tunnel proof. Unix-socket
-allowlists on non-macOS remain fail-closed.
+**Residual:** Linux and Windows host-supervised HTTP CONNECT bridges are
+**claimed** (`mediated_http`) after live guest proof. SOCKS and Unix-socket
+allowlists remain fail-closed on Linux/Windows. Windows guest contract is
+`A3S_SANDBOX_MEDIATOR_PIPE_HANDLE` (inherited connected pipe; not `HTTP_PROXY`).
+Unix-socket allowlists on non-macOS remain fail-closed.
 
 - Unix-socket path allowlists (macOS Exact Seatbelt; other platforms pending).
 - SOCKS5 mediator for non-HTTP TCP (including SSH) reusing Gate 4 fencing

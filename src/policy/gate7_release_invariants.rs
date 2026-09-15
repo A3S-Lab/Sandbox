@@ -58,7 +58,7 @@ fn gate7_release_claims_match_capability_matrix() {
     }
     #[cfg(windows)]
     {
-        assert!(!caps.mediated_http);
+        assert!(caps.mediated_http);
         assert!(!caps.mediated_socks);
         assert!(!caps.unix_socket_allowlist);
     }

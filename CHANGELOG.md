@@ -6,12 +6,11 @@
 
 - CONNECT request-line / header size bounds (8KiB / 16KiB) and Gate 7 protocol
   fuzz corpus.
-- Windows execute path prepares AppContainer-ACL'd named-pipe CONNECT mediation
-  (`A3S_SANDBOX_MEDIATOR_PIPE`); capability remains fail-closed until live guest
-  proof.
+- Windows claims `mediated_http` after live AppContainer guest proof: connected
+  named-pipe pair with inherited client handle (`A3S_SANDBOX_MEDIATOR_PIPE_HANDLE`).
 - Gate 7 in-command symlink race + overlapping same-workspace isolation tests.
 - Release helpers: SBOM generator, sign-release provenance, collect-release-evidence,
-  independent review package under `docs/`.
+  independent review package under `docs/`. SBOM script tests run on Unix only.
 - SECURITY.md Linux section corrected for baseline vs mediated `--unshare-net`.
 
 ## 0.1.2 — 2026-09-08

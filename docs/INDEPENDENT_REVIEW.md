@@ -26,7 +26,7 @@ Review `a3s-sandbox` native OS fences and host-supervised mediators for:
 | Default profile fail-closed | Inspect `SandboxPolicy::a3s_bash_baseline` — `mediated_network` / `mediated_socks` off |
 | macOS mediated HTTP | Live guest allow/deny + Seatbelt fence tests under `policy::gate4_integration` |
 | Linux mediated HTTP | OrbStack/Linux guest allow/deny/egress under `platform::linux` bridge tests |
-| Windows mediation unclaimed | `BackendCapabilities::mediated_http == false` on Windows; `gate5_windows_bridge` |
+| Windows mediated HTTP | Live AppContainer pipe allow/deny/egress under `platform::windows` + `gate5_windows_bridge` |
 | CONNECT DoS bounds | `network::connect` 8KiB/16KiB limits + `policy::gate7_fuzz` |
 | Soak / p50 | `policy::gate7_integration` (optional `GATE7_SOAK_ROUNDS`) |
 | In-command races | `gate7_in_command_symlink_swap_during_sleep_does_not_leak` |
