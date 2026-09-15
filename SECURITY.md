@@ -70,8 +70,9 @@ profile resources. The backend does not modify the system-drive root, PATH,
 Cargo, Rustup, or other user toolchain trees. System tools retain their
 host-provided AppContainer grants, workspace-local tools are covered by the
 workspace grant, and inaccessible user-private tools fail closed. Mediated HTTP
-over an AppContainer-ACL'd named pipe remains **fail-closed** until live guest
-proof (`A3S_SANDBOX_MEDIATOR_PIPE` contract; not `HTTP_PROXY`).
+CONNECT is claimed via an AppContainer-ACL'd connected named-pipe pair: the
+guest inherits the client handle as `A3S_SANDBOX_MEDIATOR_PIPE_HANDLE` (not
+`HTTP_PROXY`; name-open alone stays Access Denied under AppContainer).
 
 ## Non-goals
 

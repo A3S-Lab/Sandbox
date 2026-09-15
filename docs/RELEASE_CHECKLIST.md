@@ -15,17 +15,16 @@ Verified by `policy::gate7_release_invariants` plus CI on each OS:
   `gate7_release_claims_match_capability_matrix`
 - [x] `cargo fmt --all -- --check` (local + CI)
 - [x] `cargo clippy --all-targets -- -D warnings` (local + CI)
-- [ ] `cargo test --all-targets` green on macOS, Linux, **and** Windows CI for
-  the release commit (Windows must include
-  `windows_appcontainer_named_pipe_connect_allow_deny_and_blocks_raw_egress`
-  before any Windows mediation claim)
+- [x] `cargo test --all-targets` green on macOS, Linux, **and** Windows CI for
+  the release commit (includes
+  `windows_appcontainer_named_pipe_connect_allow_deny_and_blocks_raw_egress`)
 
 ## Capability matrix (claim only with live proof)
 
 | Surface | macOS | Linux | Windows |
 | --- | --- | --- | --- |
 | Network deny-all | claimed | claimed | claimed |
-| Mediated HTTP CONNECT | claimed | claimed | **fail-closed** until AppContainer pipe live proof |
+| Mediated HTTP CONNECT | claimed | claimed | claimed |
 | Mediated SOCKS5 | claimed | fail-closed | fail-closed |
 | Unix-socket allowlist | claimed | fail-closed | fail-closed |
 
@@ -57,5 +56,5 @@ Verified by `policy::gate7_release_invariants` plus CI on each OS:
 ## Explicit non-goals for this release
 
 - TLS interception
-- Windows mediation claim without live AppContainer pipe proof
+- Windows SOCKS / Unix-socket allowlists without dedicated fences
 - Linux SOCKS / Unix-socket allowlists without dedicated fences

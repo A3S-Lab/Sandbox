@@ -63,8 +63,8 @@ in-guest TCP→Unix relay (`a3s-sandbox-relay`) + `--unshare-net` + socket-allow
 seccomp mode. Live guest tests prove allow tunnels, denied CONNECT, and raw
 egress failure. `mediated_socks` / `unix_socket_allowlist` stay false.
 
-**Residual Gate 5 work:** Linux SOCKS relay path; Windows named-pipe broker
-ACL + live proof — see `policy/gate5_windows_bridge.rs`.
+**Residual Gate 5 work:** Linux SOCKS relay path; Windows SOCKS / Unix-socket
+allowlists — see `policy/gate5_windows_bridge.rs`.
 
 ## Windows (AppContainer + Job)
 

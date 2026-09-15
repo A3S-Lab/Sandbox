@@ -10,7 +10,8 @@ Review `a3s-sandbox` native OS fences and host-supervised mediators for:
 
 - macOS Seatbelt (network deny-all + mediated HTTP/SOCKS + Unix allowlists)
 - Linux namespaces/seccomp (network deny-all + mediated HTTP via Unix bridge)
-- Windows AppContainer/Job (network deny-all; mediation **fail-closed**)
+- Windows AppContainer/Job (network deny-all + mediated HTTP via inherited
+  named-pipe handle)
 
 ## Required reading
 

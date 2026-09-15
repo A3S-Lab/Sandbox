@@ -260,8 +260,8 @@ relay (`a3s-sandbox-relay`) with live guest allow/deny evidence
 Evidence: `network::connect`, `policy::gate4_integration`, `policy::mediate`,
 `platform::linux` bridge tests.
 
-**Residual:** Linux/Windows loopback fences; absolute-form HTTP path-prefix
-proxying (non-CONNECT); redirect revalidation; credential header transforms.
+**Residual:** absolute-form HTTP path-prefix proxying (non-CONNECT); redirect
+revalidation; credential header transforms; fuller proxy-bypass suites.
 
 **Why split from SOCKS:** Most agent/tool traffic is HTTP(S). Shipping allowlisted
 fetch with credential transforms unlocks product value without waiting on WFP/
@@ -271,15 +271,16 @@ SOCKS completeness.
   internet (macOS: Seatbelt loopback-to-mediator only).
 - Origin allowlists for CONNECT; path-prefix rules are reserved for future
   absolute-form HTTP and do not silently authorize TLS tunnels.
-- Platform fences: macOS Seatbelt loopback to mediator; Linux/Windows pending.
+- Platform fences: macOS Seatbelt loopback to mediator; Linux Unix-bridge
+  staging into scratch; Windows inherited AppContainer named-pipe handle.
 - Scrub proxy env bypasses; inject mediator proxy only when mediation is on.
 - Default profile remains network deny-all until an explicit policy enables this
   gate’s capabilities.
 
 **Exit (current claim):** Denied CONNECT never reaches upstream; allowed
-CONNECT is host-mediated and session-attributable on macOS; unclaimed
-platforms refuse `mediated_network` at compile. Full matrix bypass suites
-remain Gate 4 residual / Gate 7 assurance.
+CONNECT is host-mediated and session-attributable on macOS, Linux, and Windows;
+platforms without live fences refuse `mediated_network` at compile. Full matrix
+bypass suites remain Gate 4 residual / Gate 7 assurance.
 
 ### Gate 5 — Local IPC and non-HTTP mediation
 
@@ -352,10 +353,9 @@ signing/provenance + `scripts/collect-release-evidence.sh`,
 **Residual:** multi-hour soak evidence attached to a release, fuller throughput
 benches, signed release artifacts on a real tag, **independent security
 review** before any profile makes mediated network the default. Windows
-`mediated_http` remains fail-closed until
-`windows_appcontainer_named_pipe_connect_allow_deny_and_blocks_raw_egress` is
-green on Windows CI/hardware. Linux HTTP CONNECT is claimed; Linux SOCKS /
-unix allowlists remain fail-closed.
+`mediated_http` is claimed after live AppContainer pipe proof on Windows CI;
+Linux HTTP CONNECT is claimed; Linux/Windows SOCKS and unix allowlists remain
+fail-closed.
 
 - Adversarial suites: race/TOCTOU, symlink/hardlink, namespace, environment,
   descriptor, proxy bypass, DNS rebinding, process-tree orphans.
