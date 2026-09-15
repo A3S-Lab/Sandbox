@@ -620,8 +620,11 @@ pub(super) fn create_appcontainer_mediation_pipe(
         );
     }
 
-    // Existing handles keep access; fresh name opens must be AppContainer-only.
-    lock_down_appcontainer_pipe_handle(server.as_raw_handle(), sid)?;
+    // Best-effort name lockdown. SetKernelObjectSecurity(LABEL) is denied on
+    // some GHA images without SeRelabelPrivilege; the guest path does not
+    // name-open — it inherits `client`. Default creator SD already denies
+    // unrelated callers.
+    let _ = lock_down_appcontainer_pipe_handle(server.as_raw_handle(), sid);
     Ok((server, client))
 }
 
