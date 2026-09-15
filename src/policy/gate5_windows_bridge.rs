@@ -6,11 +6,12 @@
 //! destination fence would overfit.
 //!
 //! Preferred bridge (unclaimed until live guest proof): host-supervised
-//! named-pipe CONNECT broker ACL'd to the execution AppContainer SID, while
-//! the guest remains network-capability-less. Guest contract is
-//! `A3S_SANDBOX_MEDIATOR_PIPE` (not `HTTP_PROXY`). WFP ALE allowlisting only
-//! the mediator loopback port is an alternative with higher privilege/teardown
-//! cost.
+//! named-pipe CONNECT broker. The host creates a connected pipe pair, locks
+//! the name down to the AppContainer SID, and inherits the client handle into
+//! the guest (`A3S_SANDBOX_MEDIATOR_PIPE_HANDLE`). Name-open alone stays
+//! Access Denied under AppContainer on GHA. Guest remains network-capability-
+//! less. `A3S_SANDBOX_MEDIATOR_PIPE` still names the pipe for diagnostics;
+//! `HTTP_PROXY` is not the bridge.
 //!
 //! Live proof test (Windows-only):
 //! `platform::windows::tests::windows_appcontainer_named_pipe_connect_allow_deny_and_blocks_raw_egress`.
@@ -59,14 +60,14 @@ fn gate5_windows_mediated_policy_fails_closed_on_windows_capabilities() {
 fn gate5_windows_bridge_acceptance_checklist_is_documented() {
     let required = [
         "guest retains zero AppContainer network capabilities (no raw TCP)",
-        "guest reaches host mediator only via ACL'd named pipe (or WFP-fenced loopback)",
-        "guest contract is A3S_SANDBOX_MEDIATOR_PIPE (not HTTP_PROXY)",
+        "guest reaches host mediator via inherited connected pipe handle",
+        "guest contract is A3S_SANDBOX_MEDIATOR_PIPE_HANDLE (not HTTP_PROXY)",
         "denied CONNECT never reaches upstream",
         "NO_PROXY and proxy env bypasses cannot restore raw egress",
-        "pipe ACL setup failure fails closed (no host fallback)",
+        "pipe pair setup failure fails closed (no host fallback)",
         "AppContainer profile teardown restores prior security state",
-        "create_appcontainer_named_pipe DACL denies non-AppContainer clients",
-        "bind_named_pipe_acl recreates every accept instance with the same DACL",
+        "create_appcontainer_named_pipe DACL denies non-AppContainer name opens",
+        "create_appcontainer_mediation_pipe inherits connected client into guest",
         "windows_appcontainer_named_pipe_connect_allow_deny_and_blocks_raw_egress green on Windows",
     ];
     assert_eq!(required.len(), 10);

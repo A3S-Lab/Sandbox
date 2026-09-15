@@ -12,7 +12,7 @@ use anyhow::{bail, Context, Result};
 use std::collections::HashMap;
 use std::ffi::{c_void, OsStr, OsString};
 use std::fs::{File, OpenOptions};
-use std::mem::{size_of, zeroed};
+use std::mem::{size_of, size_of_val, zeroed};
 use std::os::windows::ffi::OsStrExt;
 use std::os::windows::io::{AsRawHandle, FromRawHandle, OwnedHandle};
 use std::path::{Component, Path, PathBuf, Prefix};
@@ -68,10 +68,9 @@ impl PlatformSandbox {
 
     /// Factory that recreates the same pipe name with the session AppContainer SID.
     ///
-    /// Every accept-loop instance must use this factory; a plain Tokio
-    /// `ServerOptions::create` would drop the AppContainer-only DACL.
-    /// Execute wires this when `mediated_network` is compiled; `mediated_http`
-    /// stays false until live AppContainer guest tunnel proof.
+    /// Kept for accept-loop name-open experiments; live guests use
+    /// [`Self::create_mediation_pipe`] + handle inheritance.
+    #[allow(dead_code)]
     pub(crate) fn mediator_named_pipe_factory(
         &self,
         pipe_name: String,
@@ -80,22 +79,62 @@ impl PlatformSandbox {
         move || super::windows_security::create_appcontainer_named_pipe(&pipe_name, &sid)
     }
 
+    /// Create a connected mediation pipe pair for AppContainer handle inheritance.
+    pub(crate) fn create_mediation_pipe(
+        &self,
+        pipe_name: &str,
+    ) -> Result<(OwnedHandle, OwnedHandle)> {
+        super::windows_security::create_appcontainer_mediation_pipe(pipe_name, &self.profile.sid)
+    }
+
     pub(crate) async fn execute(
         &self,
         policy: &EnforcedPolicy,
         request: CommandRequest,
     ) -> Result<CommandOutput> {
+        self.execute_inner(policy, request, None).await
+    }
+
+    /// Execute with an inherited, already-connected mediation pipe client handle.
+    pub(crate) async fn execute_with_mediator_client(
+        &self,
+        policy: &EnforcedPolicy,
+        request: CommandRequest,
+        mediator_client: OwnedHandle,
+    ) -> Result<CommandOutput> {
+        self.execute_inner(policy, request, Some(mediator_client))
+            .await
+    }
+
+    async fn execute_inner(
+        &self,
+        policy: &EnforcedPolicy,
+        request: CommandRequest,
+        mediator_client: Option<OwnedHandle>,
+    ) -> Result<CommandOutput> {
         // Workspace DACLs are restored after each command. Serialize per
-        // workspace so apply/use/restore cannot race. Distinct workspaces may
-        // run concurrently; DOS-device allocation uses a separate short lock.
+        // workspace so apply/use/restore cannot race. Ancestor ACL mutations
+        // (Temp/home traverse) are globally serialized so concurrent workspaces
+        // cannot corrupt shared parent DACLs.
         let execution_gate = workspace_execution_gate(&policy.workspace);
         let _execution = execution_gate.lock().await;
         let pins = WorkspacePins::acquire(policy)?;
         let budget = ResolvedResourceBudget::resolve(&policy.resources, request.timeout_ms)?;
         budget.validate_for_backend(crate::policy::BackendCapabilities::native_gate2())?;
-        let mut acls = ExecutionAcls::apply(policy, &self.profile.sid)?;
+        let mut acls = {
+            let _acl_gate = acl_mutation_gate()
+                .lock()
+                .unwrap_or_else(|poisoned| poisoned.into_inner());
+            ExecutionAcls::apply(policy, &self.profile.sid)?
+        };
         let execution = match policy.child_environment(request.env.as_deref()) {
-            Ok(environment) => {
+            Ok(mut environment) => {
+                if let Some(client) = mediator_client.as_ref() {
+                    environment.insert(
+                        OsString::from("A3S_SANDBOX_MEDIATOR_PIPE_HANDLE"),
+                        OsString::from(format!("{}", client.as_raw_handle() as usize)),
+                    );
+                }
                 match spawn_appcontainer_process(
                     &self.powershell,
                     &self.profile.sid,
@@ -103,6 +142,7 @@ impl PlatformSandbox {
                     &request.command,
                     environment,
                     &budget,
+                    mediator_client,
                 ) {
                     Ok(child) => capture_process(child, request, &budget).await,
                     Err(error) => Err(error),
@@ -110,7 +150,12 @@ impl PlatformSandbox {
             }
             Err(error) => Err(error),
         };
-        let acl_cleanup = acls.restore();
+        let acl_cleanup = {
+            let _acl_gate = acl_mutation_gate()
+                .lock()
+                .unwrap_or_else(|poisoned| poisoned.into_inner());
+            acls.restore()
+        };
         drop(acls);
         drop(pins);
         finish_execution(execution, acl_cleanup)
@@ -131,6 +176,11 @@ fn workspace_execution_gate(workspace: &Path) -> std::sync::Arc<tokio::sync::Mut
 }
 
 fn drive_allocation_gate() -> &'static Mutex<()> {
+    static GATE: OnceLock<Mutex<()>> = OnceLock::new();
+    GATE.get_or_init(|| Mutex::new(()))
+}
+
+fn acl_mutation_gate() -> &'static Mutex<()> {
     static GATE: OnceLock<Mutex<()>> = OnceLock::new();
     GATE.get_or_init(|| Mutex::new(()))
 }
@@ -266,6 +316,8 @@ struct WindowsChild {
     stdout: OwnedHandle,
     stderr: OwnedHandle,
     workspace_drive: WorkspaceDrive,
+    /// Keeps the inherited mediation client handle alive for the guest.
+    _mediator_client: Option<OwnedHandle>,
 }
 
 struct WorkspaceDrive {
@@ -353,17 +405,21 @@ fn spawn_appcontainer_process(
     script: &str,
     environment: std::collections::BTreeMap<std::ffi::OsString, std::ffi::OsString>,
     budget: &ResolvedResourceBudget,
+    mediator_client: Option<OwnedHandle>,
 ) -> Result<WindowsChild> {
     let workspace_drive = WorkspaceDrive::create(workspace)?;
     let job = JobGuard::new(budget)?;
     let (stdout_read, stdout_write) = create_pipe()?;
     let (stderr_read, stderr_write) = create_pipe()?;
     let stdin = open_null_input()?;
-    let inherited = [
+    let mut inherited = vec![
         stdin.as_raw_handle(),
         stdout_write.as_raw_handle(),
         stderr_write.as_raw_handle(),
     ];
+    if let Some(client) = mediator_client.as_ref() {
+        inherited.push(client.as_raw_handle());
+    }
 
     let mut capabilities = SECURITY_CAPABILITIES {
         AppContainerSid: sid.as_ptr(),
@@ -380,7 +436,7 @@ fn spawn_appcontainer_process(
     attributes.update(
         usize::try_from(PROC_THREAD_ATTRIBUTE_HANDLE_LIST).unwrap_or(131074),
         inherited.as_ptr().cast::<c_void>(),
-        size_of_val(&inherited),
+        size_of_val(inherited.as_slice()),
     )?;
 
     let workspace_literal = workspace_drive.root().to_string_lossy().replace('\'', "''");
@@ -464,6 +520,7 @@ fn spawn_appcontainer_process(
         stdout: stdout_read,
         stderr: stderr_read,
         workspace_drive,
+        _mediator_client: mediator_client,
     })
 }
 
@@ -525,6 +582,7 @@ async fn capture_process(
         stdout,
         stderr,
         mut workspace_drive,
+        _mediator_client,
     } = child;
     let wait_handle = duplicate_handle(&process)?;
     let mut wait = tokio::task::spawn_blocking(move || {
@@ -1032,6 +1090,8 @@ mod tests {
     ///
     /// Runs only on Windows. Passing this (allow + deny + raw egress blocked)
     /// is the remaining evidence required before flipping `mediated_http`.
+    /// Guest opens via inherited `A3S_SANDBOX_MEDIATOR_PIPE_HANDLE` — name-open
+    /// remains Access Denied under AppContainer even with package SID DACLs.
     #[tokio::test]
     async fn windows_appcontainer_named_pipe_connect_allow_deny_and_blocks_raw_egress() {
         use crate::network::ConnectMediator;
@@ -1071,14 +1131,14 @@ mod tests {
             std::process::id(),
             upstream_addr.port()
         );
-        let factory = sandbox.mediator_named_pipe_factory(pipe_name.clone());
+        let (server, client) = sandbox
+            .create_mediation_pipe(&pipe_name)
+            .expect("connected mediation pipe pair");
         let mediator =
-            ConnectMediator::bind_named_pipe_acl(document.clone(), pipe_name.clone(), factory)
+            ConnectMediator::bind_named_pipe_connected(document.clone(), pipe_name.clone(), server)
                 .await
-                .expect("ACL'd CONNECT named-pipe mediator");
+                .expect("connected CONNECT named-pipe mediator");
 
-        // Compile a baseline enforceable policy (mediation capability still false),
-        // then inject the pipe guest contract the execute path will use once claimed.
         let mut policy = EnforcedPolicy::compile(
             &SandboxPolicy::a3s_bash_baseline(),
             workspace.path(),
@@ -1091,11 +1151,10 @@ mod tests {
         let allow_script = format!(
             r#"
 $ErrorActionPreference = 'Stop'
-$full = $env:A3S_SANDBOX_MEDIATOR_PIPE
-if ([string]::IsNullOrEmpty($full)) {{ throw 'missing A3S_SANDBOX_MEDIATOR_PIPE' }}
-$name = $full -replace '^\\\\\.\\pipe\\',''
-$client = [System.IO.Pipes.NamedPipeClientStream]::new('.', $name, [System.IO.Pipes.PipeDirection]::InOut)
-$client.Connect(15000)
+$raw = $env:A3S_SANDBOX_MEDIATOR_PIPE_HANDLE
+if ([string]::IsNullOrEmpty($raw)) {{ throw 'missing A3S_SANDBOX_MEDIATOR_PIPE_HANDLE' }}
+$safe = New-Object Microsoft.Win32.SafeHandles.SafePipeHandle([IntPtr][int64]$raw, $true)
+$client = New-Object System.IO.Pipes.NamedPipeClientStream([System.IO.Pipes.PipeDirection]::InOut, $false, $true, $safe)
 $req = [Text.Encoding]::ASCII.GetBytes("CONNECT 127.0.0.1:{port} HTTP/1.1`r`nHost: 127.0.0.1`r`n`r`n")
 $client.Write($req, 0, $req.Length)
 $hdr = New-Object byte[] 128
@@ -1113,7 +1172,7 @@ $client.Dispose()
         );
 
         let allow = sandbox
-            .execute(
+            .execute_with_mediator_client(
                 &policy,
                 CommandRequest {
                     command: allow_script,
@@ -1121,6 +1180,7 @@ $client.Dispose()
                     output_observer: None,
                     env: None,
                 },
+                client,
             )
             .await
             .expect("allow execute");
@@ -1137,6 +1197,7 @@ $client.Dispose()
         hit_rx
             .await
             .expect("allowed CONNECT must reach upstream once");
+        mediator.shutdown().await;
 
         // Denied CONNECT must not reach a fresh upstream.
         let deny_upstream = TcpListener::bind("127.0.0.1:0").await.unwrap();
@@ -1149,13 +1210,26 @@ $client.Dispose()
             .await
         });
 
+        let deny_pipe = format!(
+            r"\\.\pipe\a3s-sandbox-deny-{}-{}",
+            std::process::id(),
+            deny_port
+        );
+        let (deny_server, deny_client) = sandbox
+            .create_mediation_pipe(&deny_pipe)
+            .expect("deny mediation pipe pair");
+        let deny_mediator =
+            ConnectMediator::bind_named_pipe_connected(document, deny_pipe.clone(), deny_server)
+                .await
+                .expect("deny CONNECT mediator");
+        policy.mediator_pipe_name = Some(deny_pipe);
+
         let deny_script = format!(
             r#"
 $ErrorActionPreference = 'Stop'
-$full = $env:A3S_SANDBOX_MEDIATOR_PIPE
-$name = $full -replace '^\\\\\.\\pipe\\',''
-$client = [System.IO.Pipes.NamedPipeClientStream]::new('.', $name, [System.IO.Pipes.PipeDirection]::InOut)
-$client.Connect(15000)
+$raw = $env:A3S_SANDBOX_MEDIATOR_PIPE_HANDLE
+$safe = New-Object Microsoft.Win32.SafeHandles.SafePipeHandle([IntPtr][int64]$raw, $true)
+$client = New-Object System.IO.Pipes.NamedPipeClientStream([System.IO.Pipes.PipeDirection]::InOut, $false, $true, $safe)
 $req = [Text.Encoding]::ASCII.GetBytes("CONNECT 127.0.0.1:{port} HTTP/1.1`r`nHost: 127.0.0.1`r`n`r`n")
 $client.Write($req, 0, $req.Length)
 $hdr = New-Object byte[] 128
@@ -1168,7 +1242,7 @@ $client.Dispose()
             port = deny_port
         );
         let deny = sandbox
-            .execute(
+            .execute_with_mediator_client(
                 &policy,
                 CommandRequest {
                     command: deny_script,
@@ -1176,6 +1250,7 @@ $client.Dispose()
                     output_observer: None,
                     env: None,
                 },
+                deny_client,
             )
             .await
             .expect("deny execute");
@@ -1195,6 +1270,7 @@ $client.Dispose()
             Ok(Err(_)) => {}
             Ok(Ok(_)) => panic!("denied CONNECT must not reach upstream"),
         }
+        deny_mediator.shutdown().await;
 
         // Raw TCP from the AppContainer guest must stay blocked (zero net caps).
         let egress_script = format!(
@@ -1233,7 +1309,5 @@ try {{
             "egress stdout={}",
             egress.stdout
         );
-
-        mediator.shutdown().await;
     }
 }

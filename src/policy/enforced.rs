@@ -460,8 +460,9 @@ fn compose_child_env(
     remove_bootstrap_injection_variables(&mut environment);
     scrub_proxy_environment(&mut environment);
     environment.retain(|key, _| {
-        !key.to_string_lossy()
-            .eq_ignore_ascii_case("A3S_SANDBOX_MEDIATOR_PIPE")
+        let key = key.to_string_lossy();
+        !key.eq_ignore_ascii_case("A3S_SANDBOX_MEDIATOR_PIPE")
+            && !key.eq_ignore_ascii_case("A3S_SANDBOX_MEDIATOR_PIPE_HANDLE")
     });
     if let Some(port) = mediator_port {
         let proxy = OsString::from(format!("http://127.0.0.1:{port}"));

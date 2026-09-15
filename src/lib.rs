@@ -307,6 +307,8 @@ impl NativeSandbox {
         let mut mediator_port = None;
         #[allow(unused_mut)]
         let mut mediator_pipe_name = None;
+        #[cfg(windows)]
+        let mut mediator_pipe_client: Option<std::os::windows::io::OwnedHandle> = None;
         if policy_doc.features.mediated_network {
             #[cfg(target_os = "linux")]
             {
@@ -332,25 +334,28 @@ impl NativeSandbox {
             }
             #[cfg(windows)]
             {
-                // AppContainer guests have zero network capabilities, so loopback
-                // HTTP_PROXY cannot work. Speak CONNECT over an ACL'd named pipe.
-                // Capability claim still requires live guest tunnel proof.
+                // AppContainer guests cannot name-open host pipes (Access Denied).
+                // Create a connected pair and inherit the client handle into the guest.
                 let pipe_name = format!(
                     r"\\.\pipe\a3s-sandbox-{}-{}",
                     std::process::id(),
                     command_id
                 );
-                let factory = self.platform.mediator_named_pipe_factory(pipe_name.clone());
+                let (server, client) = self
+                    .platform
+                    .create_mediation_pipe(&pipe_name)
+                    .context("failed to create AppContainer mediation pipe pair")?;
                 http_mediator = Some(
-                    crate::ConnectMediator::bind_named_pipe_acl(
+                    crate::ConnectMediator::bind_named_pipe_connected(
                         policy_doc.clone(),
                         pipe_name.clone(),
-                        factory,
+                        server,
                     )
                     .await
-                    .context("failed to start AppContainer-ACL'd CONNECT named-pipe mediator")?,
+                    .context("failed to start connected AppContainer CONNECT mediator")?,
                 );
                 mediator_pipe_name = Some(pipe_name);
+                mediator_pipe_client = Some(client);
             }
             #[cfg(not(any(target_os = "linux", target_os = "macos", windows)))]
             {
@@ -429,7 +434,22 @@ impl NativeSandbox {
                 return Err(error);
             }
         };
-        let output = self.platform.execute(&policy, request).await?;
+        let output = {
+            #[cfg(windows)]
+            {
+                if let Some(client) = mediator_pipe_client {
+                    self.platform
+                        .execute_with_mediator_client(&policy, request, client)
+                        .await?
+                } else {
+                    self.platform.execute(&policy, request).await?
+                }
+            }
+            #[cfg(not(windows))]
+            {
+                self.platform.execute(&policy, request).await?
+            }
+        };
         if let Some(handle) = http_mediator {
             handle.shutdown().await;
         }

@@ -233,11 +233,59 @@ impl ConnectMediator {
         })
     }
 
+    /// Bind a CONNECT mediator to an already-connected named-pipe server handle.
+    ///
+    /// Paired with `create_appcontainer_mediation_pipe`: the host opens the
+    /// client end and inherits it into the AppContainer guest. Live guests
+    /// cannot name-open the pipe (`ERROR_ACCESS_DENIED` on GHA even with
+    /// package SID + Low IL DACLs).
+    #[cfg(windows)]
+    pub async fn bind_named_pipe_connected(
+        policy: SandboxPolicy,
+        pipe_name: impl AsRef<str>,
+        server: std::os::windows::io::OwnedHandle,
+    ) -> Result<ConnectMediatorHandle> {
+        use std::os::windows::io::IntoRawHandle;
+        use tokio::net::windows::named_pipe::NamedPipeServer;
+
+        prepare_policy(&policy)?;
+        let pipe_name = pipe_name.as_ref().to_string();
+        if !pipe_name.starts_with(r"\\.\pipe\") {
+            bail!("named pipe CONNECT mediator requires a \\\\.\\pipe\\... path");
+        }
+
+        let raw = server.into_raw_handle();
+        // SAFETY: CreateNamedPipeW duplex overlapped server with a connected client.
+        let server = unsafe { NamedPipeServer::from_raw_handle(raw) }
+            .context("failed to wrap connected AppContainer named pipe as Tokio server")?;
+        server
+            .connect()
+            .await
+            .context("failed to finalize connected AppContainer named pipe")?;
+
+        let policy = Arc::new(policy);
+        let (shutdown_tx, mut shutdown_rx) = oneshot::channel();
+        let join = tokio::spawn(async move {
+            tokio::select! {
+                _ = &mut shutdown_rx => {}
+                _ = handle_client(server, policy) => {}
+            }
+        });
+
+        Ok(ConnectMediatorHandle {
+            addr: None,
+            unix_path: None,
+            pipe_name: Some(pipe_name),
+            shutdown: Some(shutdown_tx),
+            join: Some(join),
+        })
+    }
+
     /// Bind a CONNECT mediator whose every pipe instance is created by `create_next`.
     ///
-    /// Use with `PlatformSandbox::mediator_named_pipe_factory` so AppContainer
-    /// SID DACLs apply to the first and all subsequent instances. Fail closed
-    /// if a later instance cannot be created.
+    /// Prefer [`Self::bind_named_pipe_connected`] for live AppContainer guests.
+    /// Use with `PlatformSandbox::mediator_named_pipe_factory` for accept-loop
+    /// name-open clients. Fail closed if a later instance cannot be created.
     #[cfg(windows)]
     pub async fn bind_named_pipe_acl<F>(
         policy: SandboxPolicy,
