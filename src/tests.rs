@@ -333,6 +333,29 @@ if ([IO.File]::ReadAllText((Join-Path (Get-Location) '.git/config')) -ne 'origin
     }
 
     #[cfg(not(windows))]
+    {
+        let loops = workspace.path().join(".a3s/loops/goal-carve");
+        std::fs::create_dir_all(&loops).unwrap();
+        // Recreate sandbox so policy picks up the loops carve-out directory.
+        let sandbox = create_test_sandbox(workspace.path());
+        let loop_write = execute_test_command(
+            &sandbox,
+            "printf carved > .a3s/loops/goal-carve/ACCEPTANCE.md",
+        )
+        .await
+        .unwrap();
+        assert_eq!(
+            loop_write.exit_code, 0,
+            "goal-loop carve-out must be writable: {}",
+            loop_write.stderr
+        );
+        assert_eq!(
+            std::fs::read_to_string(loops.join("ACCEPTANCE.md")).unwrap(),
+            "carved"
+        );
+    }
+
+    #[cfg(not(windows))]
     let create_command = "mkdir .codex";
     #[cfg(windows)]
     let create_command = "New-Item -ItemType Directory -Path '.codex' -ErrorAction Stop";

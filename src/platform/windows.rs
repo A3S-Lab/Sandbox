@@ -4,7 +4,9 @@
 use super::windows_security::appcontainer_profile_name;
 use super::windows_security::{AppContainerProfile, ExecutionAcls, SidBuffer};
 use super::windows_shell::{build_powershell_command, encode_powershell_command};
-use crate::policy::{requires_directory_placeholder, resolve_executable, SandboxPolicy};
+use crate::policy::{
+    requires_directory_placeholder, resolve_executable, EnforcedPolicy, ResolvedResourceBudget,
+};
 use crate::{CommandOutput, CommandRequest};
 use anyhow::{bail, Context, Result};
 use std::collections::HashMap;
@@ -32,7 +34,7 @@ use windows_sys::Win32::System::JobObjects::{
     AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
     SetInformationJobObject, TerminateJobObject, JOBOBJECT_EXTENDED_LIMIT_INFORMATION,
     JOB_OBJECT_LIMIT_ACTIVE_PROCESS, JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION,
-    JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
+    JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE, JOB_OBJECT_LIMIT_PROCESS_MEMORY,
 };
 use windows_sys::Win32::System::Pipes::{CreatePipe, PeekNamedPipe};
 use windows_sys::Win32::System::Threading::{
@@ -64,15 +66,33 @@ impl PlatformSandbox {
         })
     }
 
+    /// Factory that recreates the same pipe name with the session AppContainer SID.
+    ///
+    /// Every accept-loop instance must use this factory; a plain Tokio
+    /// `ServerOptions::create` would drop the AppContainer-only DACL.
+    /// Execute wires this when `mediated_network` is compiled; `mediated_http`
+    /// stays false until live AppContainer guest tunnel proof.
+    pub(crate) fn mediator_named_pipe_factory(
+        &self,
+        pipe_name: String,
+    ) -> impl FnMut() -> Result<OwnedHandle> + Send + 'static {
+        let sid = self.profile.sid.clone();
+        move || super::windows_security::create_appcontainer_named_pipe(&pipe_name, &sid)
+    }
+
     pub(crate) async fn execute(
         &self,
-        policy: &SandboxPolicy,
+        policy: &EnforcedPolicy,
         request: CommandRequest,
     ) -> Result<CommandOutput> {
-        // Workspace DACLs are shared host objects. Keep their
-        // apply/use/restore lifetime atomic across in-process executions.
-        let _execution = execution_gate().lock().await;
+        // Workspace DACLs are restored after each command. Serialize per
+        // workspace so apply/use/restore cannot race. Distinct workspaces may
+        // run concurrently; DOS-device allocation uses a separate short lock.
+        let execution_gate = workspace_execution_gate(&policy.workspace);
+        let _execution = execution_gate.lock().await;
         let pins = WorkspacePins::acquire(policy)?;
+        let budget = ResolvedResourceBudget::resolve(&policy.resources, request.timeout_ms)?;
+        budget.validate_for_backend(crate::policy::BackendCapabilities::native_gate2())?;
         let mut acls = ExecutionAcls::apply(policy, &self.profile.sid)?;
         let execution = match policy.child_environment(request.env.as_deref()) {
             Ok(environment) => {
@@ -82,8 +102,9 @@ impl PlatformSandbox {
                     &policy.workspace,
                     &request.command,
                     environment,
+                    &budget,
                 ) {
-                    Ok(child) => capture_process(child, request).await,
+                    Ok(child) => capture_process(child, request, &budget).await,
                     Err(error) => Err(error),
                 }
             }
@@ -96,9 +117,22 @@ impl PlatformSandbox {
     }
 }
 
-fn execution_gate() -> &'static tokio::sync::Mutex<()> {
-    static GATE: OnceLock<tokio::sync::Mutex<()>> = OnceLock::new();
-    GATE.get_or_init(|| tokio::sync::Mutex::new(()))
+fn workspace_execution_gate(workspace: &Path) -> std::sync::Arc<tokio::sync::Mutex<()>> {
+    use std::sync::Arc;
+    static GATES: OnceLock<Mutex<HashMap<PathBuf, Arc<tokio::sync::Mutex<()>>>>> = OnceLock::new();
+    let gates = GATES.get_or_init(|| Mutex::new(HashMap::new()));
+    let key = workspace.to_path_buf();
+    let mut map = gates
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    map.entry(key)
+        .or_insert_with(|| Arc::new(tokio::sync::Mutex::new(())))
+        .clone()
+}
+
+fn drive_allocation_gate() -> &'static Mutex<()> {
+    static GATE: OnceLock<Mutex<()>> = OnceLock::new();
+    GATE.get_or_init(|| Mutex::new(()))
 }
 
 fn finish_execution(
@@ -175,17 +209,24 @@ struct JobGuard {
 }
 
 impl JobGuard {
-    fn new() -> Result<Self> {
+    fn new(budget: &ResolvedResourceBudget) -> Result<Self> {
         let raw = unsafe { CreateJobObjectW(null(), null()) };
         if raw.is_null() {
             return Err(last_windows_error("create native sandbox Job Object"));
         }
         let handle = unsafe { OwnedHandle::from_raw_handle(raw) };
         let mut limits = unsafe { zeroed::<JOBOBJECT_EXTENDED_LIMIT_INFORMATION>() };
-        limits.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+        let mut flags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
             | JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION
             | JOB_OBJECT_LIMIT_ACTIVE_PROCESS;
-        limits.BasicLimitInformation.ActiveProcessLimit = PROCESS_LIMIT;
+        limits.BasicLimitInformation.ActiveProcessLimit =
+            budget.max_processes.unwrap_or(PROCESS_LIMIT);
+        if let Some(max_memory_bytes) = budget.max_memory_bytes {
+            flags |= JOB_OBJECT_LIMIT_PROCESS_MEMORY;
+            limits.ProcessMemoryLimit = usize::try_from(max_memory_bytes)
+                .context("Windows Job Object process memory limit does not fit into usize")?;
+        }
+        limits.BasicLimitInformation.LimitFlags = flags;
         let size = u32::try_from(size_of::<JOBOBJECT_EXTENDED_LIMIT_INFORMATION>())
             .context("Job Object limit structure size overflowed")?;
         if unsafe {
@@ -236,6 +277,9 @@ struct WorkspaceDrive {
 
 impl WorkspaceDrive {
     fn create(workspace: &Path) -> Result<Self> {
+        let _drive_gate = drive_allocation_gate()
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
         let workspace = win32_process_path(workspace);
         if !matches!(
             workspace.components().next(),
@@ -281,6 +325,9 @@ impl WorkspaceDrive {
         if !self.active {
             return Ok(());
         }
+        let _drive_gate = drive_allocation_gate()
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
         let flags = DDD_REMOVE_DEFINITION
             | DDD_EXACT_MATCH_ON_REMOVE
             | DDD_RAW_TARGET_PATH
@@ -305,9 +352,10 @@ fn spawn_appcontainer_process(
     workspace: &Path,
     script: &str,
     environment: std::collections::BTreeMap<std::ffi::OsString, std::ffi::OsString>,
+    budget: &ResolvedResourceBudget,
 ) -> Result<WindowsChild> {
     let workspace_drive = WorkspaceDrive::create(workspace)?;
-    let job = JobGuard::new()?;
+    let job = JobGuard::new(budget)?;
     let (stdout_read, stdout_write) = create_pipe()?;
     let (stderr_read, stderr_write) = create_pipe()?;
     let stdin = open_null_input()?;
@@ -464,7 +512,11 @@ fn open_null_input() -> Result<OwnedHandle> {
     Ok(unsafe { OwnedHandle::from_raw_handle(raw) })
 }
 
-async fn capture_process(child: WindowsChild, request: CommandRequest) -> Result<CommandOutput> {
+async fn capture_process(
+    child: WindowsChild,
+    request: CommandRequest,
+    budget: &ResolvedResourceBudget,
+) -> Result<CommandOutput> {
     use crate::process::{BoundedCapture, OutputStream};
 
     let WindowsChild {
@@ -488,8 +540,8 @@ async fn capture_process(child: WindowsChild, request: CommandRequest) -> Result
     let mut stderr_done = false;
     let mut process_done = false;
     let mut timed_out = false;
-    let mut capture = BoundedCapture::new();
-    let deadline = tokio::time::sleep(tokio::time::Duration::from_millis(request.timeout_ms));
+    let mut capture = BoundedCapture::new(budget.max_output_bytes);
+    let deadline = tokio::time::sleep(tokio::time::Duration::from_millis(budget.timeout_ms));
     tokio::pin!(deadline);
     let settlement = tokio::time::sleep(tokio::time::Duration::from_secs(24 * 60 * 60));
     tokio::pin!(settlement);
@@ -763,10 +815,17 @@ struct WorkspacePins {
 }
 
 impl WorkspacePins {
-    fn acquire(policy: &SandboxPolicy) -> Result<Self> {
+    fn acquire(policy: &EnforcedPolicy) -> Result<Self> {
         let mut pins = Self { paths: Vec::new() };
         for path in &policy.deny_write {
             if !path.starts_with(&policy.workspace) {
+                continue;
+            }
+            if policy
+                .write_exceptions
+                .iter()
+                .any(|exception| path == exception || path.starts_with(exception))
+            {
                 continue;
             }
             pins.acquire_path(&policy.workspace, path)?;
@@ -958,5 +1017,223 @@ mod tests {
             win32_process_path(Path::new(r"\\?\UNC\server\share\work")),
             PathBuf::from(r"\\server\share\work")
         );
+    }
+
+    #[test]
+    fn workspace_execution_gates_are_isolated_by_path() {
+        let left = workspace_execution_gate(Path::new(r"C:\sandbox-a"));
+        let right = workspace_execution_gate(Path::new(r"C:\sandbox-b"));
+        let left_again = workspace_execution_gate(Path::new(r"C:\sandbox-a"));
+        assert!(!std::sync::Arc::ptr_eq(&left, &right));
+        assert!(std::sync::Arc::ptr_eq(&left, &left_again));
+    }
+
+    /// Live AppContainer guest proof for the named-pipe CONNECT bridge.
+    ///
+    /// Runs only on Windows. Passing this (allow + deny + raw egress blocked)
+    /// is the remaining evidence required before flipping `mediated_http`.
+    #[tokio::test]
+    async fn windows_appcontainer_named_pipe_connect_allow_deny_and_blocks_raw_egress() {
+        use crate::network::ConnectMediator;
+        use crate::policy::{BackendCapabilities, EnforcedPolicy, NetworkAllowRule, SandboxPolicy};
+        use crate::CommandRequest;
+        use tokio::io::{AsyncReadExt, AsyncWriteExt};
+        use tokio::net::TcpListener;
+        use tokio::sync::oneshot;
+
+        let workspace = tempfile::tempdir().unwrap();
+        let scratch = tempfile::tempdir().unwrap();
+        let sandbox = PlatformSandbox::new(workspace.path()).unwrap();
+
+        let upstream = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let upstream_addr = upstream.local_addr().unwrap();
+        let (hit_tx, hit_rx) = oneshot::channel::<()>();
+        tokio::spawn(async move {
+            let Ok((mut sock, _)) = upstream.accept().await else {
+                return;
+            };
+            let mut buf = [0u8; 4];
+            let _ = sock.read_exact(&mut buf).await;
+            let _ = sock.write_all(b"pong").await;
+            let _ = hit_tx.send(());
+        });
+
+        let mut document = SandboxPolicy::a3s_bash_baseline();
+        document.features.mediated_network = true;
+        document.network.allow.push(NetworkAllowRule {
+            host: "127.0.0.1".into(),
+            port: Some(upstream_addr.port()),
+            path_prefix: None,
+        });
+
+        let pipe_name = format!(
+            r"\\.\pipe\a3s-sandbox-live-{}-{}",
+            std::process::id(),
+            upstream_addr.port()
+        );
+        let factory = sandbox.mediator_named_pipe_factory(pipe_name.clone());
+        let mediator =
+            ConnectMediator::bind_named_pipe_acl(document.clone(), pipe_name.clone(), factory)
+                .await
+                .expect("ACL'd CONNECT named-pipe mediator");
+
+        // Compile a baseline enforceable policy (mediation capability still false),
+        // then inject the pipe guest contract the execute path will use once claimed.
+        let mut policy = EnforcedPolicy::compile(
+            &SandboxPolicy::a3s_bash_baseline(),
+            workspace.path(),
+            scratch.path(),
+            BackendCapabilities::native_gate2(),
+        )
+        .unwrap();
+        policy.mediator_pipe_name = Some(pipe_name);
+
+        let allow_script = format!(
+            r#"
+$ErrorActionPreference = 'Stop'
+$full = $env:A3S_SANDBOX_MEDIATOR_PIPE
+if ([string]::IsNullOrEmpty($full)) {{ throw 'missing A3S_SANDBOX_MEDIATOR_PIPE' }}
+$name = $full -replace '^\\\\\.\\pipe\\',''
+$client = [System.IO.Pipes.NamedPipeClientStream]::new('.', $name, [System.IO.Pipes.PipeDirection]::InOut)
+$client.Connect(15000)
+$req = [Text.Encoding]::ASCII.GetBytes("CONNECT 127.0.0.1:{port} HTTP/1.1`r`nHost: 127.0.0.1`r`n`r`n")
+$client.Write($req, 0, $req.Length)
+$hdr = New-Object byte[] 128
+$n = $client.Read($hdr, 0, $hdr.Length)
+$text = [Text.Encoding]::ASCII.GetString($hdr, 0, $n)
+if ($text -notmatch '200') {{ throw "CONNECT allow failed: $text" }}
+$ping = [Text.Encoding]::ASCII.GetBytes('ping')
+$client.Write($ping, 0, $ping.Length)
+$pong = New-Object byte[] 4
+[void]$client.Read($pong, 0, 4)
+[Console]::Out.Write([Text.Encoding]::ASCII.GetString($pong))
+$client.Dispose()
+"#,
+            port = upstream_addr.port()
+        );
+
+        let allow = sandbox
+            .execute(
+                &policy,
+                CommandRequest {
+                    command: allow_script,
+                    timeout_ms: 30_000,
+                    output_observer: None,
+                    env: None,
+                },
+            )
+            .await
+            .expect("allow execute");
+        assert_eq!(
+            allow.exit_code, 0,
+            "allow stderr={} stdout={}",
+            allow.stderr, allow.stdout
+        );
+        assert!(
+            allow.stdout.contains("pong"),
+            "allow stdout={}",
+            allow.stdout
+        );
+        hit_rx
+            .await
+            .expect("allowed CONNECT must reach upstream once");
+
+        // Denied CONNECT must not reach a fresh upstream.
+        let deny_upstream = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let deny_port = deny_upstream.local_addr().unwrap().port();
+        let deny_accept = tokio::spawn(async move {
+            tokio::time::timeout(
+                std::time::Duration::from_millis(400),
+                deny_upstream.accept(),
+            )
+            .await
+        });
+
+        let deny_script = format!(
+            r#"
+$ErrorActionPreference = 'Stop'
+$full = $env:A3S_SANDBOX_MEDIATOR_PIPE
+$name = $full -replace '^\\\\\.\\pipe\\',''
+$client = [System.IO.Pipes.NamedPipeClientStream]::new('.', $name, [System.IO.Pipes.PipeDirection]::InOut)
+$client.Connect(15000)
+$req = [Text.Encoding]::ASCII.GetBytes("CONNECT 127.0.0.1:{port} HTTP/1.1`r`nHost: 127.0.0.1`r`n`r`n")
+$client.Write($req, 0, $req.Length)
+$hdr = New-Object byte[] 128
+$n = $client.Read($hdr, 0, $hdr.Length)
+$text = [Text.Encoding]::ASCII.GetString($hdr, 0, $n)
+if ($text -match '200') {{ throw 'denied CONNECT unexpectedly succeeded' }}
+[Console]::Out.Write('deny-ok')
+$client.Dispose()
+"#,
+            port = deny_port
+        );
+        let deny = sandbox
+            .execute(
+                &policy,
+                CommandRequest {
+                    command: deny_script,
+                    timeout_ms: 30_000,
+                    output_observer: None,
+                    env: None,
+                },
+            )
+            .await
+            .expect("deny execute");
+        assert_eq!(
+            deny.exit_code, 0,
+            "deny stderr={} stdout={}",
+            deny.stderr, deny.stdout
+        );
+        assert!(
+            deny.stdout.contains("deny-ok"),
+            "deny stdout={}",
+            deny.stdout
+        );
+        let deny_hit = deny_accept.await.unwrap();
+        match deny_hit {
+            Err(_) => {}
+            Ok(Err(_)) => {}
+            Ok(Ok(_)) => panic!("denied CONNECT must not reach upstream"),
+        }
+
+        // Raw TCP from the AppContainer guest must stay blocked (zero net caps).
+        let egress_script = format!(
+            r#"
+$ErrorActionPreference = 'Stop'
+try {{
+  $c = New-Object System.Net.Sockets.TcpClient
+  $c.Connect('127.0.0.1', {port})
+  throw 'raw egress unexpectedly allowed'
+}} catch {{
+  if ($_.Exception.Message -match 'unexpectedly') {{ throw }}
+  [Console]::Out.Write('egress-blocked')
+}}
+"#,
+            port = upstream_addr.port()
+        );
+        let egress = sandbox
+            .execute(
+                &policy,
+                CommandRequest {
+                    command: egress_script,
+                    timeout_ms: 30_000,
+                    output_observer: None,
+                    env: None,
+                },
+            )
+            .await
+            .expect("egress execute");
+        assert_eq!(
+            egress.exit_code, 0,
+            "egress stderr={} stdout={}",
+            egress.stderr, egress.stdout
+        );
+        assert!(
+            egress.stdout.contains("egress-blocked"),
+            "egress stdout={}",
+            egress.stdout
+        );
+
+        mediator.shutdown().await;
     }
 }

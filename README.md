@@ -79,8 +79,13 @@ The default A3S Bash profile is intentionally strict:
   an error instead of executing on the host.
 
 These guarantees apply to the process tree, not only to the first shell.
-Read the [security model](SECURITY.md) for the threat model, platform caveats,
-and the exact protected paths.
+Read the [security model](SECURITY.md) and [threat model](THREAT_MODEL.md) for
+platform claims, residuals, exact protected paths, and the Gate 7 review
+checklist. Generate a CycloneDX SBOM with:
+
+```bash
+./scripts/generate-sbom.sh sbom.cdx.json
+```
 
 ## Native boundaries
 
@@ -117,16 +122,16 @@ decisions; they do not silently broaden them when a host feature is missing.
 ## Scope and roadmap
 
 Gate 0—the complete A3S Bash baseline—is shipped and tested on macOS, Linux,
-and Windows. The next stages add opt-in, mediated HTTP/HTTPS and SOCKS5
-networking, Unix-socket policy, TLS handling, dynamic policy snapshots,
-structured violation monitoring, nested-sandbox negotiation, and release
-migration tooling.
+and Windows. Later gates follow a first-principles order: typed policy, then
+structured denials and OS resource quotas, then deeper filesystem mounts,
+then opt-in mediated HTTP(S), then broader IPC/SOCKS, then CLI/adapters, then
+security release. Virtual bash and in-process language VMs are non-goals.
 
-See [ROADMAP.md](ROADMAP.md) for the capability matrix, staged delivery plan,
-acceptance gates, cross-architecture test matrix, and security-release risks.
+See [ROADMAP.md](ROADMAP.md) for mission, non-goals, ranked capabilities,
+exit criteria, architecture, and risks.
 
-The goal is SRT-level security outcomes and controls with an A3S-owned Rust
-API—not a line-for-line clone of SRT's internal TypeScript implementation.
+The goal is OS-enforced security outcomes for A3S products with a Rust-owned
+API—not an SRT TypeScript clone and not a simulated shell.
 
 ## Development
 
@@ -136,6 +141,27 @@ Install the platform prerequisites, then run the same gates used by CI:
 cargo fmt --all -- --check
 cargo clippy --all-targets -- -D warnings
 cargo test --all-targets
+```
+
+`a3s-sandbox-relay` is the guest TCP→Unix CONNECT helper used by the Linux
+netns mediation bridge. It is built alongside `a3s-sandbox`. Place it next to
+the host executable or set `A3S_SANDBOX_RELAY`. Linux claims `mediated_http`
+when that relay path is available; SOCKS and Windows mediation remain
+fail-closed.
+
+Release packaging helpers:
+
+```bash
+./scripts/generate-sbom.sh
+./scripts/sign-release.sh target/release/a3s-sandbox target/release/a3s-sandbox-relay
+```
+
+See [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) and
+[docs/INDEPENDENT_REVIEW.md](docs/INDEPENDENT_REVIEW.md) for the production
+release gate. Collect local evidence with:
+
+```bash
+./scripts/collect-release-evidence.sh
 ```
 
 The CI matrix covers `ubuntu-latest`, `macos-14`, and `windows-latest`.

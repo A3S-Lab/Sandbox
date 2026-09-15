@@ -33,6 +33,10 @@ pub const PROTECTED_WORKSPACE_FILES: &[&str] = &[
 
 /// Return whether a normalized workspace-relative path targets protected
 /// control metadata.
+///
+/// Durable `/goal` loop artifacts under `.a3s/loops/` are intentionally
+/// agent-writable (ACCEPTANCE/STATE/RUN_LOG). Other `.a3s` control-plane
+/// siblings stay protected.
 pub fn is_protected_workspace_path(path: &str) -> bool {
     let normalized = path.replace('\\', "/");
     let mut components = normalized
@@ -45,6 +49,12 @@ pub fn is_protected_workspace_path(path: &str) -> bool {
         return false;
     }
 
+    if first.eq_ignore_ascii_case(".a3s") {
+        return !components
+            .next()
+            .is_some_and(|second| second.eq_ignore_ascii_case("loops"));
+    }
+
     PROTECTED_WORKSPACE_DIRECTORIES
         .iter()
         .any(|protected| first.eq_ignore_ascii_case(protected))
@@ -54,17 +64,75 @@ pub fn is_protected_workspace_path(path: &str) -> bool {
 }
 
 #[derive(Debug)]
-pub(super) struct SandboxPolicy {
-    pub(super) workspace: PathBuf,
-    pub(super) scratch: PathBuf,
-    pub(super) allow_read: Vec<PathBuf>,
-    pub(super) deny_read: Vec<PathBuf>,
-    pub(super) allow_write: Vec<PathBuf>,
-    pub(super) deny_write: Vec<PathBuf>,
+pub(crate) struct EnforcedPolicy {
+    pub(crate) workspace: PathBuf,
+    pub(crate) scratch: PathBuf,
+    pub(crate) allow_read: Vec<PathBuf>,
+    pub(crate) deny_read: Vec<PathBuf>,
+    pub(crate) allow_write: Vec<PathBuf>,
+    pub(crate) deny_write: Vec<PathBuf>,
+    /// Writable carve-outs under an otherwise write-denied ancestor (e.g.
+    /// `.a3s/loops` under protected `.a3s`). Applied after deny rules.
+    pub(crate) write_exceptions: Vec<PathBuf>,
+    pub(crate) resources: crate::policy::ResourceLimits,
+    pub(crate) session_write: crate::policy::SessionWriteMode,
+    /// Loopback CONNECT mediator port when Gate 4 mediation is active.
+    pub(crate) mediator_port: Option<u16>,
+    /// Host Unix CONNECT mediator path for the Linux netns bridge (Gate 5).
+    /// When set, the guest gets `--unshare-net`, socket syscalls for the
+    /// in-netns relay, and `HTTP_PROXY` pointing at
+    /// [`crate::GUEST_HTTP_CONNECT_RELAY_PORT`].
+    pub(crate) mediator_unix_path: Option<PathBuf>,
+    /// Windows AppContainer named-pipe CONNECT path (`\\.\pipe\...`).
+    /// Guest contract is `A3S_SANDBOX_MEDIATOR_PIPE` — not `HTTP_PROXY`,
+    /// because zero-net AppContainers cannot reach loopback TCP.
+    pub(crate) mediator_pipe_name: Option<String>,
+    /// Loopback SOCKS5 mediator port when Gate 5 SOCKS mediation is active.
+    pub(crate) socks_mediator_port: Option<u16>,
+    /// Exact Unix-domain socket paths allowed for outbound connect (Gate 5).
+    pub(crate) allow_unix_sockets: Vec<PathBuf>,
 }
 
-impl SandboxPolicy {
-    pub(super) fn for_execution(workspace: &Path, scratch: &Path) -> Result<Self> {
+#[derive(Debug, Clone, Copy)]
+enum OverlayKind {
+    Allow,
+    Deny,
+    Exception,
+}
+
+impl EnforcedPolicy {
+    /// Compile a validated [`crate::policy::SandboxPolicy`] into OS path sets.
+    ///
+    /// Materializes the A3S Bash baseline, then applies Exact overlays. Glob
+    /// overlays and allow-paths outside workspace/scratch fail closed.
+    pub(crate) fn compile(
+        document: &crate::policy::SandboxPolicy,
+        workspace: &Path,
+        scratch: &Path,
+        capabilities: crate::policy::BackendCapabilities,
+    ) -> Result<Self> {
+        document
+            .validate_for_backend(capabilities)
+            .context("sandbox policy is not enforceable on this backend")?;
+        let mut enforced = Self::materialize_a3s_bash_baseline(workspace, scratch)?;
+        enforced.resources = document.resources.clone();
+        enforced.session_write = document.filesystem.session_write;
+        enforced.apply_document_overlays(document)?;
+        Ok(enforced)
+    }
+
+    /// Test helper that compiles the A3S Bash baseline document.
+    #[cfg(test)]
+    pub(crate) fn for_execution(workspace: &Path, scratch: &Path) -> Result<Self> {
+        Self::compile(
+            &crate::policy::SandboxPolicy::a3s_bash_baseline(),
+            workspace,
+            scratch,
+            crate::policy::BackendCapabilities::native_gate1(),
+        )
+    }
+
+    fn materialize_a3s_bash_baseline(workspace: &Path, scratch: &Path) -> Result<Self> {
         let workspace = workspace
             .canonicalize()
             .context("failed to resolve the native sandbox workspace")?;
@@ -96,9 +164,22 @@ impl SandboxPolicy {
         deny_write.extend(sensitive);
         validate_denied_workspace_entries(&workspace, &deny_write)?;
 
+        // Goal Engineering writes ACCEPTANCE/STATE under `.a3s/loops`. Keep the
+        // rest of `.a3s` write-denied, but carve the loops tree back open.
+        let loops = workspace.join(".a3s").join("loops");
+        std::fs::create_dir_all(&loops).with_context(|| {
+            format!(
+                "failed to create goal-loop write carve-out {}",
+                loops.display()
+            )
+        })?;
+        let mut write_exceptions = vec![loops];
+        expand_existing_canonical_paths(&mut write_exceptions);
+
         deduplicate_paths(&mut allow_read);
         deduplicate_paths(&mut deny_read);
         remove_redundant_descendants(&mut deny_write);
+        deduplicate_paths(&mut write_exceptions);
 
         Ok(Self {
             workspace,
@@ -107,19 +188,143 @@ impl SandboxPolicy {
             deny_read,
             allow_write,
             deny_write,
+            write_exceptions,
+            resources: crate::policy::ResourceLimits::default(),
+            session_write: crate::policy::SessionWriteMode::Persistent,
+            mediator_port: None,
+            mediator_unix_path: None,
+            mediator_pipe_name: None,
+            socks_mediator_port: None,
+            allow_unix_sockets: Vec::new(),
         })
     }
 
-    pub(super) fn child_environment(
+    fn apply_document_overlays(&mut self, document: &crate::policy::SandboxPolicy) -> Result<()> {
+        for rule in &document.filesystem.deny_read {
+            self.deny_read
+                .push(self.resolve_overlay_path(rule, OverlayKind::Deny)?);
+        }
+        for rule in &document.filesystem.deny_write {
+            self.deny_write
+                .push(self.resolve_overlay_path(rule, OverlayKind::Deny)?);
+        }
+        for rule in &document.filesystem.write_exceptions {
+            self.write_exceptions
+                .push(self.resolve_overlay_path(rule, OverlayKind::Exception)?);
+        }
+        for rule in &document.filesystem.allow_read {
+            let path = self.resolve_overlay_path(rule, OverlayKind::Allow)?;
+            self.ensure_within_boundary(&path, "allow_read")?;
+            self.allow_read.push(path);
+        }
+        for rule in &document.filesystem.allow_write {
+            let path = self.resolve_overlay_path(rule, OverlayKind::Allow)?;
+            self.ensure_within_boundary(&path, "allow_write")?;
+            self.allow_write.push(path);
+        }
+        for mount in &document.filesystem.mounts {
+            self.apply_mount(mount)?;
+        }
+        for rule in &document.sockets.allow_unix {
+            let path = self.resolve_overlay_path(rule, OverlayKind::Allow)?;
+            self.allow_unix_sockets.push(path);
+        }
+
+        deduplicate_paths(&mut self.allow_read);
+        deduplicate_paths(&mut self.deny_read);
+        deduplicate_paths(&mut self.allow_write);
+        remove_redundant_descendants(&mut self.deny_write);
+        deduplicate_paths(&mut self.write_exceptions);
+        deduplicate_paths(&mut self.allow_unix_sockets);
+        Ok(())
+    }
+
+    fn apply_mount(&mut self, mount: &crate::policy::FilesystemMount) -> Result<()> {
+        use crate::policy::MountMode;
+        let path = self.resolve_overlay_path(&mount.root, OverlayKind::Allow)?;
+        match mount.mode {
+            MountMode::ReadOnly => {
+                // Outside workspace/scratch is allowed for RO knowledge trees.
+                self.allow_read.push(path.clone());
+                // If the root sits under a writable ancestor (workspace), deny
+                // writes explicitly so RO wins over the ancestor allow_write.
+                if self
+                    .allow_write
+                    .iter()
+                    .any(|writable| path.starts_with(writable))
+                {
+                    self.deny_write.push(path);
+                }
+            }
+            MountMode::ReadWrite => {
+                self.ensure_within_boundary(&path, "ReadWrite mount")?;
+                self.allow_read.push(path.clone());
+                self.allow_write.push(path);
+            }
+            MountMode::Scratch => {
+                if !path.starts_with(&self.scratch) {
+                    bail!(
+                        "Scratch mount {} must stay under session scratch {}; fail closed",
+                        path.display(),
+                        self.scratch.display()
+                    );
+                }
+                self.allow_read.push(path.clone());
+                self.allow_write.push(path);
+            }
+        }
+        Ok(())
+    }
+
+    fn resolve_overlay_path(
+        &self,
+        rule: &crate::policy::PathRule,
+        kind: OverlayKind,
+    ) -> Result<PathBuf> {
+        let value = match rule {
+            crate::policy::PathRule::Exact(value) => value,
+            crate::policy::PathRule::Glob(_) => bail!(
+                "glob path rules cannot compile into Gate 1 OS profiles; fail closed \
+                 (kind={kind:?})"
+            ),
+        };
+        let candidate = if Path::new(value).is_absolute() {
+            PathBuf::from(value)
+        } else {
+            self.workspace.join(value)
+        };
+        candidate.canonicalize().with_context(|| {
+            format!("failed to resolve policy overlay path {value} (kind={kind:?})")
+        })
+    }
+
+    fn ensure_within_boundary(&self, path: &Path, field: &str) -> Result<()> {
+        if path.starts_with(&self.workspace) || path.starts_with(&self.scratch) {
+            return Ok(());
+        }
+        bail!(
+            "policy {field} overlay {} is outside workspace/scratch and would broaden \
+             the boundary; fail closed",
+            path.display()
+        );
+    }
+
+    pub(crate) fn child_environment(
         &self,
         explicit: Option<&HashMap<String, String>>,
     ) -> Result<BTreeMap<OsString, OsString>> {
-        compose_child_env(explicit, &self.scratch)
+        compose_child_env(
+            explicit,
+            &self.scratch,
+            self.mediator_port,
+            self.mediator_pipe_name.as_deref(),
+            self.socks_mediator_port,
+        )
     }
 }
 
 #[cfg(any(target_os = "linux", windows))]
-pub(super) fn requires_directory_placeholder(workspace: &Path, path: &Path) -> bool {
+pub(crate) fn requires_directory_placeholder(workspace: &Path, path: &Path) -> bool {
     let Ok(relative) = path.strip_prefix(workspace) else {
         return false;
     };
@@ -163,6 +368,9 @@ fn validate_denied_workspace_entries(workspace: &Path, paths: &[PathBuf]) -> Res
 fn compose_child_env(
     explicit: Option<&HashMap<String, String>>,
     scratch: &Path,
+    mediator_port: Option<u16>,
+    mediator_pipe_name: Option<&str>,
+    socks_mediator_port: Option<u16>,
 ) -> Result<BTreeMap<OsString, OsString>> {
     const SAFE_KEYS: &[&str] = &[
         "PATH",
@@ -243,6 +451,42 @@ fn compose_child_env(
         }
     }
     remove_bootstrap_injection_variables(&mut environment);
+    scrub_proxy_environment(&mut environment);
+    environment.retain(|key, _| {
+        !key.to_string_lossy()
+            .eq_ignore_ascii_case("A3S_SANDBOX_MEDIATOR_PIPE")
+    });
+    if let Some(port) = mediator_port {
+        let proxy = OsString::from(format!("http://127.0.0.1:{port}"));
+        for key in ["HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"] {
+            environment.insert(OsString::from(key), proxy.clone());
+        }
+        // When SOCKS is also active, ALL_PROXY points at SOCKS below.
+        if socks_mediator_port.is_none() {
+            for key in ["ALL_PROXY", "all_proxy"] {
+                environment.insert(OsString::from(key), proxy.clone());
+            }
+        }
+        // Force tools through the host mediator; bypass lists would defeat Gate 4.
+        environment.insert(OsString::from("NO_PROXY"), OsString::from(""));
+        environment.insert(OsString::from("no_proxy"), OsString::from(""));
+    }
+    if let Some(pipe_name) = mediator_pipe_name {
+        // Windows AppContainer bridge: named pipe only. HTTP_PROXY would imply
+        // guest loopback TCP, which zero-net AppContainers cannot use.
+        environment.insert(
+            OsString::from("A3S_SANDBOX_MEDIATOR_PIPE"),
+            OsString::from(pipe_name),
+        );
+    }
+    if let Some(port) = socks_mediator_port {
+        let proxy = OsString::from(format!("socks5://127.0.0.1:{port}"));
+        for key in ["ALL_PROXY", "all_proxy"] {
+            environment.insert(OsString::from(key), proxy.clone());
+        }
+        environment.insert(OsString::from("NO_PROXY"), OsString::from(""));
+        environment.insert(OsString::from("no_proxy"), OsString::from(""));
+    }
 
     let scratch = scratch.as_os_str().to_os_string();
     for key in [
@@ -261,6 +505,27 @@ fn compose_child_env(
         environment.insert(OsString::from(key), scratch.clone());
     }
     Ok(environment)
+}
+
+fn scrub_proxy_environment(environment: &mut BTreeMap<OsString, OsString>) {
+    const PROXY_KEYS: &[&str] = &[
+        "HTTP_PROXY",
+        "HTTPS_PROXY",
+        "ALL_PROXY",
+        "NO_PROXY",
+        "http_proxy",
+        "https_proxy",
+        "all_proxy",
+        "no_proxy",
+        "FTP_PROXY",
+        "ftp_proxy",
+    ];
+    environment.retain(|key, _| {
+        let key = key.to_string_lossy();
+        !PROXY_KEYS
+            .iter()
+            .any(|blocked| key.eq_ignore_ascii_case(blocked))
+    });
 }
 
 fn remove_bootstrap_injection_variables(environment: &mut BTreeMap<OsString, OsString>) {
@@ -295,7 +560,7 @@ fn remove_bootstrap_injection_variables(environment: &mut BTreeMap<OsString, OsS
     });
 }
 
-pub(super) fn resolve_executable(
+pub(crate) fn resolve_executable(
     binary: impl Into<PathBuf>,
     excluded_root: &Path,
 ) -> Result<PathBuf> {
@@ -1036,7 +1301,7 @@ fn expand_existing_canonical_paths(paths: &mut Vec<PathBuf>) {
     deduplicate_paths(paths);
 }
 
-pub(super) fn deduplicate_paths(paths: &mut Vec<PathBuf>) {
+pub(crate) fn deduplicate_paths(paths: &mut Vec<PathBuf>) {
     paths.sort();
     paths.dedup();
 }
@@ -1052,7 +1317,7 @@ fn remove_redundant_descendants(paths: &mut Vec<PathBuf>) {
 }
 
 #[cfg(any(target_os = "linux", target_os = "macos"))]
-pub(super) fn path_ancestors(path: &Path) -> Vec<PathBuf> {
+pub(crate) fn path_ancestors(path: &Path) -> Vec<PathBuf> {
     let mut ancestors = path
         .parent()
         .into_iter()
@@ -1076,7 +1341,8 @@ mod tests {
             ("BASH_ENV".to_string(), "/tmp/attack".to_string()),
             ("LD_PRELOAD".to_string(), "/tmp/attack.so".to_string()),
         ]);
-        let environment = compose_child_env(Some(&explicit), scratch.path()).unwrap();
+        let environment =
+            compose_child_env(Some(&explicit), scratch.path(), None, None, None).unwrap();
 
         assert_eq!(
             environment.get(OsStr::new("SAFE_VALUE")),
@@ -1099,7 +1365,8 @@ mod tests {
             ("LUA_INIT_script".to_string(), "attack.lua".to_string()),
             ("SAFE_VALUE".to_string(), "visible".to_string()),
         ]);
-        let environment = compose_child_env(Some(&explicit), scratch.path()).unwrap();
+        let environment =
+            compose_child_env(Some(&explicit), scratch.path(), None, None, None).unwrap();
 
         assert!(!environment.keys().any(|key| {
             matches!(
@@ -1113,6 +1380,70 @@ mod tests {
         assert_eq!(
             environment.get(OsStr::new("SAFE_VALUE")),
             Some(&OsString::from("visible"))
+        );
+    }
+
+    #[test]
+    fn child_environment_mediator_overwrites_explicit_proxy_bypass() {
+        let scratch = tempfile::tempdir().unwrap();
+        let explicit = HashMap::from([
+            ("NO_PROXY".to_string(), "*".to_string()),
+            (
+                "HTTPS_PROXY".to_string(),
+                "http://evil.example:9".to_string(),
+            ),
+            ("FTP_PROXY".to_string(), "http://evil.example:9".to_string()),
+            (
+                "ALL_PROXY".to_string(),
+                "socks5://evil.example:9".to_string(),
+            ),
+        ]);
+        let environment =
+            compose_child_env(Some(&explicit), scratch.path(), Some(18080), None, None).unwrap();
+        assert_eq!(
+            environment.get(OsStr::new("HTTPS_PROXY")),
+            Some(&OsString::from("http://127.0.0.1:18080"))
+        );
+        assert_eq!(
+            environment.get(OsStr::new("ALL_PROXY")),
+            Some(&OsString::from("http://127.0.0.1:18080"))
+        );
+        assert_eq!(
+            environment.get(OsStr::new("NO_PROXY")),
+            Some(&OsString::from(""))
+        );
+        assert!(!environment.contains_key(OsStr::new("FTP_PROXY")));
+    }
+
+    #[test]
+    fn child_environment_socks_mediator_sets_all_proxy_only() {
+        let scratch = tempfile::tempdir().unwrap();
+        let environment = compose_child_env(None, scratch.path(), None, None, Some(19090)).unwrap();
+        assert_eq!(
+            environment.get(OsStr::new("ALL_PROXY")),
+            Some(&OsString::from("socks5://127.0.0.1:19090"))
+        );
+        assert!(!environment.contains_key(OsStr::new("HTTPS_PROXY")));
+        assert_eq!(
+            environment.get(OsStr::new("NO_PROXY")),
+            Some(&OsString::from(""))
+        );
+    }
+
+    #[test]
+    fn child_environment_mediator_pipe_sets_named_pipe_not_http_proxy() {
+        let scratch = tempfile::tempdir().unwrap();
+        let pipe = r"\\.\pipe\a3s-sandbox-test";
+        let environment = compose_child_env(None, scratch.path(), None, Some(pipe), None).unwrap();
+        assert_eq!(
+            environment.get(OsStr::new("A3S_SANDBOX_MEDIATOR_PIPE")),
+            Some(&OsString::from(pipe))
+        );
+        assert!(
+            !environment.contains_key(OsStr::new("HTTP_PROXY"))
+                && !environment.contains_key(OsStr::new("HTTPS_PROXY"))
+                && !environment.contains_key(OsStr::new("ALL_PROXY")),
+            "Windows named-pipe bridge must not invent loopback HTTP_PROXY"
         );
     }
 
@@ -1132,6 +1463,8 @@ mod tests {
             "../.git/config",
             ".gitignore",
             "src/main.rs",
+            ".a3s/loops/goal-1/ACCEPTANCE.md",
+            r".a3s\loops\goal-1\STATE.md",
         ] {
             assert!(!is_protected_workspace_path(path), "{path}");
         }
@@ -1144,7 +1477,7 @@ mod tests {
         std::fs::create_dir(workspace.path().join(".GIT")).unwrap();
         std::fs::write(workspace.path().join(".MCP.JSON"), "control").unwrap();
 
-        let policy = SandboxPolicy::for_execution(workspace.path(), scratch.path()).unwrap();
+        let policy = EnforcedPolicy::for_execution(workspace.path(), scratch.path()).unwrap();
         let workspace = workspace.path().canonicalize().unwrap();
         assert!(policy.deny_write.contains(&workspace.join(".GIT")));
         assert!(policy.deny_write.contains(&workspace.join(".MCP.JSON")));
@@ -1160,7 +1493,7 @@ mod tests {
         std::fs::write(workspace.join(".GIT"), "gitdir: ../git-dir\n").unwrap();
         let scratch = tempfile::tempdir().unwrap();
 
-        let policy = SandboxPolicy::for_execution(&workspace, scratch.path()).unwrap();
+        let policy = EnforcedPolicy::for_execution(&workspace, scratch.path()).unwrap();
         assert!(policy.deny_write.contains(&git_dir.canonicalize().unwrap()));
     }
 
@@ -1180,7 +1513,7 @@ mod tests {
         let workspace = workspace.canonicalize().unwrap();
         let scratch = tempfile::tempdir().unwrap();
         let start = std::time::Instant::now();
-        let result = SandboxPolicy::for_execution(&workspace, scratch.path());
+        let result = EnforcedPolicy::for_execution(&workspace, scratch.path());
         let elapsed = start.elapsed();
         match result {
             Ok(_) => eprintln!("monorepo_scan_ok elapsed_ms={}", elapsed.as_millis()),
@@ -1209,7 +1542,7 @@ mod tests {
         std::fs::write(&outside, "outside").unwrap();
         std::fs::hard_link(&outside, workspace.path().join("hardlink-secret")).unwrap();
 
-        let policy = SandboxPolicy::for_execution(workspace.path(), scratch.path()).unwrap();
+        let policy = EnforcedPolicy::for_execution(workspace.path(), scratch.path()).unwrap();
         let workspace = workspace.path().canonicalize().unwrap();
 
         assert!(policy
@@ -1266,7 +1599,7 @@ mod tests {
         std::fs::write(&outside, "ordinary").unwrap();
         std::fs::hard_link(&outside, workspace.path().join("node_modules/ordinary")).unwrap();
 
-        let policy = SandboxPolicy::for_execution(workspace.path(), scratch.path()).unwrap();
+        let policy = EnforcedPolicy::for_execution(workspace.path(), scratch.path()).unwrap();
         let workspace = workspace.path().canonicalize().unwrap();
 
         assert!(policy
@@ -1375,7 +1708,7 @@ mod tests {
         let outside = tempfile::tempdir().unwrap();
         symlink(outside.path(), workspace.path().join(".git")).unwrap();
 
-        let error = SandboxPolicy::for_execution(workspace.path(), scratch.path()).unwrap_err();
+        let error = EnforcedPolicy::for_execution(workspace.path(), scratch.path()).unwrap_err();
         assert!(error.to_string().contains("symbolic link"), "{error:#}");
     }
 }

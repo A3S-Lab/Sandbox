@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+### Security
+
+- CONNECT request-line / header size bounds (8KiB / 16KiB) and Gate 7 protocol
+  fuzz corpus.
+- Windows execute path prepares AppContainer-ACL'd named-pipe CONNECT mediation
+  (`A3S_SANDBOX_MEDIATOR_PIPE`); capability remains fail-closed until live guest
+  proof.
+- Gate 7 in-command symlink race + overlapping same-workspace isolation tests.
+- Release helpers: SBOM generator, sign-release provenance, collect-release-evidence,
+  independent review package under `docs/`.
+- SECURITY.md Linux section corrected for baseline vs mediated `--unshare-net`.
+
 ## 0.1.2 — 2026-09-08
 
 ### Fixed

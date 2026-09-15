@@ -1,12 +1,13 @@
 //! AppContainer identity and temporary Windows filesystem authorization.
 
 use super::windows::{last_windows_error, wide_null, win32_process_path};
-use crate::policy::SandboxPolicy;
+use crate::policy::EnforcedPolicy;
 use anyhow::{bail, Context, Result};
 use sha2::{Digest, Sha256};
 use std::collections::HashSet;
 use std::ffi::{c_void, OsStr};
 use std::mem::size_of;
+use std::os::windows::io::{FromRawHandle, OwnedHandle};
 use std::path::{Path, PathBuf};
 use std::ptr::{null, null_mut};
 use std::sync::OnceLock;
@@ -30,7 +31,7 @@ use windows_sys::Win32::Storage::FileSystem::{
 
 const HRESULT_ALREADY_EXISTS: u32 = 0x8007_00b7;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(super) struct SidBuffer {
     words: Vec<u32>,
 }
@@ -140,7 +141,7 @@ pub(super) struct ExecutionAcls<'a> {
 }
 
 impl<'a> ExecutionAcls<'a> {
-    pub(super) fn apply(policy: &SandboxPolicy, sid: &'a SidBuffer) -> Result<Self> {
+    pub(super) fn apply(policy: &EnforcedPolicy, sid: &'a SidBuffer) -> Result<Self> {
         let mut guard = Self {
             sid,
             paths: Vec::new(),
@@ -509,4 +510,142 @@ fn query_path_dacl(path: &Path, wide: &[u16]) -> Result<(*mut ACL, LocalAllocati
         );
     }
     Ok((acl, LocalAllocation(descriptor)))
+}
+
+/// Create a duplex overlapped named pipe whose DACL grants only `sid`.
+///
+/// The host keeps the server handle from creation; AppContainer clients may
+/// open the pipe name. Other callers should receive `ERROR_ACCESS_DENIED`.
+///
+/// Used by the Windows execute path to create every named-pipe instance with
+/// the same AppContainer-only DACL. Capability claim still requires live guest
+/// tunnel proof.
+pub(super) fn create_appcontainer_named_pipe(
+    pipe_name: &str,
+    sid: &SidBuffer,
+) -> Result<OwnedHandle> {
+    use windows_sys::Win32::Foundation::{GENERIC_READ, GENERIC_WRITE};
+    use windows_sys::Win32::Security::{
+        InitializeSecurityDescriptor, SetSecurityDescriptorDacl, SECURITY_ATTRIBUTES,
+        SECURITY_DESCRIPTOR,
+    };
+    use windows_sys::Win32::Storage::FileSystem::{
+        FILE_FLAG_OVERLAPPED, PIPE_ACCESS_DUPLEX, SYNCHRONIZE,
+    };
+    use windows_sys::Win32::System::Pipes::{
+        CreateNamedPipeW, PIPE_READMODE_BYTE, PIPE_REJECT_REMOTE_CLIENTS, PIPE_TYPE_BYTE,
+        PIPE_UNLIMITED_INSTANCES, PIPE_WAIT,
+    };
+    use windows_sys::Win32::System::SystemServices::SECURITY_DESCRIPTOR_REVISION;
+
+    if !pipe_name.starts_with(r"\\.\pipe\") {
+        bail!("AppContainer named pipe requires a \\\\.\\pipe\\... path");
+    }
+
+    let mut access = EXPLICIT_ACCESS_W {
+        grfAccessPermissions: GENERIC_READ | GENERIC_WRITE | SYNCHRONIZE,
+        grfAccessMode: GRANT_ACCESS,
+        grfInheritance: NO_INHERITANCE,
+        Trustee: Default::default(),
+    };
+    access.Trustee.TrusteeForm = TRUSTEE_IS_SID;
+    access.Trustee.TrusteeType = TRUSTEE_IS_UNKNOWN;
+    access.Trustee.ptstrName = sid.as_ptr().cast::<u16>();
+
+    let mut acl: *mut ACL = null_mut();
+    let status = unsafe { SetEntriesInAclW(1, &access, null_mut(), &mut acl) };
+    if status != 0 {
+        bail!("SetEntriesInAclW failed while building named pipe DACL: {status}");
+    }
+    let _acl_guard = LocalAllocation(acl.cast::<c_void>());
+
+    let mut descriptor: SECURITY_DESCRIPTOR = unsafe { std::mem::zeroed() };
+    let ok = unsafe {
+        InitializeSecurityDescriptor(
+            (&raw mut descriptor).cast::<c_void>(),
+            SECURITY_DESCRIPTOR_REVISION,
+        )
+    };
+    if ok == 0 {
+        bail!(
+            "InitializeSecurityDescriptor failed: {}",
+            std::io::Error::last_os_error()
+        );
+    }
+    let ok =
+        unsafe { SetSecurityDescriptorDacl((&raw mut descriptor).cast::<c_void>(), 1, acl, 0) };
+    if ok == 0 {
+        bail!(
+            "SetSecurityDescriptorDacl failed: {}",
+            std::io::Error::last_os_error()
+        );
+    }
+
+    let mut attributes = SECURITY_ATTRIBUTES {
+        nLength: u32::try_from(size_of::<SECURITY_ATTRIBUTES>())
+            .context("SECURITY_ATTRIBUTES size overflowed")?,
+        lpSecurityDescriptor: (&raw mut descriptor).cast::<c_void>(),
+        bInheritHandle: 0,
+    };
+    let wide = wide_null(OsStr::new(pipe_name));
+    let handle = unsafe {
+        CreateNamedPipeW(
+            wide.as_ptr(),
+            PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
+            PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT | PIPE_REJECT_REMOTE_CLIENTS,
+            PIPE_UNLIMITED_INSTANCES,
+            64 * 1024,
+            64 * 1024,
+            0,
+            &mut attributes,
+        )
+    };
+    if handle.is_null() || handle == windows_sys::Win32::Foundation::INVALID_HANDLE_VALUE {
+        bail!(
+            "CreateNamedPipeW failed for {pipe_name}: {}",
+            std::io::Error::last_os_error()
+        );
+    }
+    Ok(unsafe { OwnedHandle::from_raw_handle(handle) })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::os::windows::io::AsRawHandle;
+
+    #[test]
+    fn appcontainer_named_pipe_dacl_denies_host_client_open() {
+        use windows_sys::Win32::Foundation::{
+            GetLastError, GENERIC_READ, GENERIC_WRITE, INVALID_HANDLE_VALUE,
+        };
+        use windows_sys::Win32::Storage::FileSystem::{CreateFileW, OPEN_EXISTING};
+
+        let profile = AppContainerProfile::create().expect("AppContainer profile");
+        let pipe_name = format!(r"\\.\pipe\a3s-sandbox-acl-{}", std::process::id());
+        let server = create_appcontainer_named_pipe(&pipe_name, &profile.sid)
+            .expect("create ACL'd named pipe");
+        assert!(!server.as_raw_handle().is_null());
+
+        // Host process is not the AppContainer SID, so a fresh client open must fail.
+        let wide = wide_null(OsStr::new(&pipe_name));
+        let client = unsafe {
+            CreateFileW(
+                wide.as_ptr(),
+                GENERIC_READ | GENERIC_WRITE,
+                0,
+                null(),
+                OPEN_EXISTING,
+                0,
+                null_mut(),
+            )
+        };
+        assert!(
+            client == INVALID_HANDLE_VALUE,
+            "host client open should be denied by AppContainer-only DACL"
+        );
+        let err = unsafe { GetLastError() };
+        assert_eq!(err, 5, "expected ERROR_ACCESS_DENIED (5), got {err}");
+        drop(server);
+    }
 }

@@ -39,19 +39,20 @@ The Windows launcher is PowerShell 7 from the system Program Files directory.
 Windows PowerShell 5.1 is not used because its .NET Framework initialization is
 not AppContainer-safe under the baseline policy.
 
-On Linux, seccomp rejects `socket`, `socketpair`, `io_uring`, `unshare`, and
-`setns` entry points before Bash starts. It also rejects `clone3` and rejects
-namespace flags passed to `clone`, while ordinary child-process creation
-remains available. This keeps the boundary compatible with Bubblewrap releases
-that predate its optional `--disable-userns` flag. Bubblewrap starts Bash with
-an empty capability set and closes unexpected inherited file descriptors, so a
-command cannot bypass socket creation denial through an ambient host
-connection. The backend deliberately avoids a network namespace: the seccomp
-boundary already denies socket creation, while loopback setup is not available
-under every unprivileged Linux host policy.
+On Linux, the baseline (no mediation) keeps socket creation denied by seccomp:
+`socket`, `socketpair`, `io_uring`, `unshare`, and `setns` are rejected before
+Bash starts. `clone3` and namespace flags on `clone` are rejected while ordinary
+child-process creation remains available. Bubblewrap starts Bash with an empty
+capability set and closes unexpected inherited file descriptors. The baseline
+does **not** take a network namespace, so unprivileged hosts that cannot set up
+loopback still get a fail-closed deny-all via seccomp.
 
-On Windows, all workspaces in one host process share one process-scoped
-AppContainer identity with no network capabilities. Workspace ACL entries for
+When `mediated_network` is active on Linux, the guest instead runs with
+`--unshare-net` (loopback only), a socket-allowing seccomp mode for the
+in-guest TCP→Unix CONNECT relay, and a bind-mounted host Unix mediator. That
+path is claimed only with live guest allow/deny/egress evidence.
+
+On Windows, AppContainer identity is process-scoped. Workspace ACL entries for
 that identity are installed only for the command lifetime and then restored from
 exact snapshots. Protected paths replace the package SID's inherited permission
 mask while their DACL inheritance is disabled; cleanup restores both the ACL and
@@ -59,22 +60,32 @@ its original protected or inheriting state. Workspace and scratch ancestors
 receive only a non-inheriting `FILE_TRAVERSE` entry for that identity; the volume
 root is excluded, directory listing and data access are not granted, and every
 ancestor DACL is restored. A temporary local DOS drive exposes only the selected
-workspace to the child and is removed during child cleanup. Executions are
-serialized inside one host process because these DACL and device-map updates are
-shared mutable state. The profile remains inert after ACL restoration and is
-reused only by the same sandbox process, avoiding unsafe profile deletion while
-container brokers may still hold profile resources. The backend does not modify
-the system-drive root, PATH, Cargo, Rustup, or other user toolchain trees. System
-tools retain their host-provided AppContainer grants, workspace-local tools are
-covered by the workspace grant, and inaccessible user-private tools fail closed.
+workspace to the child and is removed during child cleanup. Executions against
+the **same workspace** are serialized inside one host process so ACL
+apply/use/restore cannot race; **distinct workspaces may run concurrently**.
+DOS-device letter allocation uses a separate short critical section. The profile
+remains inert after ACL restoration and is reused only by the same sandbox
+process, avoiding unsafe profile deletion while container brokers may still hold
+profile resources. The backend does not modify the system-drive root, PATH,
+Cargo, Rustup, or other user toolchain trees. System tools retain their
+host-provided AppContainer grants, workspace-local tools are covered by the
+workspace grant, and inaccessible user-private tools fail closed. Mediated HTTP
+over an AppContainer-ACL'd named pipe remains **fail-closed** until live guest
+proof (`A3S_SANDBOX_MEDIATOR_PIPE` contract; not `HTTP_PROXY`).
 
 ## Non-goals
 
-This crate does not provide an HTTP proxy, selective network allow-list, or
-remote container orchestration. Those features are intentionally outside the
-A3S baseline policy; network access is denied by the native platform boundary.
+This crate does not provide remote container orchestration, TLS interception by
+default, or a virtual shell. Network access remains deny-all for the A3S Bash
+baseline. Opt-in host-supervised HTTP CONNECT / SOCKS5 mediation (Gates 4–5)
+is available only where the OS can fence the guest to the mediator and the
+policy enablement is explicit; unsupported platforms fail closed. Mediated
+network must not become the default profile without independent review
+(see `docs/INDEPENDENT_REVIEW.md`).
 
 ## Reporting
 
 Please report security issues privately to the A3S Lab maintainers rather than
-opening a public issue with exploit details.
+opening a public issue with exploit details. Include the crate version, OS,
+backend (`a3s-sandbox capabilities`), and a minimal reproduction. Related
+threat-model notes live in `THREAT_MODEL.md`.

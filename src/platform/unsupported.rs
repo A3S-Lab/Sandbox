@@ -1,4 +1,4 @@
-use crate::policy::SandboxPolicy;
+use crate::policy::EnforcedPolicy;
 use crate::{CommandOutput, CommandRequest};
 use anyhow::{bail, Result};
 use std::path::Path;
@@ -16,7 +16,7 @@ impl PlatformSandbox {
 
     pub(crate) async fn execute(
         &self,
-        _policy: &SandboxPolicy,
+        _policy: &EnforcedPolicy,
         _request: CommandRequest,
     ) -> Result<CommandOutput> {
         bail!(
