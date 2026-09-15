@@ -383,7 +383,7 @@ mod tests {
         policy.validate().unwrap();
         let result =
             policy.validate_for_backend(crate::policy::BackendCapabilities::native_gate2());
-        if cfg!(any(target_os = "macos", target_os = "linux")) {
+        if cfg!(any(target_os = "macos", target_os = "linux", windows)) {
             result.unwrap();
         } else {
             let error = result.unwrap_err().to_string();

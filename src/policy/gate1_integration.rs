@@ -124,7 +124,7 @@ fn gate1_compile_requires_sandbox_policy_and_rejects_broadening() {
         scratch.path(),
         BackendCapabilities::native_gate1(),
     );
-    if cfg!(any(target_os = "macos", target_os = "linux")) {
+    if cfg!(any(target_os = "macos", target_os = "linux", windows)) {
         compiled.expect("claiming platforms can enforce mediated HTTP");
     } else {
         let error = format!("{:#}", compiled.unwrap_err());
