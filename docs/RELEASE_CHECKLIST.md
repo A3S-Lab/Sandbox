@@ -37,7 +37,6 @@ Verified by `policy::gate7_release_invariants` plus CI on each OS:
 - [x] SBOM generator: `./scripts/generate-sbom.sh`
 - [x] Checksums / signatures helper: `./scripts/sign-release.sh <artifacts...>`
 - [x] Local evidence collector: `./scripts/collect-release-evidence.sh`
-- [ ] Provenance JSON attached to a published GitHub Release
 - [x] Independent review package: `docs/INDEPENDENT_REVIEW.md`
 
 ## Independent review (external)
@@ -51,7 +50,8 @@ Verified by `policy::gate7_release_invariants` plus CI on each OS:
 
 - [x] `CHANGELOG.md` entry for the release
 - [x] Crate version bumped intentionally (immutable crates.io versions)
-- [ ] Tag matches the signed artifact commit SHA
+- [x] Tag matches the signed artifact commit SHA (`v0.1.3`)
+- [x] Provenance JSON attached to a published GitHub Release
 
 ## Explicit non-goals for this release
 
