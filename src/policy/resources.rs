@@ -101,7 +101,11 @@ pub(crate) fn apply_unix_rlimits(budget: &ResolvedResourceBudget) -> Result<()> 
 }
 
 #[cfg(target_os = "linux")]
-fn set_rlimit(resource: libc::__rlimit_resource_t, soft_and_hard: u64) -> Result<()> {
+fn set_rlimit(
+    // musl exposes RLIMIT_* as c_int; glibc uses __rlimit_resource_t.
+    resource: libc::c_int,
+    soft_and_hard: u64,
+) -> Result<()> {
     let limit = libc::rlimit {
         rlim_cur: soft_and_hard as libc::rlim_t,
         rlim_max: soft_and_hard as libc::rlim_t,

@@ -1,3 +1,12 @@
+## [Unreleased]
+
+## [0.1.4] - 2026-09-16
+
+### Fixed
+
+- Linux `set_rlimit` takes `libc::c_int` so musl cross-builds (Node SDK
+  `*-unknown-linux-musl`) no longer fail looking up `__rlimit_resource_t`.
+
 # Changelog
 
 ## Unreleased
