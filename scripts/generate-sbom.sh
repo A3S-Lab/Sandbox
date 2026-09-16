@@ -35,7 +35,7 @@ bom = {
     "version": 1,
     "metadata": {
         "timestamp": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "tools": {"components": [{"type": "application", "name": "a3s-sandbox-sbom", "version": "0.1.2"}]},
+        "tools": {"components": [{"type": "application", "name": "a3s-sandbox-sbom", "version": "0.1.3"}]},
         "component": {
             "type": "library",
             "name": "a3s-sandbox",
