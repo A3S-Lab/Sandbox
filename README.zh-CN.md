@@ -94,11 +94,11 @@ CommandRequest
 
 ## 范围与路线图
 
-Gate 0——完整的 A3S Bash 基线——已在 macOS、Linux 与 Windows 上交付并测试。下一阶段将加入可选的、经中介的 HTTP/HTTPS 与 SOCKS5 网络、Unix 套接字策略、TLS 处理、动态策略快照、结构化违规监控、嵌套沙箱协商，以及发布迁移工具。
+Gate 0——完整的 A3S Bash 基线——已在 macOS、Linux 与 Windows 上交付并测试。后续门禁按第一性原理排序：类型化策略 → 结构化拒绝与 OS 资源配额 → 更深的文件系统挂载 → 可选中介 HTTP(S) → 更广的 IPC/SOCKS → CLI/适配器 → 安全发布。虚拟 bash 与进程内语言 VM 为非目标。
 
-能力矩阵、分阶段交付计划、验收门、跨架构测试矩阵与安全发布风险见 [ROADMAP.md](ROADMAP.md)。
+使命、非目标、能力排序、退出条件、架构与风险见 [ROADMAP.md](ROADMAP.md)。
 
-目标是达到 SRT 级安全结果与控制，同时提供 A3S 拥有的 Rust API——而不是逐行克隆 SRT 的内部 TypeScript 实现。
+目标是为 A3S 产品提供由 OS 强制的安全结果与 Rust 自有 API——不是 SRT TypeScript 克隆，也不是模拟 shell。
 
 ## 开发
 

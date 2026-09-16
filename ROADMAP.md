@@ -1,61 +1,96 @@
 # A3S Sandbox Roadmap
 
-This roadmap defines the path from the A3S Bash safety boundary to a
-production-grade, Rust-native alternative to the feature set exposed by
-Anthropic's Sandbox Runtime (SRT). It is intentionally an A3S product plan,
-not a promise to copy SRT's internal TypeScript APIs.
+This document is the authoritative development plan for `a3s-sandbox`.
+It is derived from first principles, not from cloning Anthropic Sandbox
+Runtime (SRT) APIs or importing a virtual-shell product such as
+`vercel-labs/just-bash`.
 
-## A3S Cloud substrate obligations
+Status anchor: Gate 0 (`0.1.x`) is shipped. Later gates are opt-in behind
+explicit capability and policy flags. Softening required isolation to ship
+features is forbidden.
 
-**Status as of 2026-09-10.**
+## First principles
 
-Sandbox is on the Cloud Wave 1 `BX0.3` critical path as the host command
-boundary Box/Code may require. Fail closed when a platform cannot provide the
-requested isolation. Softening required isolation to “ship Cloud” is forbidden.
-See
-[cloud-substrate-dependency-roadmap.md](https://github.com/A3S-Lab/a3s/blob/main/docs/cloud-substrate-dependency-roadmap.md).
+Before any gate is scheduled, a change must pass this filter:
 
-## Product decision
+1. **Mission fit.** Does it strengthen a fail-closed host command boundary for
+   untrusted agent/tool process trees?
+2. **Enforcement locus.** Is the guarantee enforced by the OS (or a
+   host-supervised mediator the OS can fence), not by an in-process interpreter
+   pretending to be bash?
+3. **Real demand.** Is the pain felt by A3S Bash, Code, Box, or Cloud substrate
+   consumers today—not a hypothetical parity checkbox?
+4. **Dependency order.** Does it introduce a single source of truth (policy)
+   before platform forks, and observability before expanding blast radius?
+5. **Minimal surface.** Is there a simpler alternative that preserves the same
+   security outcome?
 
-`a3s-sandbox` is the single native sandbox library used by A3S products. The
-public contract is Rust-first and platform-neutral; A3S Code, the CLI, and
-future SDKs adapt to that contract. Node.js, npm, and SRT are not runtime
-dependencies.
+If a proposal fails the filter, it is refused or deferred—not “parked politely”
+inside this roadmap.
 
-Compatibility is defined at the capability and security level:
+## Mission
 
-- preserve the useful SRT behaviours (filesystem policy, mediated network,
-  Unix sockets, process-tree lifecycle, violation reporting, and CLI/library
-  embedding);
-- use A3S policy types, error codes, audit events, and configuration rather
-  than reproducing SRT's private module graph or settings-file quirks;
-- fail closed whenever a platform cannot provide the requested boundary;
-- keep a strict baseline mode for A3S Bash even when an operator opts into
-  broader, explicitly configured capabilities.
+`a3s-sandbox` is the **native Gate 0 command boundary** for A3S products:
 
-The upstream reference for the feature comparison is the
-[Anthropic Sandbox Runtime README](https://github.com/anthropics/sandbox-runtime/blob/main/README.md).
+- take an untrusted command string and its descendants;
+- run them only after a workspace / credential / environment / network /
+  lifecycle policy can be established;
+- enforce that policy with macOS Seatbelt, Linux Bubblewrap+seccomp, or Windows
+  AppContainer+Job Object;
+- return bounded output and tear down the process tree;
+- **fail closed** when the host cannot provide the requested guarantee.
 
-## Baseline delivered (Gate 0)
+Public contract: Rust-first, platform-neutral, embeddable by Code, CLI, agents,
+and future SDKs. Node/npm/SRT are not runtime dependencies.
 
-The current `0.1.x` baseline is complete and is the minimum boundary required
-by A3S Bash:
+Cloud obligation: Wave 1 `BX0.3` host command boundary for Box/Code. See
+[cloud-substrate-dependency-roadmap.md](../../docs/cloud-substrate-dependency-roadmap.md).
 
-| Capability | Current behaviour | Evidence |
+## Non-goals (refuse)
+
+These are adjacent products or anti-patterns. They must not land in this crate:
+
+| Non-goal | Why | Belongs elsewhere |
 | --- | --- | --- |
-| Command lifecycle | Async command execution, bounded output, deadlines, process-group/process-tree termination, descendant cleanup, and stream observers | Unit and integration tests in `src/tests.rs` |
-| macOS boundary | Seatbelt profile plus process-group lifecycle | Native macOS test job |
-| Linux boundary | Bubblewrap user, mount, PID, IPC, and UTS namespaces with seccomp | Native Linux test job |
-| Windows boundary | PowerShell 7 in an AppContainer, restricted ACLs, temporary workspace drive, and kill-on-close Job Object | Native Windows test job |
-| Network and IPC | IPv4/IPv6 sockets and host Unix sockets denied by default | Negative network and socket tests |
-| Filesystem safety | Credential and secret-file protection, A3S/Git metadata protection, normalized path checks, and symlink/hard-link escape tests | Filesystem adversarial tests |
-| Environment safety | Sanitized environment and redirected state/temp variables; injection variables are rejected | Environment tests |
-| Failure mode | Missing launcher, unavailable namespace, or failed probe returns an error; no host execution fallback | Fail-closed tests |
-| Embedding | Small `NativeSandbox` Rust API suitable for A3S Code and child-session inheritance | Public API and Code integration tests |
+| Reimplemented bash / builtin catalog | Compatibility and escape complexity explode; OS boundary already wraps real shells | Optional upper layer, never this crate |
+| In-process WASM Python / QuickJS / sql.js as the sandbox | Same-realm or weak WASM memory bounds are not OS isolation | Agent runtime / tool plugins |
+| MicroVM / container orchestration | Different trust and lifecycle model | `a3s-box` and Cloud node |
+| Desktop UI policy authoring / fleet control | Product surfaces, not boundary library | Host apps consuming the audit protocol |
+| Silent degradation to unsandboxed exec | Violates Cloud substrate and SECURITY.md | Never |
+| Line-for-line SRT TypeScript API or settings clone | Couples A3S to foreign module graph | Capability outcomes only |
+| TLS interception as a default path | Private CA, plaintext, pinning exclusions | Later opt-in with separate security review |
 
-The three-platform CI baseline is green at
-[Sandbox CI run 33575883293](https://github.com/A3S-Lab/Sandbox/actions/runs/33575883293).
-Every change must keep the local gates green:
+SRT and `just-bash` remain **reference inputs**: useful behaviours and agent UX
+patterns may be adapted when they strengthen the mission; their implementation
+shape is not a requirement.
+
+## Adjacent product lines (do not collapse)
+
+```text
+a3s-sandbox   → OS process-tree boundary around real bash/pwsh
+a3s-box       → hardware-isolated microVM execution
+just-bash-like virtual shell (if ever) → in-memory FS + simulated commands
+```
+
+Agents may compose them. This roadmap only owns the middle-left box.
+
+## Gate 0 — Baseline delivered
+
+Current `0.1.x` is the minimum A3S Bash boundary. Evidence lives in
+`src/tests.rs`, platform backends, and three-OS CI.
+
+| Capability | Behaviour |
+| --- | --- |
+| Lifecycle | Async exec, deadlines, process-group / Job Object kill, descendant cleanup, stream observers |
+| macOS | Seatbelt + process group |
+| Linux | bwrap user/mount/PID/IPC/UTS + seccomp; network via socket denial, not netns |
+| Windows | PowerShell 7 AppContainer, ACL snapshot/restore, temp drive, kill-on-close Job; per-process serialization |
+| Network / IPC | IPv4/IPv6 and host Unix sockets denied |
+| Filesystem | Workspace + ephemeral scratch writes; credentials and control metadata protected; symlink/hardlink escape resistance with documented package-store residual risk |
+| Environment | Allowlisted env; HOME/TMP redirected; injection vars stripped |
+| Failure | Missing launcher / probe failure → error, never host fallback |
+
+Local gates that must stay green:
 
 ```bash
 cargo fmt --all -- --check
@@ -63,188 +98,359 @@ cargo clippy --all-targets -- -D warnings
 cargo test --all-targets
 ```
 
-The baseline deliberately has no selective network allowlist, HTTP/SOCKS
-proxy, TLS interception, dynamic policy reload, or cross-platform violation
-store yet. Network is deny-all at the native boundary until Gate 2 is shipped.
+Known Gate 0 debts (tracked, not ignored):
 
-## Capability delta to full SRT parity
+- Windows executions serialized in one host process (shared ACL/device-map state).
+- Residual pre-planted package-store hardlinks to non-credential outside files.
+- No structured denial telemetry yet (operators cannot explain denials uniformly).
+- Resource limits: policy timeout + output ceilings everywhere; Windows Job
+  process/memory; Linux memory via `RLIMIT_AS`; unenforceable quotas fail closed.
+- Network is deny-all only (correct default; insufficient for opt-in tool fetch).
 
-“Full parity” means equivalent security outcomes and user-visible controls,
-not identical implementation details. The following items are the remaining
-work, in dependency order.
+## Capability backlog (ranked)
 
-| Area | Required capability | Design outcome |
+Rank = product leverage × architectural necessity ÷ blast-radius cost.
+
+| Rank | Capability | Serves | Depends on | Notes |
+| --- | --- | --- | --- | --- |
+| 1 | Versioned typed policy + digest | Every later gate | — | Single decision authority; backends only enforce |
+| 2 | Structured allow/deny events | Operators, Code UX, Cloud | Policy digests | Needed **before** opening network |
+| 3 | OS resource quotas (CPU/mem/pids/output profiles) | Agent DoS, Cloud density | Policy | cgroup / Job / rlimit—not JS counters |
+| 4 | Richer FS policy + session write modes | Agent DX, safer monorepos | Policy | RO binds, multi-root allowlists, optional ephemeral overlay/tmpfs where OS allows |
+| 5 | Mediated HTTP(S) allowlist + credential transforms | Real tool fetch without secret leakage | Policy + events + FS mounts for proxy socket | Highest agent-value network slice |
+| 6 | Unix-socket allowlists / Linux mediator bridge | Local IPC without host socket free-for-all | Policy + events | Required before trusting loopback mediators |
+| 7 | SOCKS5 / non-HTTP TCP mediation | SSH and odd protocols | HTTP mediator lessons | Second network slice; do not block HTTP on this |
+| 8 | Dynamic policy snapshots + nested/`weaker` probe | Long sessions, containers | Policy + events | Never implicit degrade |
+| 9 | CLI + Code/CLI adapters | Diagnostics, migration off SRT paths | Stable library | A3S-native first; SRT translation is lossy helper only |
+| 10 | Assurance release (fuzz, soak, external review) | Production trust | Gates that expand surface | Especially before defaulting any network mediation |
+
+Deliberately **not** ranked into the trunk: virtual bash, in-process language VMs,
+TLS MITM as default, fleet UI.
+
+## Development and test discipline
+
+Every gate follows this order. Skipping a step to “look done” is forbidden.
+
+1. **State the exit criterion** in falsifiable tests (unit and integration).
+2. **Run tests** and confirm new coverage fails or the gap is otherwise proven.
+3. **Implement the minimal enforcement** that makes those tests pass.
+4. **Re-run the full local gates** (`fmt`, `clippy -D warnings`, `test --all-targets`).
+5. **Only then** move to the next gate.
+
+### Mandatory test classes per gate
+
+| Class | Required | Purpose |
 | --- | --- | --- |
-| Policy model | Typed filesystem/network/socket policy, path normalization, glob semantics, precedence, port-aware host rules, and a canonical policy digest | One versioned policy model shared by all backends |
-| Filesystem | Deny-read/allow-read and allow-write/deny-write rules, protected metadata, symlink/hard-link and TOCTOU resistance, and per-session scratch mounts | Deterministic decisions with no path-based bypass |
-| Network | HTTP/HTTPS CONNECT proxy, SOCKS5 proxy, domain and port allow/deny rules, DNS handling, IPv4/IPv6 coverage, redirect handling, and proxy-auth support | All permitted traffic is observable and routed through an explicit host mediator |
-| Unix sockets | Path allowlists on macOS/Windows and an explicit Linux bridge policy | No accidental local IPC bypass; unsupported path filtering fails closed |
-| Runtime controls | Immutable session snapshots, authenticated policy updates, capability probing, nested/weaker mode negotiation, and cancellation | Policy changes are explicit, auditable, and race-free |
-| Observability | Structured allow/deny events, reason codes, command attribution, counters, bounded/redacted logs, and optional live subscribers | Operators can explain every denial without leaking secrets |
-| Host integration | Stable CLI, Rust library, A3S Code/CLI/SDK adapters, lifecycle inheritance, packaging, and SRT migration tooling | One implementation is consumed consistently across A3S |
-| Assurance | Cross-architecture matrix, adversarial tests, property/fuzz tests, benchmarks, threat-model review, and external security audit | Release evidence is repeatable rather than platform anecdote |
+| Unit / property | Yes | Policy normalization, precedence, digests, malformed rejection—no OS launcher required |
+| Integration | Yes | Real backend (or multi-fixture decision replay) proves the gate exit on this host |
+| Negative security | Yes when the gate expands surface | Denied path must not reach host via descendant, FD, env, link, or network bypass |
+| Platform matrix | Accumulate | Do not claim cross-OS parity from a single-host green run |
+
+Integration tests may be `#[cfg(target_os = "...")]` where the backend only exists there, but the **decision fixtures** for Gate 1+ must be platform-neutral and identical across OSes.
+
+### Refuse overfitting
+
+Do not land optimizations or special cases that only exist to green a local lab condition, a single CI image quirk, or a transient environment bug. Examples of forbidden overfitting:
+
+- DNS / fake-IP / proxy-environment workarounds that are not part of the typed network policy;
+- “allow this path because the monorepo scan is slow” without a general rule and residual-risk note;
+- silent weaker isolation so a test host can run without `bwrap` / Seatbelt / AppContainer;
+- golden tests that assert incidental string formatting instead of security decisions;
+- feature flags that broaden the default A3S Bash profile without an explicit policy opt-in.
+
+If a host cannot provide a required capability, **fail closed** or expose an explicit weaker mode via probe—never paper over it in product code.
 
 ## Delivery plan
 
-### Gate 1 — Versioned policy engine (2–3 weeks)
+### Gate 1 — Policy spine (must ship first)
 
-Build the policy layer before adding network exceptions.
+**Status:** Complete for the Gate 1 exit — typed `SandboxPolicy`,
+normalization, decisions, digests, `BackendCapabilities`, and
+`EnforcedPolicy::compile` (baseline materialization + Exact overlays).
+`NativeSandbox::with_policy` / `execute` only run through compile; globs and
+outside allow overlays fail closed. Evidence: `policy::gate1_integration` plus
+full `cargo test --all-targets` (71 tests).
 
-- Define `SandboxPolicy`, filesystem rules, network rules, socket rules,
-  resource limits, and feature flags as typed Rust values.
-- Normalize absolute, relative, home-relative, drive-letter, UNC, and
-  case-folded paths once at the policy boundary.
-- Specify rule precedence and glob behaviour in a versioned document:
-  deny-read/allow-read, allow-write/deny-write, and deny-network/allow-network.
-- Produce a canonical, redacted policy digest for audit and replay.
-- Add property tests for path equivalence, symlink components, hard links,
-  wildcard matching, ports, IPv6 literals, and malformed rules.
+**Why first:** Without one typed policy model, every platform invents rules and
+“parity” becomes three divergent sandboxes.
 
-**Exit gate:** the same policy fixtures produce identical decisions on all
-three platforms; malformed or ambiguous rules are rejected; no backend can
-silently broaden a decision; existing Gate 0 tests remain green.
+- Define `SandboxPolicy`: filesystem, network, socket, resource limits, feature
+  flags as versioned Rust values.
+- Normalize paths once (absolute, relative, home, drive-letter, UNC, case-fold).
+- Document precedence and globs: deny-read / allow-read, allow-write /
+  deny-write, deny-network / allow-network.
+- Emit a canonical redacted policy digest for audit and replay.
+- Property tests for path equivalence, symlink components, hard links,
+  wildcards, ports, IPv6 literals, malformed rules.
+- Backends declare enforceable capabilities; unsupported rules fail closed.
 
-### Gate 2 — Mediated network and Unix sockets (4–6 weeks)
+**Exit:** Identical decisions on macOS / Linux / Windows fixtures; no silent
+broadening; Gate 0 tests remain green.
 
-Introduce opt-in network access without weakening the deny-all baseline.
+### Gate 2 — Explainability and hard resource bounds
 
-- Implement an in-process or supervised HTTP proxy for HTTP and HTTPS CONNECT.
-- Implement a SOCKS5 mediator for non-HTTP TCP protocols (including SSH).
-- Enforce domain patterns, explicit ports, deny precedence, DNS rebinding
-  resistance, IPv4/IPv6 consistency, redirects, CONNECT tunnelling, and
-  proxy authentication.
-- Linux: remove direct network interfaces and expose only a private Unix
-  socket bridge to the host mediator.
-- macOS: allow only the mediator's loopback port in Seatbelt.
-- Windows: use a narrowly scoped Windows Filtering Platform egress fence
-  keyed to the sandbox identity; permit loopback only to the mediator range.
-- Scrub proxy variables and reject alternate proxy, resolver, and raw-socket
-  bypasses. A proxy crash must terminate or quarantine the session.
+**Status:** Complete for the Gate 2 exit on enforceable primitives —
+`AuditEvent` / `AuditLog`, session/command attribution on `execute`, policy
+timeout and output ceilings on all backends, Windows Job process/memory quotas,
+Linux `RLIMIT_AS` memory quotas. Unenforceable requests fail closed (Unix
+`max_processes` without cgroup; macOS `max_memory_bytes` because address-space
+rlimits cannot be lowered). Evidence: `observability::gate2_integration`,
+`observability::gate2_resources`, `policy::resources`, plus
+`cargo fmt` / `clippy -D warnings` / `test --all-targets` (85 tests on macOS).
 
-**Exit gate:** allow/deny, DNS, redirect, TLS, SOCKS, local-bind, and bypass
-tests pass on macOS arm64/x86_64, Linux x86_64/aarch64, and Windows x64 (with
-Windows arm64 where the host toolchain is available). A denied request never
-reaches the upstream; an allowed request is attributable to a session.
+**Residual (do not claim):** Linux/macOS process-tree PID quotas need cgroup (or
+equivalent). macOS memory quotas need a non-rlimit enforcement path. Neither is
+silently approximated.
 
-### Gate 3 — Dynamic policy and violation monitoring (2–3 weeks)
+**Why before network:** Gate 0 already denies. Expanding egress without
+attribution and quotas multiplies blind incidents.
 
-- Add an authenticated, monotonic policy-update API with atomic session
-  snapshots; updates cannot retroactively broaden an already running command
-  unless the caller explicitly opts in.
-- Add capability probes and a typed explanation of degraded/unsupported
-  features. Degraded mode is never implicit.
-- Emit a common audit event schema for filesystem, process, network, and IPC
-  decisions with command/session IDs, policy digest, backend, reason code,
-  timestamp, and redacted target metadata.
-- Add bounded in-memory storage, optional durable export, live subscribers,
-  and stderr annotation compatible with A3S tool diagnostics.
-- Add rate limits and back-pressure so a denial storm cannot exhaust the host.
+- Common audit event schema for filesystem, process, network, and IPC decisions:
+  session/command IDs, policy digest, backend, reason code, timestamp, redacted
+  target metadata.
+- Bounded in-memory store, optional export, live subscribers; monitoring failure
+  never grants access.
+- Resource profiles mapped to OS primitives that actually enforce (Windows Job
+  Object limits, Linux `RLIMIT_AS`, portable timeout/output ceilings). Profiles
+  are policy fields, not ad-hoc constants. Missing OS support fails closed.
+- Rate-limit denial storms so telemetry cannot DoS the host.
 
-**Exit gate:** events are complete and correctly attributed under concurrent
-commands; secrets and credentials are redacted; replaying an event with its
-policy digest reproduces the decision; monitoring failure cannot grant access.
+**Exit:** Concurrent commands attribute correctly; secrets redacted; digest
+replay reproduces decisions; quota exhaustion (where claimed) kills or bounds
+the tree; unclaimable quotas refuse at policy compile.
 
-### Gate 4 — Cross-platform parity and host migration (3–4 weeks)
+### Gate 3 — Filesystem policy depth and session write modes
 
-- Finish Windows WFP service lifecycle, privilege/error UX, and arm64
-  packaging; document the required signed components if a kernel-mode path is
-  unavoidable.
-- Support nested/container hosts through an explicit `weaker` capability
-  negotiation. Refuse startup when the requested guarantee is unavailable.
-- Align process, file-descriptor/handle, signal, timeout, and cleanup
-  semantics across all backends.
-- Stabilize the `NativeSandbox` library and a small `a3s-sandbox` CLI for
-  diagnostics and reproducing policy decisions.
-- Add A3S Code and CLI migration helpers that translate supported SRT settings
-  into the typed policy model, report lossy options, and remove old Node/npm
-  resources only after the new path is verified.
+**Status:** Complete for the Gate 3 exit on claimed capabilities — typed
+`FilesystemMount` / `MountMode` / `SessionWriteMode`; RO mounts outside
+workspace compile and enforce (live read + write-deny on macOS); RW mounts
+outside workspace fail closed; ephemeral session writes use Linux bwrap
+`--tmpfs` on scratch and fail closed on macOS/Windows (no in-process FS).
+Evidence: `policy::gate3_integration`, Linux `ephemeral_scratch_is_mounted_as_tmpfs_not_host_bind`,
+plus `cargo fmt` / `clippy -D warnings` / `test --all-targets` (92 tests on macOS).
 
-**Exit gate:** A3S Code, CLI, and direct library consumers use the same
-  release artifact; upgrade and rollback are documented; no active dependency
-  or packaging path invokes SRT.
+**Residual:** Windows ephemeral session mode; further hardlink residual
+tightening remains documented Gate 0 debt, not silently claimed fixed.
 
-### Gate 5 — Security release (2–4 weeks)
+**Why here:** Agents need controlled visibility and optional non-persistent
+writes without leaving the OS boundary model.
 
-- Run race/TOCTOU, symlink/hard-link, namespace, environment, descriptor,
-  proxy-bypass, DNS-rebinding, and process-tree adversarial suites.
-- Add policy-parser and protocol fuzzing, long-running soak tests, and
-  resource-exhaustion tests.
-- Benchmark startup latency, command throughput, proxy overhead, memory, and
-  cleanup under large process trees.
-- Review the threat model per OS and obtain an independent security review
-  before enabling network mediation by default.
-- Publish signed, reproducible artifacts, SBOM/provenance, compatibility
-  notes, and a documented vulnerability-reporting process.
+- Typed multi-root mounts: RO knowledge trees, RW workspace, private scratch.
+- Optional ephemeral write mode where the platform can provide overlay/tmpfs
+  semantics; where it cannot, capability negotiation fails closed—no fake
+  in-memory FS.
+- Tighten residual hardlink story where cheap; document remaining residual risk
+  honestly.
+- Keep symlink/TOCTOU adversarial coverage as exit evidence.
 
-**Release gate:** all mandatory tests and audits are recorded for each target
-  architecture; any unsupported capability is visible to the caller; the
-  default A3S Bash profile remains fail-closed.
+**Exit:** Mount fixtures decide identically across backends that claim the
+capability; unsupported session modes are visible via probe/capabilities,
+never silently emulated in-process.
+
+### Gate 4 — Mediated HTTP(S) (primary network)
+
+**Status:** Complete for the claimed macOS CONNECT slice and the Linux netns
+bridge — host-loopback / Unix CONNECT mediator, `decide_mediated_connect`,
+macOS Seatbelt `localhost:<port>` fence, Linux `--unshare-net` + TCP→Unix
+relay (`a3s-sandbox-relay`) with live guest allow/deny evidence
+(`gate4_macos_sandbox_mediator_tunnels_allowed_connect`,
+`gate4_linux_sandbox_mediator_tunnels_allowed_connect`,
+`linux_bridge_wire_*`). `mediated_http` is true on macOS, Linux, and Windows
+(Windows: inherited named-pipe CONNECT).
+Evidence: `network::connect`, `policy::gate4_integration`, `policy::mediate`,
+`platform::linux` bridge tests.
+
+**Residual:** absolute-form HTTP path-prefix proxying (non-CONNECT); redirect
+revalidation; credential header transforms; fuller proxy-bypass suites.
+
+**Why split from SOCKS:** Most agent/tool traffic is HTTP(S). Shipping allowlisted
+fetch with credential transforms unlocks product value without waiting on WFP/
+SOCKS completeness.
+
+- Host-supervised HTTP/HTTPS CONNECT mediator; guest has no raw sockets to the
+  internet (macOS: Seatbelt loopback-to-mediator only).
+- Origin allowlists for CONNECT; path-prefix rules are reserved for future
+  absolute-form HTTP and do not silently authorize TLS tunnels.
+- Platform fences: macOS Seatbelt loopback to mediator; Linux Unix-bridge
+  staging into scratch; Windows inherited AppContainer named-pipe handle.
+- Scrub proxy env bypasses; inject mediator proxy only when mediation is on.
+- Default profile remains network deny-all until an explicit policy enables this
+  gate’s capabilities.
+
+**Exit (current claim):** Denied CONNECT never reaches upstream; allowed
+CONNECT is host-mediated and session-attributable on macOS, Linux, and Windows;
+platforms without live fences refuse `mediated_network` at compile. Full matrix
+bypass suites remain Gate 4 residual / Gate 7 assurance.
+
+### Gate 5 — Local IPC and non-HTTP mediation
+
+**Status:** In progress — macOS Exact Unix-socket allowlists compile into
+Seatbelt `path-literal` outbound rules with live allow/deny evidence
+(`gate5_macos_allows_listed_unix_socket_and_denies_others`). Host-supervised
+SOCKS5 CONNECT mediator reuses Gate 4 origin allowlists (`decide_mediated_socks`)
+with macOS Seatbelt loopback fencing and live guest tunnel evidence
+(`gate5_macos_sandbox_socks_tunnels_allowed_connect`).
+`unix_socket_allowlist` and `mediated_socks` are true only on macOS;
+Linux/Windows fail closed. Evidence: `policy::gate5_integration`,
+`network::socks`, plus full `cargo test --all-targets` (137 lib tests on macOS
+plus CLI suite).
+
+**Residual:** Linux and Windows host-supervised HTTP CONNECT bridges are
+**claimed** (`mediated_http`) after live guest proof. SOCKS and Unix-socket
+allowlists remain fail-closed on Linux/Windows. Windows guest contract is
+`A3S_SANDBOX_MEDIATOR_PIPE_HANDLE` (inherited connected pipe; not `HTTP_PROXY`).
+Unix-socket allowlists on non-macOS remain fail-closed.
+
+- Unix-socket path allowlists (macOS Exact Seatbelt; other platforms pending).
+- SOCKS5 mediator for non-HTTP TCP (including SSH) reusing Gate 4 fencing
+  (macOS claimed; other platforms pending).
+- Keep TLS interception **out** unless a separate security review opts in.
+
+**Exit (partial):** Listed Unix sockets connect; unlisted sockets fail closed on
+macOS; SOCKS5 allow tunnels and deny never reach upstream on macOS; unclaimed
+platforms refuse allowlists / `mediated_socks` at compile.
+
+### Gate 6 — Session controls, nesting, and host integration
+
+**Status:** In progress — monotonic `replace_policy` refuses silent broadening
+unless `PolicyUpdateOptions::allow_broadening`; `capability_report` lists
+unavailable surfaces explicitly for nested/container negotiation; `a3s-sandbox`
+CLI ships `probe` / `digest` / `capabilities` / `exec`. Evidence:
+`policy::gate6_integration`, `policy::update`, `tests/cli_gate6.rs`.
+
+**Residual:** none for the library/CLI/Code adapter path. An SRT-settings
+translator is **refused** until a concrete Code migration consumer exists;
+shipping a lossy clone without demand would couple the API to a non-goal.
+
+- Authenticated monotonic policy updates; running commands do not broaden unless
+  explicitly opted in. ✅ (`replace_policy` + execute policy snapshot)
+- Nested/container hosts use explicit `weaker` capability negotiation; refuse
+  startup when the requested guarantee is unavailable. ✅ (report surfaces;
+  constructor still fail-closed on unenforceable policy)
+- Stabilize `NativeSandbox` and ship a small `a3s-sandbox` CLI for probe,
+  policy digest, and reproduction. ✅
+- Code/CLI adapters consume the Rust contract; optional lossy SRT-settings
+  translator is a migration aid, not the API. ✅ (Code adapter consumes Rust
+  contract; SRT translator refused for now—see residual)
+- Reduce Windows serialization where safe (per-workspace identity or lock
+  scope), without weakening ACL restore correctness. ✅ (per-workspace ACL
+  gate + short DOS-drive allocation lock)
+
+**Exit (partial):** Code, CLI, and library consumers share one artifact; weaker
+modes are explicit in probes; no packaging path invokes SRT. Upgrade/rollback
+notes remain a packaging residual.
+
+### Gate 7 — Security release
+
+**Status:** In progress — adversarial negatives, between-execute and in-command
+TOCTOU/symlink races, overlapping same-workspace isolation, soak
+(`GATE7_SOAK_ROUNDS`) + baseline/exec and CONNECT mediator p50 starters,
+CONNECT protocol fuzz corpus, release-checklist invariant tests
+(`gate7_release_invariants`), per-OS threat model, CycloneDX SBOM,
+signing/provenance + `scripts/collect-release-evidence.sh`,
+`docs/RELEASE_CHECKLIST.md`, and `docs/INDEPENDENT_REVIEW.md` are in tree.
+
+**Residual:** multi-hour soak evidence attached to a release, fuller throughput
+benches, signed release artifacts on a real tag, **independent security
+review** before any profile makes mediated network the default. Windows
+`mediated_http` is claimed after live AppContainer pipe proof on Windows CI;
+Linux HTTP CONNECT is claimed; Linux/Windows SOCKS and unix allowlists remain
+fail-closed.
+
+- Adversarial suites: race/TOCTOU, symlink/hardlink, namespace, environment,
+  descriptor, proxy bypass, DNS rebinding, process-tree orphans.
+  (proxy bypass / host-literal non-alias / protocol abuse / TOCTOU between
+  executes + in-command symlink swap + overlapping executes: ✅ starter)
+- Policy/protocol fuzzing, soak, resource exhaustion.
+  (validate malformed-host / zero-ceiling rejects: ✅;
+   CONNECT malformed corpus + size bounds: ✅;
+   repeated soak 64× + concurrent same-workspace: ✅; multi-hour residual)
+- Benchmarks: startup/exec p50 + CONNECT mediator allow p50 starters ✅;
+  fuller throughput residual.
+- Per-OS threat-model review; independent security review before any profile
+  makes mediated network the default. ✅ threat model + checklist + review
+  package; external sign-off residual
+- Signed artifacts, SBOM/provenance, vulnerability reporting process.
+  ✅ SBOM + sign-release + collect-release-evidence; attach-to-tag residual
+
+**Release gate:** Mandatory evidence recorded per architecture; unsupported
+capabilities visible to callers; default A3S Bash profile remains fail-closed.
+Follow `docs/RELEASE_CHECKLIST.md` and `docs/INDEPENDENT_REVIEW.md`.
+Run `./scripts/collect-release-evidence.sh` before cutting a tag.
 
 ## Target architecture
-
-The implementation can remain a small public facade while the internals are
-split by responsibility as the feature set grows:
 
 ```text
 src/
 ├── config/          # versioned typed policy and migration
 ├── policy/          # normalization, matching, precedence, digests
-├── filesystem/      # path decisions and protected-tree handling
-├── network/         # HTTP, SOCKS5, DNS, mediation, and bypass checks
-├── process/         # limits, descendants, signals, handles, cleanup
+├── filesystem/      # path decisions, mounts, protected trees
+├── network/         # HTTP mediator, later SOCKS/DNS/bypass checks
+├── process/         # quotas, descendants, signals, handles, cleanup
 ├── observability/   # audit events, attribution, redaction, subscribers
 └── platform/
-    ├── macos/       # Seatbelt and loopback mediation
-    ├── linux/       # Bubblewrap, namespaces, seccomp, socket bridge
-    ├── windows/     # AppContainer, ACLs, Job Object, WFP fence
-    └── unsupported/ # explicit fail-closed errors
+    ├── macos/
+    ├── linux/
+    ├── windows/
+    └── unsupported/
 ```
 
-Platform modules enforce decisions; they do not parse user configuration or
-implement their own rule precedence. The policy engine is the single source
-of truth, and each backend declares the capabilities it can enforce.
+Platform modules **enforce**; they do not invent precedence. The policy engine
+is the single source of truth.
 
 ## Test and release matrix
 
-Each gate must add fixtures to the same conformance suite and run them on:
+Each gate extends one conformance suite on:
 
 - macOS arm64 and x86_64;
-- Linux x86_64 and aarch64, both ordinary hosts and representative containers;
-- Windows x64, then arm64 when the WFP/AppContainer toolchain is available.
+- Linux x86_64 and aarch64 (ordinary hosts and representative containers);
+- Windows x64, then arm64 when the fencing toolchain is available.
 
-Required test classes are unit/property tests, backend integration tests,
-cross-process and descendant tests, network protocol tests, negative
-security tests, fuzz/soak tests, and packaging/upgrade tests. CI must exercise
-both the strict default profile and every explicitly advertised weaker mode.
+Required classes: unit/property, backend integration, cross-process/descendant,
+network protocol (from Gate 4), negative security, fuzz/soak (Gate 7),
+packaging/upgrade (Gate 6+). CI exercises the strict default and every
+advertised weaker mode.
 
 ## Risks and decisions
 
-- Windows WFP may require a privileged service or signed driver. The product
-  must ship a clearly scoped broker or fail closed; it must never replace WFP
-  with an undocumented firewall hint.
-- Unprivileged Linux namespaces and seccomp vary by distribution and container
-  policy. Capability probing and explicit weaker-mode negotiation are part of
-  the API, not hidden fallbacks.
-- macOS Seatbelt and system violation-log interfaces are OS-dependent. Keep a
-  conservative profile generator and treat missing telemetry as a monitoring
-  limitation, never as permission.
-- TLS interception introduces a private CA, certificate handling, and
-  sensitive plaintext. It requires opt-in configuration, secret-safe logs,
-  mTLS/certificate-pinning exclusions, and a separate security review.
-- DNS, IPv6, redirects, proxy environment variables, inherited descriptors,
-  and nested sandboxes are common bypass surfaces; every one needs a negative
-  regression test before a feature is called complete.
-
-Remote container orchestration, desktop UI policy authoring, and fleet-level
-control are outside this crate's scope. They may consume the stable library
-and audit protocol after Gate 4.
+- **Windows egress fencing** may need a privileged broker. Ship a scoped broker
+  or fail closed—never an undocumented firewall hint.
+- **Unprivileged Linux userns/seccomp** vary by distro and container. Probe +
+  explicit weaker mode; no hidden fallback.
+- **Seatbelt / violation logs** are OS-dependent. Missing telemetry is a
+  monitoring limit, never permission.
+- **HTTP before SOCKS** is intentional. Do not hold agent fetch behind SSH
+  mediation.
+- **No virtual shell in-tree.** If A3S later wants a just-bash-like layer, it is
+  a separate crate that *calls* sandbox/box—never a substitute for them.
+- **Package-store hardlink residual** remains documented until a cheap complete
+  mitigation exists; do not claim it is closed.
 
 ## Estimate
 
-With one experienced cross-platform engineer and shared review capacity, the
-full feature set is approximately **12–18 engineering weeks after Gate 0**.
-The estimate excludes external security-audit scheduling and can expand for
-Windows WFP signing/privilege requirements or hosts that do not permit
-unprivileged Linux namespaces. Gate 0 is usable today for A3S Bash with
-network deny-all; later gates should be enabled incrementally behind explicit
-capability and policy flags.
+With one experienced cross-platform engineer and shared review:
+
+| Gate | Focus | Rough effort after Gate 0 |
+| --- | --- | --- |
+| 1 | Policy spine | 2–3 weeks |
+| 2 | Events + resource quotas | 2–3 weeks |
+| 3 | FS mounts / session modes | 2–3 weeks |
+| 4 | Mediated HTTP(S) | 3–5 weeks |
+| 5 | Unix sockets + SOCKS | 2–4 weeks |
+| 6 | Session controls + CLI/adapters | 3–4 weeks |
+| 7 | Security release | 2–4 weeks |
+
+Total roughly **16–26 engineering weeks**, excluding external audit scheduling
+and Windows signing/privilege surprises. Gate 0 remains the supported deny-all
+baseline for A3S Bash today.
+
+## Acceptance of this roadmap
+
+This plan is complete when:
+
+1. Mission, non-goals, and adjacent product boundaries are explicit.
+2. Gates are ordered by policy → observability/quotas → FS depth → HTTP →
+   broader IPC/network → integration → assurance.
+3. just-bash-like and SRT-clone work is explicitly refused or demoted.
+4. Each gate has a falsifiable exit condition.
+5. Cloud `BX0.3` fail-closed obligation is preserved.

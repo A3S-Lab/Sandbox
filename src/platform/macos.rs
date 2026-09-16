@@ -1,6 +1,6 @@
 //! macOS Seatbelt backend.
 
-use crate::policy::{path_ancestors, resolve_executable, SandboxPolicy};
+use crate::policy::{path_ancestors, resolve_executable, EnforcedPolicy, ResolvedResourceBudget};
 use crate::process::run_tokio_command;
 use crate::{CommandOutput, CommandRequest};
 use anyhow::{bail, Context, Result};
@@ -32,7 +32,7 @@ impl PlatformSandbox {
 
     pub(crate) async fn execute(
         &self,
-        policy: &SandboxPolicy,
+        policy: &EnforcedPolicy,
         request: CommandRequest,
     ) -> Result<CommandOutput> {
         let profile = compile_profile(policy)?;
@@ -45,6 +45,9 @@ impl PlatformSandbox {
                     profile_path.display()
                 )
             })?;
+
+        let budget = ResolvedResourceBudget::resolve(&policy.resources, request.timeout_ms)?;
+        budget.validate_for_backend(crate::policy::BackendCapabilities::native_gate2())?;
 
         let environment = policy.child_environment(request.env.as_deref())?;
         let mut command = Command::new(&self.sandbox_exec);
@@ -63,7 +66,7 @@ impl PlatformSandbox {
             .current_dir(&policy.workspace)
             .env_clear();
 
-        run_tokio_command(command, request, "macOS native sandbox command").await
+        run_tokio_command(command, request, &budget, "macOS native sandbox command").await
     }
 }
 
@@ -74,7 +77,7 @@ fn environment_assignment(key: &OsStr, value: &OsStr) -> OsString {
     assignment
 }
 
-fn compile_profile(policy: &SandboxPolicy) -> Result<String> {
+fn compile_profile(policy: &EnforcedPolicy) -> Result<String> {
     let mut lines = vec![
         "(version 1)".to_string(),
         "(deny default)".to_string(),
@@ -128,11 +131,40 @@ fn compile_profile(policy: &SandboxPolicy) -> Result<String> {
         "  (literal \"/dev/urandom\")".to_string(),
         ")".to_string(),
         "".to_string(),
-        "; Network and Unix-domain sockets remain denied by default".to_string(),
-        "".to_string(),
-        "; Filesystem reads".to_string(),
-        "(allow file-read*)".to_string(),
     ];
+
+    lines.push("; Network and Unix-domain sockets remain denied by default".to_string());
+    if let Some(port) = policy.mediator_port {
+        lines.push(format!(
+            "; Gate 4: loopback CONNECT mediator only (localhost:{port})"
+        ));
+        // Seatbelt requires host `*` or `localhost` in remote ip filters.
+        lines.push(format!(
+            "(allow network-outbound (remote ip \"localhost:{port}\"))"
+        ));
+    }
+    if let Some(port) = policy.socks_mediator_port {
+        lines.push(format!(
+            "; Gate 5: loopback SOCKS5 mediator only (localhost:{port})"
+        ));
+        lines.push(format!(
+            "(allow network-outbound (remote ip \"localhost:{port}\"))"
+        ));
+    }
+    if !policy.allow_unix_sockets.is_empty() {
+        lines.push("; Gate 5: exact Unix-domain socket allowlist".to_string());
+        for socket in &policy.allow_unix_sockets {
+            let path = escaped_path(socket)?;
+            lines.push(format!(
+                "(allow network-outbound (remote unix-socket (path-literal {path})))"
+            ));
+            // Connecting often needs metadata/read on the socket inode.
+            lines.push(format!("(allow file-read* (literal {path}))"));
+        }
+    }
+    lines.push(String::new());
+    lines.push("; Filesystem reads".to_string());
+    lines.push("(allow file-read*)".to_string());
 
     push_path_rule(&mut lines, "deny", &["file-read*"], &policy.deny_read)?;
     push_path_rule(&mut lines, "allow", &["file-read*"], &policy.allow_read)?;
@@ -157,11 +189,22 @@ fn compile_profile(policy: &SandboxPolicy) -> Result<String> {
     lines.push("; Filesystem writes".to_string());
     push_path_rule(&mut lines, "allow", &["file-write*"], &policy.allow_write)?;
     push_path_rule(&mut lines, "deny", &["file-write*"], &policy.deny_write)?;
+    // Late allow for goal-loop carve-outs under protected `.a3s`.
+    push_path_rule(
+        &mut lines,
+        "allow",
+        &["file-write*"],
+        &policy.write_exceptions,
+    )?;
 
     let mut pinned = BTreeSet::new();
     for path in &policy.deny_write {
         pinned.insert(path.clone());
         pinned.extend(path_ancestors(path));
+    }
+    // Do not pin create/unlink denies inside write exceptions.
+    for exception in &policy.write_exceptions {
+        pinned.retain(|path| path != exception && !path.starts_with(exception));
     }
     push_literal_rule(
         &mut lines,
@@ -234,12 +277,13 @@ mod tests {
         let workspace = tempfile::tempdir().unwrap();
         let scratch = tempfile::tempdir().unwrap();
         std::fs::write(workspace.path().join(".env"), "secret").unwrap();
-        let policy = SandboxPolicy::for_execution(workspace.path(), scratch.path()).unwrap();
+        let policy = EnforcedPolicy::for_execution(workspace.path(), scratch.path()).unwrap();
 
         let profile = compile_profile(&policy).unwrap();
         let canonical_workspace = workspace.path().canonicalize().unwrap();
 
         assert!(!profile.contains("(allow network"));
+        assert!(!profile.contains("Gate 4: loopback CONNECT mediator"));
         assert!(profile.contains("(deny file-link)"));
         let workspace_rule = format!(
             "(subpath {})",

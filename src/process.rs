@@ -1,8 +1,10 @@
 //! Bounded process-output capture utilities.
 
+use crate::OutputSummary;
+#[cfg(test)]
+use crate::MAX_OUTPUT_SIZE;
 #[cfg(unix)]
 use crate::{CommandOutput, CommandRequest, OutputObserver};
-use crate::{OutputSummary, MAX_OUTPUT_SIZE};
 #[cfg(unix)]
 use anyhow::{Context, Result};
 use std::collections::VecDeque;
@@ -34,6 +36,8 @@ struct CapturedByte {
 }
 
 pub(crate) struct BoundedCapture {
+    max_output: usize,
+    head_limit: usize,
     head: Vec<CapturedByte>,
     tail: VecDeque<CapturedByte>,
     total_bytes: usize,
@@ -42,10 +46,14 @@ pub(crate) struct BoundedCapture {
 }
 
 impl BoundedCapture {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(max_output: usize) -> Self {
+        let max_output = max_output.max(1);
+        let head_limit = (max_output / 2).clamp(1, OUTPUT_HEAD_BYTES);
         Self {
-            head: Vec::with_capacity(OUTPUT_HEAD_BYTES),
-            tail: VecDeque::with_capacity(MAX_OUTPUT_SIZE - OUTPUT_HEAD_BYTES),
+            max_output,
+            head_limit,
+            head: Vec::with_capacity(head_limit),
+            tail: VecDeque::with_capacity(max_output.saturating_sub(head_limit)),
             total_bytes: 0,
             stdout_bytes: 0,
             stderr_bytes: 0,
@@ -62,7 +70,7 @@ impl BoundedCapture {
                 self.stderr_bytes = self.stderr_bytes.saturating_add(bytes.len());
             }
         }
-        let head_remaining = OUTPUT_HEAD_BYTES.saturating_sub(self.head.len());
+        let head_remaining = self.head_limit.saturating_sub(self.head.len());
         let head_bytes = head_remaining.min(bytes.len());
         self.head
             .extend(bytes[..head_bytes].iter().map(|byte| CapturedByte {
@@ -70,7 +78,7 @@ impl BoundedCapture {
                 byte: *byte,
             }));
 
-        let tail_limit = MAX_OUTPUT_SIZE - OUTPUT_HEAD_BYTES;
+        let tail_limit = self.max_output.saturating_sub(self.head_limit);
         self.tail
             .extend(bytes[head_bytes..].iter().map(|byte| CapturedByte {
                 stream,
@@ -85,7 +93,7 @@ impl BoundedCapture {
         OutputSummary {
             total_bytes: self.total_bytes,
             captured_bytes: self.head.len() + self.tail.len(),
-            truncated: self.total_bytes > MAX_OUTPUT_SIZE,
+            truncated: self.total_bytes > self.max_output,
             timed_out,
         }
     }
@@ -94,7 +102,7 @@ impl BoundedCapture {
     fn render_combined(&self) -> String {
         let mut rendered = String::new();
         append_captured_bytes(&mut rendered, self.head.iter().copied());
-        if self.total_bytes > MAX_OUTPUT_SIZE {
+        if self.total_bytes > self.max_output {
             rendered.push_str(&format!(
                 "\n\n[command output truncated: retained the first {} and last {} of {} bytes]\n\n",
                 self.head.len(),
@@ -207,6 +215,7 @@ impl Drop for ProcessGroupGuard {
 pub(crate) async fn read_process_output(
     child: &mut Child,
     timeout_ms: u64,
+    max_output_bytes: usize,
     observer: Option<&dyn OutputObserver>,
 ) -> io::Result<CapturedProcessOutput> {
     let mut stdout = match child.stdout.take() {
@@ -223,7 +232,7 @@ pub(crate) async fn read_process_output(
     };
 
     let mut process_group = ProcessGroupGuard::for_child(child);
-    let mut capture = BoundedCapture::new();
+    let mut capture = BoundedCapture::new(max_output_bytes);
     let mut stdout_done = false;
     let mut stderr_done = false;
     let mut stdout_buffer = vec![0_u8; READ_CHUNK_BYTES];
@@ -318,6 +327,7 @@ pub(crate) async fn read_process_output(
 pub(super) async fn run_tokio_command(
     mut command: Command,
     request: CommandRequest,
+    budget: &crate::policy::ResolvedResourceBudget,
     description: &str,
 ) -> Result<CommandOutput> {
     command
@@ -325,13 +335,15 @@ pub(super) async fn run_tokio_command(
         .stderr(std::process::Stdio::piped())
         .kill_on_drop(true);
     configure_process_group(&mut command);
+    apply_budget_pre_exec(&mut command, budget)?;
 
     let mut child = command
         .spawn()
         .with_context(|| format!("failed to start {description}"))?;
     let output = read_process_output(
         &mut child,
-        request.timeout_ms,
+        budget.timeout_ms,
+        budget.max_output_bytes,
         request.output_observer.as_deref(),
     )
     .await
@@ -345,13 +357,29 @@ pub(super) async fn run_tokio_command(
     })
 }
 
+#[cfg(unix)]
+fn apply_budget_pre_exec(
+    command: &mut Command,
+    budget: &crate::policy::ResolvedResourceBudget,
+) -> Result<()> {
+    let budget = *budget;
+    // Tokio's Command inherits std's unix extensions for pre_exec.
+    unsafe {
+        command.pre_exec(move || {
+            crate::policy::resources::apply_unix_rlimits(&budget)
+                .map_err(|error| std::io::Error::other(error.to_string()))
+        });
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn bounded_capture_keeps_head_and_tail_with_exact_accounting() {
-        let mut capture = BoundedCapture::new();
+        let mut capture = BoundedCapture::new(MAX_OUTPUT_SIZE);
         let input = (0..(MAX_OUTPUT_SIZE + 1234))
             .map(|index| b'a' + (index % 26) as u8)
             .collect::<Vec<_>>();
@@ -363,9 +391,10 @@ mod tests {
         assert!(summary.truncated);
         let rendered = capture.render_combined();
         assert!(rendered.contains("command output truncated"));
-        let expected_head = String::from_utf8_lossy(&input[..OUTPUT_HEAD_BYTES]);
+        let head_limit = (MAX_OUTPUT_SIZE / 2).clamp(1, OUTPUT_HEAD_BYTES);
+        let expected_head = String::from_utf8_lossy(&input[..head_limit]);
         let expected_tail =
-            String::from_utf8_lossy(&input[input.len() - (MAX_OUTPUT_SIZE - OUTPUT_HEAD_BYTES)..]);
+            String::from_utf8_lossy(&input[input.len() - (MAX_OUTPUT_SIZE - head_limit)..]);
         assert!(rendered.starts_with(expected_head.as_ref()));
         assert!(rendered.ends_with(expected_tail.as_ref()));
         let stdout = capture.render_stream(OutputStream::Stdout);
@@ -377,7 +406,7 @@ mod tests {
 
     #[test]
     fn bounded_capture_preserves_stream_identity_under_one_global_limit() {
-        let mut capture = BoundedCapture::new();
+        let mut capture = BoundedCapture::new(MAX_OUTPUT_SIZE);
         let stdout = vec![b'o'; 70 * 1024];
         let stderr = vec![b'e'; 70 * 1024];
         capture.push(OutputStream::Stdout, &stdout);
@@ -398,7 +427,7 @@ mod tests {
 
     #[test]
     fn bounded_capture_at_exact_limit_is_not_marked_truncated() {
-        let mut capture = BoundedCapture::new();
+        let mut capture = BoundedCapture::new(MAX_OUTPUT_SIZE);
         let input = vec![b'x'; MAX_OUTPUT_SIZE];
         capture.push(OutputStream::Stdout, &input);
 
@@ -417,7 +446,7 @@ mod tests {
 
     #[test]
     fn bounded_capture_replaces_invalid_utf8_per_stream() {
-        let mut capture = BoundedCapture::new();
+        let mut capture = BoundedCapture::new(MAX_OUTPUT_SIZE);
         capture.push(OutputStream::Stdout, &[0xff, b'o', 0xfe]);
         capture.push(OutputStream::Stderr, &[0x80, b'e']);
 
@@ -450,7 +479,9 @@ mod tests {
         );
         let started = std::time::Instant::now();
 
-        let output = read_process_output(&mut child, 50, None).await.unwrap();
+        let output = read_process_output(&mut child, 50, MAX_OUTPUT_SIZE, None)
+            .await
+            .unwrap();
 
         assert!(output.timed_out);
         assert!(started.elapsed() < std::time::Duration::from_millis(250));
@@ -470,8 +501,9 @@ mod tests {
             "exec 1>&- 2>&-; \
              (touch descendant-started; sleep 2; touch cancellation-leak) & wait",
         );
-        let capture =
-            tokio::spawn(async move { read_process_output(&mut child, 5_000, None).await });
+        let capture = tokio::spawn(async move {
+            read_process_output(&mut child, 5_000, MAX_OUTPUT_SIZE, None).await
+        });
 
         tokio::time::timeout(std::time::Duration::from_secs(1), async {
             while !directory.path().join("descendant-started").exists() {
@@ -499,7 +531,9 @@ mod tests {
             "(touch descendant-started; exec 1>&- 2>&-; sleep 0.80; touch normal-exit-leak) & exit 0",
         );
 
-        let output = read_process_output(&mut child, 5_000, None).await.unwrap();
+        let output = read_process_output(&mut child, 5_000, MAX_OUTPUT_SIZE, None)
+            .await
+            .unwrap();
         assert_eq!(output.status.unwrap().code(), Some(0));
         tokio::time::sleep(std::time::Duration::from_millis(1_000)).await;
         assert!(

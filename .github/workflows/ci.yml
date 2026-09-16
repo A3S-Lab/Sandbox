@@ -34,10 +34,15 @@ jobs:
           fi
       - run: cargo fmt --all -- --check
       - run: cargo clippy --all-targets -- -D warnings
+      - name: Build bins for mediation relay tests
+        run: cargo build --bins
       - name: Run tests
         if: runner.os != 'Windows'
         run: cargo test --all-targets
       - name: Run Windows tests with bounded diagnostics
         if: runner.os == 'Windows'
-        timeout-minutes: 10
+        timeout-minutes: 45
+        env:
+          # AppContainer exec is ~10s/command on GHA; keep soak bounded.
+          GATE7_SOAK_ROUNDS: "8"
         run: cargo test --all-targets -- --test-threads=1 --nocapture

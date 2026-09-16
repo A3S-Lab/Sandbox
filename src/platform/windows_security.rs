@@ -1,12 +1,13 @@
 //! AppContainer identity and temporary Windows filesystem authorization.
 
 use super::windows::{last_windows_error, wide_null, win32_process_path};
-use crate::policy::SandboxPolicy;
+use crate::policy::EnforcedPolicy;
 use anyhow::{bail, Context, Result};
 use sha2::{Digest, Sha256};
 use std::collections::HashSet;
 use std::ffi::{c_void, OsStr};
 use std::mem::size_of;
+use std::os::windows::io::{AsRawHandle, FromRawHandle, OwnedHandle};
 use std::path::{Path, PathBuf};
 use std::ptr::{null, null_mut};
 use std::sync::OnceLock;
@@ -30,7 +31,7 @@ use windows_sys::Win32::Storage::FileSystem::{
 
 const HRESULT_ALREADY_EXISTS: u32 = 0x8007_00b7;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(super) struct SidBuffer {
     words: Vec<u32>,
 }
@@ -140,7 +141,7 @@ pub(super) struct ExecutionAcls<'a> {
 }
 
 impl<'a> ExecutionAcls<'a> {
-    pub(super) fn apply(policy: &SandboxPolicy, sid: &'a SidBuffer) -> Result<Self> {
+    pub(super) fn apply(policy: &EnforcedPolicy, sid: &'a SidBuffer) -> Result<Self> {
         let mut guard = Self {
             sid,
             paths: Vec::new(),
@@ -170,6 +171,28 @@ impl<'a> ExecutionAcls<'a> {
         // propagates inheritable ACEs through those host trees, which is both
         // expensive and too broad. System/package tools retain their existing
         // AppContainer grants; workspace-local tools are covered above.
+        // Typed policy mounts (Gate 3 RO/RW knowledge trees) are granted
+        // explicitly — they sit outside workspace/scratch and otherwise stay
+        // invisible to the AppContainer.
+        for path in &policy.mount_roots {
+            if !path.exists() {
+                continue;
+            }
+            guard.grant_ancestor_traversal(path)?;
+            if policy.allow_write.iter().any(|writable| writable == path) {
+                guard.modify(
+                    path,
+                    FILE_GENERIC_READ
+                        | FILE_GENERIC_WRITE
+                        | FILE_GENERIC_EXECUTE
+                        | DELETE
+                        | FILE_DELETE_CHILD,
+                    GRANT_ACCESS,
+                )?;
+            } else {
+                guard.modify(path, FILE_GENERIC_READ | FILE_GENERIC_EXECUTE, GRANT_ACCESS)?;
+            }
+        }
         for path in &policy.deny_read {
             if !path.exists()
                 || !policy
@@ -509,4 +532,257 @@ fn query_path_dacl(path: &Path, wide: &[u16]) -> Result<(*mut ACL, LocalAllocati
         );
     }
     Ok((acl, LocalAllocation(descriptor)))
+}
+
+/// Create a connected AppContainer mediation pipe pair.
+///
+/// AppContainer guests on GHA cannot `CreateFile`/`NamedPipeClientStream.Connect`
+/// against a host-created pipe even with package SID + `AC` + Low IL DACLs
+/// (persistent `ERROR_ACCESS_DENIED`). The fail-closed bridge therefore:
+/// 1. Creates the server pipe under the host's default SD,
+/// 2. Opens the client end in the host (succeeds under the creator SD),
+/// 3. Marks the client handle inheritable and locks the pipe name down to the
+///    AppContainer SID + Low IL so subsequent name opens stay denied,
+/// 4. Passes the connected client handle into the guest via the handle list.
+///
+/// Capability claim still requires the live AppContainer guest tunnel proof.
+pub(super) fn create_appcontainer_mediation_pipe(
+    pipe_name: &str,
+    sid: &SidBuffer,
+) -> Result<(OwnedHandle, OwnedHandle)> {
+    use windows_sys::Win32::Foundation::{
+        SetHandleInformation, GENERIC_READ, GENERIC_WRITE, HANDLE_FLAG_INHERIT,
+        INVALID_HANDLE_VALUE,
+    };
+    use windows_sys::Win32::Storage::FileSystem::{
+        CreateFileW, FILE_FLAG_OVERLAPPED, OPEN_EXISTING, PIPE_ACCESS_DUPLEX,
+    };
+    use windows_sys::Win32::System::Pipes::{
+        CreateNamedPipeW, PIPE_READMODE_BYTE, PIPE_REJECT_REMOTE_CLIENTS, PIPE_TYPE_BYTE,
+        PIPE_UNLIMITED_INSTANCES, PIPE_WAIT,
+    };
+
+    if !pipe_name.starts_with(r"\\.\pipe\") {
+        bail!("AppContainer named pipe requires a \\\\.\\pipe\\... path");
+    }
+
+    let wide = wide_null(OsStr::new(pipe_name));
+    // Create under the host default SD so the same-process client open succeeds.
+    let server = unsafe {
+        CreateNamedPipeW(
+            wide.as_ptr(),
+            PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
+            PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT | PIPE_REJECT_REMOTE_CLIENTS,
+            PIPE_UNLIMITED_INSTANCES,
+            64 * 1024,
+            64 * 1024,
+            0,
+            null(),
+        )
+    };
+    if server.is_null() || server == INVALID_HANDLE_VALUE {
+        bail!(
+            "CreateNamedPipeW failed for {pipe_name}: {}",
+            std::io::Error::last_os_error()
+        );
+    }
+    let server = unsafe { OwnedHandle::from_raw_handle(server) };
+
+    let client = unsafe {
+        CreateFileW(
+            wide.as_ptr(),
+            GENERIC_READ | GENERIC_WRITE,
+            0,
+            null(),
+            OPEN_EXISTING,
+            FILE_FLAG_OVERLAPPED,
+            null_mut(),
+        )
+    };
+    if client.is_null() || client == INVALID_HANDLE_VALUE {
+        bail!(
+            "host CreateFileW for mediation pipe client failed: {}",
+            std::io::Error::last_os_error()
+        );
+    }
+    let client = unsafe { OwnedHandle::from_raw_handle(client) };
+    let ok = unsafe {
+        SetHandleInformation(
+            client.as_raw_handle(),
+            HANDLE_FLAG_INHERIT,
+            HANDLE_FLAG_INHERIT,
+        )
+    };
+    if ok == 0 {
+        bail!(
+            "SetHandleInformation(INHERIT) failed for mediation pipe client: {}",
+            std::io::Error::last_os_error()
+        );
+    }
+
+    // Best-effort name lockdown. SetKernelObjectSecurity(LABEL) is denied on
+    // some GHA images without SeRelabelPrivilege; the guest path does not
+    // name-open — it inherits `client`. Default creator SD already denies
+    // unrelated callers.
+    let _ = lock_down_appcontainer_pipe_handle(server.as_raw_handle(), sid);
+    Ok((server, client))
+}
+
+/// Create a duplex overlapped named pipe whose DACL grants AppContainer clients.
+///
+/// Prefer [`create_appcontainer_mediation_pipe`] for the live guest bridge; this
+/// helper remains for accept-loop factories and host-deny unit coverage.
+#[cfg_attr(not(test), allow(dead_code))]
+pub(super) fn create_appcontainer_named_pipe(
+    pipe_name: &str,
+    sid: &SidBuffer,
+) -> Result<OwnedHandle> {
+    use windows_sys::Win32::Foundation::INVALID_HANDLE_VALUE;
+    use windows_sys::Win32::Security::SECURITY_ATTRIBUTES;
+    use windows_sys::Win32::Storage::FileSystem::{FILE_FLAG_OVERLAPPED, PIPE_ACCESS_DUPLEX};
+    use windows_sys::Win32::System::Pipes::{
+        CreateNamedPipeW, PIPE_READMODE_BYTE, PIPE_REJECT_REMOTE_CLIENTS, PIPE_TYPE_BYTE,
+        PIPE_UNLIMITED_INSTANCES, PIPE_WAIT,
+    };
+
+    if !pipe_name.starts_with(r"\\.\pipe\") {
+        bail!("AppContainer named pipe requires a \\\\.\\pipe\\... path");
+    }
+
+    let descriptor = appcontainer_pipe_security_descriptor(sid)?;
+    let _descriptor_guard = LocalAllocation(descriptor);
+    let attributes = SECURITY_ATTRIBUTES {
+        nLength: u32::try_from(size_of::<SECURITY_ATTRIBUTES>())
+            .context("SECURITY_ATTRIBUTES size overflowed")?,
+        lpSecurityDescriptor: descriptor,
+        bInheritHandle: 0,
+    };
+    let wide = wide_null(OsStr::new(pipe_name));
+    let handle = unsafe {
+        CreateNamedPipeW(
+            wide.as_ptr(),
+            PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
+            PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT | PIPE_REJECT_REMOTE_CLIENTS,
+            PIPE_UNLIMITED_INSTANCES,
+            64 * 1024,
+            64 * 1024,
+            0,
+            &attributes,
+        )
+    };
+    if handle.is_null() || handle == INVALID_HANDLE_VALUE {
+        bail!(
+            "CreateNamedPipeW failed for {pipe_name}: {}",
+            std::io::Error::last_os_error()
+        );
+    }
+    Ok(unsafe { OwnedHandle::from_raw_handle(handle) })
+}
+
+fn appcontainer_pipe_security_descriptor(sid: &SidBuffer) -> Result<*mut c_void> {
+    use windows_sys::Win32::Security::Authorization::{
+        ConvertSidToStringSidW, ConvertStringSecurityDescriptorToSecurityDescriptorW,
+    };
+
+    let mut sid_string: *mut u16 = null_mut();
+    let ok = unsafe { ConvertSidToStringSidW(sid.as_ptr(), &mut sid_string) };
+    if ok == 0 || sid_string.is_null() {
+        bail!(
+            "ConvertSidToStringSidW failed: {}",
+            std::io::Error::last_os_error()
+        );
+    }
+    let sid_text = unsafe {
+        let mut len = 0usize;
+        while *sid_string.add(len) != 0 {
+            len += 1;
+        }
+        String::from_utf16_lossy(std::slice::from_raw_parts(sid_string, len))
+    };
+    unsafe {
+        LocalFree(sid_string.cast());
+    }
+
+    // Package SID + All Application Packages + Low mandatory label.
+    let sddl = format!("D:(A;;GA;;;{sid_text})(A;;GA;;;AC)S:(ML;;NW;;;LW)");
+    let mut descriptor: *mut c_void = null_mut();
+    let ok = unsafe {
+        ConvertStringSecurityDescriptorToSecurityDescriptorW(
+            wide_null(OsStr::new(&sddl)).as_ptr(),
+            1, // SDDL_REVISION_1
+            &mut descriptor,
+            null_mut(),
+        )
+    };
+    if ok == 0 || descriptor.is_null() {
+        bail!(
+            "ConvertStringSecurityDescriptorToSecurityDescriptorW failed: {}",
+            std::io::Error::last_os_error()
+        );
+    }
+    Ok(descriptor)
+}
+
+fn lock_down_appcontainer_pipe_handle(handle: *mut c_void, sid: &SidBuffer) -> Result<()> {
+    use windows_sys::Win32::Security::{
+        SetKernelObjectSecurity, DACL_SECURITY_INFORMATION, LABEL_SECURITY_INFORMATION,
+    };
+
+    let descriptor = appcontainer_pipe_security_descriptor(sid)?;
+    let _guard = LocalAllocation(descriptor);
+    let ok = unsafe {
+        SetKernelObjectSecurity(
+            handle,
+            DACL_SECURITY_INFORMATION | LABEL_SECURITY_INFORMATION,
+            descriptor,
+        )
+    };
+    if ok == 0 {
+        bail!(
+            "SetKernelObjectSecurity failed locking mediation pipe: {}",
+            std::io::Error::last_os_error()
+        );
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::os::windows::io::AsRawHandle;
+
+    #[test]
+    fn appcontainer_named_pipe_dacl_denies_host_client_open() {
+        use windows_sys::Win32::Foundation::{
+            GetLastError, GENERIC_READ, GENERIC_WRITE, INVALID_HANDLE_VALUE,
+        };
+        use windows_sys::Win32::Storage::FileSystem::{CreateFileW, OPEN_EXISTING};
+
+        let profile = AppContainerProfile::create().expect("AppContainer profile");
+        let pipe_name = format!(r"\\.\pipe\a3s-sandbox-acl-{}", std::process::id());
+        let server = create_appcontainer_named_pipe(&pipe_name, &profile.sid)
+            .expect("create ACL'd named pipe");
+        assert!(!server.as_raw_handle().is_null());
+
+        // Host process is not the AppContainer SID, so a fresh client open must fail.
+        let wide = wide_null(OsStr::new(&pipe_name));
+        let client = unsafe {
+            CreateFileW(
+                wide.as_ptr(),
+                GENERIC_READ | GENERIC_WRITE,
+                0,
+                null(),
+                OPEN_EXISTING,
+                0,
+                null_mut(),
+            )
+        };
+        assert!(
+            client == INVALID_HANDLE_VALUE,
+            "host client open should be denied by AppContainer-only DACL"
+        );
+        let err = unsafe { GetLastError() };
+        assert_eq!(err, 5, "expected ERROR_ACCESS_DENIED (5), got {err}");
+        drop(server);
+    }
 }

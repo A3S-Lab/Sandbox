@@ -1,7 +1,8 @@
 //! Linux namespace, mount, and seccomp backend.
 
 use crate::policy::{
-    path_ancestors, requires_directory_placeholder, resolve_executable, SandboxPolicy,
+    path_ancestors, requires_directory_placeholder, resolve_executable, EnforcedPolicy,
+    ResolvedResourceBudget,
 };
 use crate::process::run_tokio_command;
 use crate::{CommandOutput, CommandRequest};
@@ -35,28 +36,44 @@ impl PlatformSandbox {
 
     pub(crate) async fn execute(
         &self,
-        policy: &SandboxPolicy,
+        policy: &EnforcedPolicy,
         request: CommandRequest,
     ) -> Result<CommandOutput> {
         let _pins = WorkspacePins::acquire(policy)?;
-        let seccomp = write_seccomp_filter(&policy.scratch)?;
+        let budget = ResolvedResourceBudget::resolve(&policy.resources, request.timeout_ms)?;
+        budget.validate_for_backend(crate::policy::BackendCapabilities::native_gate2())?;
+        let allow_network_sockets = policy.mediator_unix_path.is_some();
+        let seccomp = write_seccomp_filter(&policy.scratch, allow_network_sockets)?;
         let mut command = Command::new(&self.bwrap);
         configure_base_arguments(&mut command, policy)?;
+        if allow_network_sockets {
+            // Guest netns: only loopback. Host CONNECT mediator is reached via
+            // the Unix socket under scratch + in-guest TCP→Unix relay.
+            command.arg("--unshare-net");
+        }
         configure_environment(&mut command, policy, request.env.as_deref())?;
         configure_seccomp_fd(&mut command, &seccomp)?;
+        let guest_command = if let Some(sock) = &policy.mediator_unix_path {
+            let relay_bin = crate::stage_relay_into_scratch(&policy.scratch)
+                .context("failed to stage guest CONNECT relay into scratch")?;
+            crate::wrap_command_with_guest_relay(&relay_bin, sock, &request.command)
+                .context("failed to wrap guest command with CONNECT relay")?
+        } else {
+            request.command.clone()
+        };
         command
             .arg("--")
             .arg(&self.shell)
             .arg("-c")
-            .arg(&request.command)
+            .arg(&guest_command)
             .current_dir(&policy.workspace)
             .env_clear();
 
-        run_tokio_command(command, request, "Linux native sandbox command").await
+        run_tokio_command(command, request, &budget, "Linux native sandbox command").await
     }
 }
 
-fn configure_base_arguments(command: &mut Command, policy: &SandboxPolicy) -> Result<()> {
+fn configure_base_arguments(command: &mut Command, policy: &EnforcedPolicy) -> Result<()> {
     command.args([
         "--die-with-parent",
         "--new-session",
@@ -97,6 +114,20 @@ fn configure_base_arguments(command: &mut Command, policy: &SandboxPolicy) -> Re
     }
     for writable in &policy.allow_write {
         ensure_mount_destination(command, writable);
+        if policy.session_write == crate::policy::SessionWriteMode::Ephemeral
+            && writable == &policy.scratch
+        {
+            if policy.mediator_unix_path.is_some() {
+                // Mediation needs a host↔guest Unix socket under scratch; tmpfs
+                // would hide the host-bound socket and the staged relay binary.
+                command.arg("--bind").arg(writable).arg(writable);
+            } else {
+                // Ephemeral scratch: tmpfs replaces the host bind so guest writes
+                // do not persist on the host after the sandbox exits.
+                command.arg("--tmpfs").arg(writable);
+            }
+            continue;
+        }
         command.arg("--bind").arg(writable).arg(writable);
     }
 
@@ -123,6 +154,12 @@ fn configure_base_arguments(command: &mut Command, policy: &SandboxPolicy) -> Re
             continue;
         }
         bind_read_only(command, denied)?;
+    }
+    // Re-bind goal-loop carve-outs as writable after the `.a3s` read-only mask.
+    for exception in &policy.write_exceptions {
+        if exception.exists() {
+            command.arg("--bind").arg(exception).arg(exception);
+        }
     }
 
     command.args(["--proc", "/proc", "--dev", "/dev", "--chdir"]);
@@ -203,7 +240,7 @@ fn bind_read_only(command: &mut Command, path: &Path) -> Result<()> {
 
 fn configure_environment(
     command: &mut Command,
-    policy: &SandboxPolicy,
+    policy: &EnforcedPolicy,
     explicit: Option<&HashMap<String, String>>,
 ) -> Result<()> {
     command.arg("--clearenv");
@@ -241,8 +278,8 @@ struct SockFilter {
     k: u32,
 }
 
-fn write_seccomp_filter(scratch: &Path) -> Result<File> {
-    let instructions = seccomp_instructions()?;
+fn write_seccomp_filter(scratch: &Path, allow_network_sockets: bool) -> Result<File> {
+    let instructions = seccomp_instructions(allow_network_sockets)?;
     let path = scratch.join("network-seccomp.bpf");
     let mut file = OpenOptions::new()
         .create_new(true)
@@ -262,7 +299,7 @@ fn write_seccomp_filter(scratch: &Path) -> Result<File> {
     Ok(file)
 }
 
-fn seccomp_instructions() -> Result<Vec<SockFilter>> {
+fn seccomp_instructions(allow_network_sockets: bool) -> Result<Vec<SockFilter>> {
     const BPF_LD_W_ABS: u16 = 0x20;
     const BPF_ALU_AND_K: u16 = 0x54;
     const BPF_JMP_JEQ_K: u16 = 0x15;
@@ -345,19 +382,18 @@ fn seccomp_instructions() -> Result<Vec<SockFilter>> {
                 k: 0,
             },
         ];
-        let blocked_with_errno = [
-            &[
-                SYS_SOCKET,
-                SYS_SOCKETPAIR,
-                SYS_IO_URING_SETUP,
-                SYS_IO_URING_ENTER,
-                SYS_IO_URING_REGISTER,
-                SYS_UNSHARE,
-                SYS_SETNS,
-            ][..],
-            LINK_SYSCALLS,
-        ]
-        .concat();
+        let mut blocked_with_errno = Vec::new();
+        if !allow_network_sockets {
+            blocked_with_errno.extend([SYS_SOCKET, SYS_SOCKETPAIR]);
+        }
+        blocked_with_errno.extend([
+            SYS_IO_URING_SETUP,
+            SYS_IO_URING_ENTER,
+            SYS_IO_URING_REGISTER,
+            SYS_UNSHARE,
+            SYS_SETNS,
+        ]);
+        blocked_with_errno.extend_from_slice(LINK_SYSCALLS);
         let clone3_jump = u8::try_from(blocked_with_errno.len() + 6)
             .context("native sandbox clone3 seccomp jump offset overflowed")?;
         instructions.push(SockFilter {
@@ -442,7 +478,7 @@ struct WorkspacePins {
 }
 
 impl WorkspacePins {
-    fn acquire(policy: &SandboxPolicy) -> Result<Self> {
+    fn acquire(policy: &EnforcedPolicy) -> Result<Self> {
         let mut guard = Self { paths: Vec::new() };
         for path in &policy.deny_write {
             if !path.starts_with(&policy.workspace) {
@@ -587,7 +623,7 @@ mod tests {
 
     #[test]
     fn seccomp_filter_blocks_sockets_and_namespace_reentry() {
-        let filter = seccomp_instructions().unwrap();
+        let filter = seccomp_instructions(false).unwrap();
         #[cfg(target_arch = "x86_64")]
         let (arch, socket, socketpair, clone, unshare, setns) = (0xc000_003e, 41, 53, 56, 272, 308);
         #[cfg(target_arch = "aarch64")]
@@ -617,30 +653,321 @@ mod tests {
     }
 
     #[test]
+    fn seccomp_mediation_mode_allows_sockets_but_blocks_namespace_escape() {
+        let filter = seccomp_instructions(true).unwrap();
+        #[cfg(target_arch = "x86_64")]
+        let (arch, socket, socketpair, unshare, setns) = (0xc000_003e, 41, 53, 272, 308);
+        #[cfg(target_arch = "aarch64")]
+        let (arch, socket, socketpair, unshare, setns) = (0xc000_00b7, 198, 199, 97, 268);
+
+        let allow = 0x7fff_0000;
+        let permission_denied = 0x0005_0000 | u32::try_from(libc::EPERM).unwrap();
+        assert_eq!(evaluate_filter(&filter, arch, socket, 0), allow);
+        assert_eq!(evaluate_filter(&filter, arch, socketpair, 0), allow);
+        assert_eq!(
+            evaluate_filter(&filter, arch, unshare, 0),
+            permission_denied
+        );
+        assert_eq!(evaluate_filter(&filter, arch, setns, 0), permission_denied);
+    }
+
+    #[test]
     fn seccomp_filter_file_is_rewound_for_bubblewrap() {
         let scratch = tempfile::tempdir().unwrap();
-        let mut filter = write_seccomp_filter(scratch.path()).unwrap();
+        let mut filter = write_seccomp_filter(scratch.path(), false).unwrap();
         assert_eq!(filter.stream_position().unwrap(), 0);
         assert_eq!(
             filter.metadata().unwrap().len(),
             u64::try_from(
-                seccomp_instructions().unwrap().len() * std::mem::size_of::<SockFilter>(),
+                seccomp_instructions(false).unwrap().len() * std::mem::size_of::<SockFilter>(),
             )
             .unwrap()
         );
     }
 
     #[test]
-    fn workspace_pins_remove_only_the_sentinel_they_created() {
+    fn ephemeral_scratch_is_mounted_as_tmpfs_not_host_bind() {
         let workspace = tempfile::tempdir().unwrap();
         let scratch = tempfile::tempdir().unwrap();
-        let policy = SandboxPolicy::for_execution(workspace.path(), scratch.path()).unwrap();
-        let protected = workspace.path().join(".git");
-        assert!(!protected.exists());
-        {
-            let _pins = WorkspacePins::acquire(&policy).unwrap();
-            assert!(protected.is_dir());
+        let mut document = crate::policy::SandboxPolicy::a3s_bash_baseline();
+        document.filesystem.session_write = crate::policy::SessionWriteMode::Ephemeral;
+        let policy = EnforcedPolicy::compile(
+            &document,
+            workspace.path(),
+            scratch.path(),
+            crate::policy::BackendCapabilities::native_gate2(),
+        )
+        .unwrap();
+        let mut command =
+            Command::new(resolve_executable("/usr/bin/bwrap", workspace.path()).unwrap());
+        configure_base_arguments(&mut command, &policy).unwrap();
+        let args: Vec<String> = command
+            .as_std()
+            .get_args()
+            .map(|arg| arg.to_string_lossy().into_owned())
+            .collect();
+        let scratch = policy.scratch.to_string_lossy().into_owned();
+        assert!(
+            args.windows(2)
+                .any(|pair| pair[0] == "--tmpfs" && pair[1] == scratch),
+            "ephemeral scratch must use --tmpfs; args={args:?}"
+        );
+        assert!(
+            !args
+                .windows(3)
+                .any(|pair| { pair[0] == "--bind" && pair[1] == scratch && pair[2] == scratch }),
+            "ephemeral scratch must not host-bind; args={args:?}"
+        );
+    }
+
+    #[test]
+    fn ephemeral_scratch_with_mediation_keeps_host_bind_for_socket() {
+        let workspace = tempfile::tempdir().unwrap();
+        let scratch = tempfile::tempdir().unwrap();
+        let mut document = crate::policy::SandboxPolicy::a3s_bash_baseline();
+        document.filesystem.session_write = crate::policy::SessionWriteMode::Ephemeral;
+        let mut policy = EnforcedPolicy::compile(
+            &document,
+            workspace.path(),
+            scratch.path(),
+            crate::policy::BackendCapabilities::native_gate2(),
+        )
+        .unwrap();
+        policy.mediator_unix_path = Some(scratch.path().join("mediator.sock"));
+        let mut command =
+            Command::new(resolve_executable("/usr/bin/bwrap", workspace.path()).unwrap());
+        configure_base_arguments(&mut command, &policy).unwrap();
+        let args: Vec<String> = command
+            .as_std()
+            .get_args()
+            .map(|arg| arg.to_string_lossy().into_owned())
+            .collect();
+        let scratch = policy.scratch.to_string_lossy().into_owned();
+        assert!(
+            args.windows(3)
+                .any(|pair| pair[0] == "--bind" && pair[1] == scratch && pair[2] == scratch),
+            "mediation requires host-bound scratch; args={args:?}"
+        );
+        assert!(
+            !args
+                .windows(2)
+                .any(|pair| pair[0] == "--tmpfs" && pair[1] == scratch),
+            "mediation must not hide scratch behind tmpfs; args={args:?}"
+        );
+    }
+
+    #[test]
+    fn mediation_wire_adds_unshare_net_when_unix_mediator_set() {
+        let workspace = tempfile::tempdir().unwrap();
+        let scratch = tempfile::tempdir().unwrap();
+        let mut policy = EnforcedPolicy::for_execution(workspace.path(), scratch.path()).unwrap();
+        policy.mediator_unix_path = Some(scratch.path().join("mediator.sock"));
+        policy.mediator_port = Some(crate::GUEST_HTTP_CONNECT_RELAY_PORT);
+        let mut command =
+            Command::new(resolve_executable("/usr/bin/bwrap", workspace.path()).unwrap());
+        configure_base_arguments(&mut command, &policy).unwrap();
+        if policy.mediator_unix_path.is_some() {
+            command.arg("--unshare-net");
         }
-        assert!(!protected.exists());
+        let args: Vec<String> = command
+            .as_std()
+            .get_args()
+            .map(|arg| arg.to_string_lossy().into_owned())
+            .collect();
+        assert!(
+            args.iter().any(|arg| arg == "--unshare-net"),
+            "Linux mediation wire must unshare net; args={args:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn linux_bridge_wire_tunnels_allowed_connect_via_unix_mediator() {
+        use crate::network::ConnectMediator;
+        use crate::policy::NetworkAllowRule;
+        use tokio::io::{AsyncReadExt, AsyncWriteExt};
+        use tokio::net::TcpListener;
+        use tokio::sync::Mutex;
+
+        static RELAY_ENV_LOCK: Mutex<()> = Mutex::const_new(());
+        let _guard = RELAY_ENV_LOCK.lock().await;
+
+        let workspace = tempfile::tempdir().unwrap();
+        let scratch = tempfile::tempdir().unwrap();
+        let sock = scratch.path().join("mediator.sock");
+
+        let upstream = TcpListener::bind(std::net::SocketAddr::from(([127, 0, 0, 1], 0)))
+            .await
+            .unwrap();
+        let upstream_port = upstream.local_addr().unwrap().port();
+        let upstream_task = tokio::spawn(async move {
+            let (mut stream, _) = upstream.accept().await.unwrap();
+            let mut buf = [0u8; 4];
+            stream.read_exact(&mut buf).await.unwrap();
+            assert_eq!(&buf, b"ping");
+            stream.write_all(b"pong").await.unwrap();
+        });
+
+        let mut document = crate::policy::SandboxPolicy::a3s_bash_baseline();
+        document.features.mediated_network = true;
+        document.network.allow.push(NetworkAllowRule {
+            host: "127.0.0.1".into(),
+            port: Some(upstream_port),
+            path_prefix: None,
+        });
+        // Capability claim is still off; arm the wire fields directly to prove
+        // the OS bridge path before flipping BackendCapabilities::mediated_http.
+        let mut policy = EnforcedPolicy::compile(
+            &crate::policy::SandboxPolicy::a3s_bash_baseline(),
+            workspace.path(),
+            scratch.path(),
+            crate::policy::BackendCapabilities::native_gate2(),
+        )
+        .unwrap();
+        let mediator = ConnectMediator::bind_unix(document, &sock)
+            .await
+            .expect("unix CONNECT mediator");
+        policy.mediator_unix_path = Some(sock.clone());
+        policy.mediator_port = Some(crate::GUEST_HTTP_CONNECT_RELAY_PORT);
+
+        let test_exe = std::env::current_exe().expect("test exe");
+        let relay_bin = test_exe
+            .parent()
+            .and_then(|p| p.parent())
+            .map(|debug| debug.join("a3s-sandbox-relay"))
+            .expect("resolve target/debug");
+        assert!(
+            relay_bin.is_file(),
+            "expected relay at {} (run cargo test --bins first if missing)",
+            relay_bin.display()
+        );
+        std::env::set_var("A3S_SANDBOX_RELAY", &relay_bin);
+
+        let sandbox = PlatformSandbox::new(workspace.path()).unwrap();
+        let probe = workspace.path().join("connect_probe.py");
+        std::fs::write(
+            &probe,
+            format!(
+                "import socket\n\
+s = socket.create_connection(('127.0.0.1', {port}))\n\
+s.sendall(b'CONNECT 127.0.0.1:{up} HTTP/1.1\\r\\nHost: 127.0.0.1:{up}\\r\\n\\r\\n')\n\
+hdr = b''\n\
+while b'\\r\\n\\r\\n' not in hdr:\n\
+\tchunk = s.recv(1)\n\
+\tassert chunk, 'closed'\n\
+\thdr += chunk\n\
+assert hdr.startswith(b'HTTP/1.1 200'), hdr\n\
+s.sendall(b'ping')\n\
+print(s.recv(4).decode())\n",
+                port = crate::GUEST_HTTP_CONNECT_RELAY_PORT,
+                up = upstream_port
+            ),
+        )
+        .unwrap();
+        let command = format!("python3 {}", probe.display());
+        let output = sandbox
+            .execute(
+                &policy,
+                crate::CommandRequest {
+                    command,
+                    timeout_ms: 30_000,
+                    output_observer: None,
+                    env: None,
+                },
+            )
+            .await
+            .expect("linux bridge execute");
+        std::env::remove_var("A3S_SANDBOX_RELAY");
+        assert_eq!(output.exit_code, 0, "stderr={}", output.stderr);
+        assert_eq!(output.stdout.trim(), "pong");
+        upstream_task.await.unwrap();
+        mediator.shutdown().await;
+    }
+
+    #[tokio::test]
+    async fn linux_bridge_wire_denies_forbidden_connect_and_raw_egress() {
+        use crate::network::ConnectMediator;
+        use crate::policy::NetworkAllowRule;
+        use tokio::sync::Mutex;
+
+        static RELAY_ENV_LOCK: Mutex<()> = Mutex::const_new(());
+        let _guard = RELAY_ENV_LOCK.lock().await;
+
+        let workspace = tempfile::tempdir().unwrap();
+        let scratch = tempfile::tempdir().unwrap();
+        let sock = scratch.path().join("mediator.sock");
+
+        let mut document = crate::policy::SandboxPolicy::a3s_bash_baseline();
+        document.features.mediated_network = true;
+        document.network.allow.push(NetworkAllowRule {
+            host: "allowed.example".into(),
+            port: Some(443),
+            path_prefix: None,
+        });
+        let mut policy = EnforcedPolicy::compile(
+            &crate::policy::SandboxPolicy::a3s_bash_baseline(),
+            workspace.path(),
+            scratch.path(),
+            crate::policy::BackendCapabilities::native_gate2(),
+        )
+        .unwrap();
+        let mediator = ConnectMediator::bind_unix(document, &sock)
+            .await
+            .expect("unix CONNECT mediator");
+        policy.mediator_unix_path = Some(sock.clone());
+        policy.mediator_port = Some(crate::GUEST_HTTP_CONNECT_RELAY_PORT);
+
+        let test_exe = std::env::current_exe().expect("test exe");
+        let relay_bin = test_exe
+            .parent()
+            .and_then(|p| p.parent())
+            .map(|debug| debug.join("a3s-sandbox-relay"))
+            .expect("resolve target/debug");
+        assert!(relay_bin.is_file(), "missing {}", relay_bin.display());
+        std::env::set_var("A3S_SANDBOX_RELAY", &relay_bin);
+
+        let probe = workspace.path().join("deny_probe.py");
+        std::fs::write(
+            &probe,
+            format!(
+                "import socket\n\
+# Denied CONNECT must return 403 and never open a real tunnel.\n\
+s = socket.create_connection(('127.0.0.1', {port}))\n\
+s.sendall(b'CONNECT 127.0.0.1:9 HTTP/1.1\\r\\nHost: 127.0.0.1:9\\r\\n\\r\\n')\n\
+hdr = b''\n\
+while b'\\r\\n\\r\\n' not in hdr:\n\
+\tchunk = s.recv(1)\n\
+\tassert chunk, 'closed'\n\
+\thdr += chunk\n\
+assert hdr.startswith(b'HTTP/1.1 403'), hdr\n\
+# Raw egress to a public IP must fail inside the guest netns.\n\
+failed = False\n\
+try:\n\
+\tsocket.create_connection(('1.1.1.1', 443), timeout=1.0)\n\
+except OSError:\n\
+\tfailed = True\n\
+assert failed, 'raw egress unexpectedly succeeded'\n\
+print('denied-ok')\n",
+                port = crate::GUEST_HTTP_CONNECT_RELAY_PORT,
+            ),
+        )
+        .unwrap();
+
+        let sandbox = PlatformSandbox::new(workspace.path()).unwrap();
+        let output = sandbox
+            .execute(
+                &policy,
+                crate::CommandRequest {
+                    command: format!("python3 {}", probe.display()),
+                    timeout_ms: 30_000,
+                    output_observer: None,
+                    env: None,
+                },
+            )
+            .await
+            .expect("linux deny bridge execute");
+        std::env::remove_var("A3S_SANDBOX_RELAY");
+        assert_eq!(output.exit_code, 0, "stderr={}", output.stderr);
+        assert_eq!(output.stdout.trim(), "denied-ok");
+        mediator.shutdown().await;
     }
 }

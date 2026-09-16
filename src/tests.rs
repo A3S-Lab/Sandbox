@@ -207,11 +207,40 @@ async fn native_backend_keeps_concurrent_workspaces_isolated() {
     let right_command = "[IO.File]::WriteAllText('right.txt', 'right')";
 
     let (left_output, right_output) = tokio::join!(
-        execute_test_command(&left, left_command),
-        execute_test_command(&right, right_command),
+        left.execute(CommandRequest {
+            command: left_command.to_string(),
+            // AppContainer cold start on GHA is multi-second; concurrent pairs need headroom.
+            timeout_ms: if cfg!(windows) {
+                60_000
+            } else {
+                TEST_COMMAND_TIMEOUT_MS
+            },
+            output_observer: None,
+            env: None,
+        }),
+        right.execute(CommandRequest {
+            command: right_command.to_string(),
+            timeout_ms: if cfg!(windows) {
+                60_000
+            } else {
+                TEST_COMMAND_TIMEOUT_MS
+            },
+            output_observer: None,
+            env: None,
+        }),
     );
-    assert_eq!(left_output.unwrap().exit_code, 0);
-    assert_eq!(right_output.unwrap().exit_code, 0);
+    let left_output = left_output.expect("left execute");
+    let right_output = right_output.expect("right execute");
+    assert_eq!(
+        left_output.exit_code, 0,
+        "left timed_out={} stdout={} stderr={}",
+        left_output.timed_out, left_output.stdout, left_output.stderr
+    );
+    assert_eq!(
+        right_output.exit_code, 0,
+        "right timed_out={} stdout={} stderr={}",
+        right_output.timed_out, right_output.stdout, right_output.stderr
+    );
     assert_eq!(
         std::fs::read_to_string(left_workspace.path().join("left.txt")).unwrap(),
         "left"
@@ -329,6 +358,29 @@ if ([IO.File]::ReadAllText((Join-Path (Get-Location) '.git/config')) -ne 'origin
         assert_eq!(
             std::fs::read_to_string(workspace.path().join(path)).unwrap(),
             expected
+        );
+    }
+
+    #[cfg(not(windows))]
+    {
+        let loops = workspace.path().join(".a3s/loops/goal-carve");
+        std::fs::create_dir_all(&loops).unwrap();
+        // Recreate sandbox so policy picks up the loops carve-out directory.
+        let sandbox = create_test_sandbox(workspace.path());
+        let loop_write = execute_test_command(
+            &sandbox,
+            "printf carved > .a3s/loops/goal-carve/ACCEPTANCE.md",
+        )
+        .await
+        .unwrap();
+        assert_eq!(
+            loop_write.exit_code, 0,
+            "goal-loop carve-out must be writable: {}",
+            loop_write.stderr
+        );
+        assert_eq!(
+            std::fs::read_to_string(loops.join("ACCEPTANCE.md")).unwrap(),
+            "carved"
         );
     }
 
