@@ -49,8 +49,8 @@ Verified by `policy::gate7_release_invariants` plus CI on each OS:
 
 ## Versioning
 
-- [ ] `CHANGELOG.md` entry for the release
-- [ ] Crate version bumped intentionally (immutable crates.io versions)
+- [x] `CHANGELOG.md` entry for the release
+- [x] Crate version bumped intentionally (immutable crates.io versions)
 - [ ] Tag matches the signed artifact commit SHA
 
 ## Explicit non-goals for this release
