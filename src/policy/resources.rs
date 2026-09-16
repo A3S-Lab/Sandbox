@@ -86,8 +86,11 @@ pub(crate) fn apply_unix_rlimits(budget: &ResolvedResourceBudget) -> Result<()> 
     if let Some(max_memory_bytes) = budget.max_memory_bytes {
         #[cfg(target_os = "linux")]
         {
-            // Cast: musl uses c_int; glibc uses __rlimit_resource_t (u32).
-            set_rlimit(libc::RLIMIT_AS as u32, max_memory_bytes)?;
+            // musl: RLIMIT_* is c_int; glibc: __rlimit_resource_t (u32).
+            // Cast is a no-op on glibc; allow keeps -D warnings green there.
+            #[allow(clippy::unnecessary_cast)]
+            let resource = libc::RLIMIT_AS as u32;
+            set_rlimit(resource, max_memory_bytes)?;
         }
         #[cfg(not(target_os = "linux"))]
         {
