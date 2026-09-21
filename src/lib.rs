@@ -44,6 +44,14 @@ const PROBE_MARKER: &str = "a3s-native-sandbox-ready";
 /// Maximum stdout and stderr bytes retained for a command.
 pub const MAX_OUTPUT_SIZE: usize = 100 * 1024;
 
+/// Windows host commands use the same PowerShell 7 executable as the
+/// AppContainer backend. `powershell.exe` is a different binary and is not
+/// part of this contract.
+#[cfg(windows)]
+pub fn windows_host_powershell(workspace: &Path) -> Result<PathBuf> {
+    platform::resolve_powershell(workspace)
+}
+
 /// Native backend selected for the current target.
 pub const NATIVE_SANDBOX_BACKEND: &str = if cfg!(target_os = "macos") {
     "macos-seatbelt"
