@@ -199,7 +199,7 @@ fn finish_execution(
     }
 }
 
-fn resolve_powershell(workspace: &Path) -> Result<PathBuf> {
+pub(crate) fn resolve_powershell(workspace: &Path) -> Result<PathBuf> {
     let program_files = std::env::var_os("ProgramFiles")
         .filter(|path| !path.is_empty())
         .map(PathBuf::from)

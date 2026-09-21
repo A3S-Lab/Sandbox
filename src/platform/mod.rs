@@ -20,4 +20,6 @@ pub(crate) use macos::PlatformSandbox;
 #[cfg(not(any(target_os = "linux", target_os = "macos", windows)))]
 pub(crate) use unsupported::PlatformSandbox;
 #[cfg(windows)]
+pub(crate) use windows::resolve_powershell;
+#[cfg(windows)]
 pub(crate) use windows::PlatformSandbox;
