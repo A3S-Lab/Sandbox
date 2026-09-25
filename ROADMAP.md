@@ -436,6 +436,38 @@ tree.
   guest env/filesystem when `SecretRef`s are used, sentinels never reach
   upstream, and the per-platform capability matrix is updated.
 
+### Gate 9 — Approval-to-policy loop (Gate 10 of `docs/sandbox-optimization-roadmap.md`)
+
+**Status:** In progress — slice 1 complete: typed `NetworkGrant` objects and
+`NativeSandbox::apply_network_grant`, the only sanctioned broadening path.
+Application is digest-pinned (`expected_base_digest` must match the current
+policy; stale lineage refuses and is audited), the widening is minimal
+(exactly one origin rule; a deny-all baseline gains `mediated_network`
+scoped to that origin), regrants are idempotent, and grants inherit the
+existing decision semantics so `localhost` grants never alias `127.0.0.1`
+and port pins hold. Every application records a `GrantApplied` audit event
+carrying the new policy digest. Evidence: `policy::grant` units,
+`policy::grant_integration` (lineage, audit, no-opt-in refusal, subject
+scoping) and the macOS live loop `grant_loop_unblocks_a_denied_command_...`
+(denied command → grant → same command flows).
+
+**Residual:** host-side integration — `a3s-code` surfaces structured grant
+requests from denials, prompts the user, calls `apply_network_grant`, and
+persists the subject + digest lineage into ACL permissions; unix-socket and
+filesystem grant subjects; Windows path (`mediated_http` capability gates it
+today).
+
+**Why:** deny-all defaults without a typed, audited grant path force humans
+to hand-edit policy under pressure; the grant loop converts refusals into
+scoped, replayable approvals and is the product-side precondition for ever
+revisiting Claim B (mediated-as-default).
+
+- ~~Typed network grant + digest-pinned application + audit lineage~~ ✅
+- Host approval surface in `a3s-code` (prompting, ACL persistence).
+  **Exit:** every mediated allow traces to a user grant + digest; no code
+  path broadens without host authorization (monotonicity property tests). ✅
+  crate-side; host-side pending.
+
 ## Target architecture
 
 ```text

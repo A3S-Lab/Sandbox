@@ -31,9 +31,9 @@ pub use policy::{
     normalize_policy_path, policy_digest, sensitive_paths, should_skip_workspace_scan_directory,
     workspace_credential_hardlink_aliases, workspace_hardlink_paths, workspace_sensitive_paths,
     AccessDecision, BackendCapabilities, FeatureFlags, FilesystemMount, FilesystemRules,
-    MediatedHttpRequest, MountMode, NetworkAllowRule, NetworkDefault, NetworkRules, NormalizedPath,
-    PathRule, PolicyUpdateOptions, ResolvedResourceBudget, ResourceLimits, SandboxPolicy,
-    SecretHeaderInjection, SessionWriteMode, SocketRules, POLICY_VERSION,
+    MediatedHttpRequest, MountMode, NetworkAllowRule, NetworkDefault, NetworkGrant, NetworkRules,
+    NormalizedPath, PathRule, PolicyUpdateOptions, ResolvedResourceBudget, ResourceLimits,
+    SandboxPolicy, SecretHeaderInjection, SessionWriteMode, SocketRules, POLICY_VERSION,
     PROTECTED_WORKSPACE_DIRECTORIES, PROTECTED_WORKSPACE_FILES,
 };
 
@@ -253,6 +253,66 @@ impl NativeSandbox {
         }
         self.policy = policy;
         Ok(())
+    }
+
+    /// Apply a host-approved network grant: the only sanctioned broadening
+    /// path (optimization-roadmap Gate 10).
+    ///
+    /// `expected_base_digest` must match the current policy digest, pinning
+    /// the grant to the exact policy the user approved against. On a deny-all
+    /// baseline the grant is also the sanctioned activation of
+    /// `mediated_network`, scoped to exactly one origin. Returns the new
+    /// policy digest; every application (and every stale-digest refusal) is
+    /// auditable.
+    pub fn apply_network_grant(
+        &mut self,
+        grant: policy::NetworkGrant,
+        expected_base_digest: &str,
+    ) -> Result<String> {
+        let base_digest = self.policy_digest();
+        let subject = match grant.port {
+            Some(port) => format!("{}:{port}", grant.host),
+            None => grant.host.clone(),
+        };
+        if base_digest != expected_base_digest {
+            self.audit.record(AuditEvent::from_parts(AuditEventParts {
+                session_id: self.session_id.clone(),
+                command_id: format!("grant-{}", unix_millis()),
+                policy_digest: base_digest.clone(),
+                backend: self.backend().into(),
+                surface: AuditSurface::PolicyCompile,
+                decision: AccessDecision::Deny,
+                reason_code: ReasonCode::PolicyDeny,
+                target_redacted: format!("<network-grant:{subject};stale-digest>"),
+            }));
+            bail!(
+                "network grant for {subject} was approved against digest \
+                 {expected_base_digest}, but the session policy is now {base_digest}; \
+                 re-approve against the current policy"
+            );
+        }
+        let (widened, changed) = policy::apply_network_grant_to_policy(&self.policy, &grant)?;
+        self.replace_policy(
+            widened,
+            PolicyUpdateOptions {
+                allow_broadening: true,
+            },
+        )
+        .context("granted policy must be enforceable on this backend")?;
+        let new_digest = self.policy_digest();
+        if changed {
+            self.audit.record(AuditEvent::from_parts(AuditEventParts {
+                session_id: self.session_id.clone(),
+                command_id: format!("grant-{}", unix_millis()),
+                policy_digest: new_digest.clone(),
+                backend: self.backend().into(),
+                surface: AuditSurface::Network,
+                decision: AccessDecision::Allow,
+                reason_code: ReasonCode::GrantApplied,
+                target_redacted: format!("<network-grant:{subject}>"),
+            }));
+        }
+        Ok(new_digest)
     }
 
     /// Prove that the selected operating-system boundary can start a command.

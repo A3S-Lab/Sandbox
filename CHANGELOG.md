@@ -2,6 +2,15 @@
 
 ### Added
 
+- Gate 10 slice 1 — typed policy grants: `NetworkGrant` and
+  `NativeSandbox::apply_network_grant`, the only sanctioned broadening path.
+  Digest-pinned lineage (stale approvals refuse and are audited), minimal
+  widening (one origin rule; deny-all baselines gain `mediated_network`
+  scoped to the granted origin), idempotent regrants, existing decision
+  aliasing semantics inherited, `ReasonCode::GrantApplied` audit events.
+  macOS live test proves the full loop: denied command → grant → same
+  command flows through mediation.
+
 - Gate 9 slice 1 — Linux `mediated_socks` claimed via the HTTP bridge fence
   family. New `Socks5Mediator::bind_unix` hosts the SOCKS5 mediator on a
   bind-mounted scratch socket; the in-guest relay wrapper starts one

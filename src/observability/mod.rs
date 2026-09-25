@@ -21,6 +21,7 @@ pub enum ReasonCode {
     Timeout,
     CompileOverlayRejected,
     SecretRequiresMediation,
+    GrantApplied,
 }
 
 /// What surface produced the decision.

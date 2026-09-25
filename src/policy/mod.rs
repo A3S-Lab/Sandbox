@@ -35,10 +35,14 @@ mod gate7_fuzz;
 mod gate7_integration;
 #[cfg(test)]
 mod gate7_release_invariants;
+mod grant;
+#[cfg(test)]
+mod grant_integration;
 
 pub use capabilities::BackendCapabilities;
 pub use decide::{decide_network, decide_read, decide_write, AccessDecision};
 pub use digest::policy_digest;
+pub use grant::{apply_network_grant_to_policy, NetworkGrant};
 pub use mediate::{
     decide_mediated_connect, decide_mediated_http, decide_mediated_socks,
     matching_secret_injections, MediatedHttpRequest,
