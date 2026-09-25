@@ -169,17 +169,27 @@ async fn gate2_windows_process_limit_blocks_extra_children() {
 }
 
 #[cfg(not(windows))]
-#[test]
-fn gate2_unix_process_limit_fails_closed_at_policy() {
+#[tokio::test]
+async fn gate2_unix_process_limit_fails_closed_at_policy() {
+    // Gate 11: on Linux the refusal is probe-scoped — hosts with a
+    // delegated cgroup subtree accept and enforce pids.max; every other
+    // unix host refuses at construction. Windows enforces via Job Objects.
     let workspace = tempfile::tempdir().unwrap();
     let mut policy = SandboxPolicy::a3s_bash_baseline();
     policy.resources.max_processes = Some(8);
-    let error = format!(
-        "{:#}",
-        NativeSandbox::with_policy(workspace.path(), policy).unwrap_err()
-    );
-    assert!(
-        error.contains("process limit"),
-        "Unix must fail closed instead of claiming RLIMIT_NPROC tree quotas: {error}"
-    );
+    match NativeSandbox::with_policy(workspace.path(), policy) {
+        Ok(sandbox) => {
+            assert!(
+                sandbox.capabilities().resource_process_limit,
+                "accepting a pids quota requires the capability"
+            );
+        }
+        Err(error) => {
+            let error = format!("{error:#}");
+            assert!(
+                error.contains("process limit"),
+                "hosts without a cgroup fence must fail closed: {error}"
+            );
+        }
+    }
 }

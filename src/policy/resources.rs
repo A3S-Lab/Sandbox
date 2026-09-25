@@ -186,7 +186,10 @@ mod tests {
     #[test]
     fn gate2_capabilities_can_enforce_optional_process_and_memory() {
         let caps = BackendCapabilities::native_gate2();
-        assert_eq!(caps.resource_process_limit, cfg!(windows));
+        assert_eq!(
+            caps.resource_process_limit,
+            cfg!(any(windows, target_os = "linux"))
+        );
         assert_eq!(
             caps.resource_memory_limit,
             cfg!(any(windows, target_os = "linux"))

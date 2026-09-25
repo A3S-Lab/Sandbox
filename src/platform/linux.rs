@@ -116,15 +116,14 @@ impl PlatformSandbox {
     ) -> Result<Option<super::cgroup::CgroupControl>> {
         use std::sync::atomic::{AtomicU64, Ordering};
         static CGROUP_SEQ: AtomicU64 = AtomicU64::new(0);
-        if budget.max_processes.is_none()
-            && budget.max_memory_bytes.is_none()
-            && budget.max_cpu_millicores.is_none()
-        {
+        // Memory rides RLIMIT_AS (no cgroup needed); only pids and CPU
+        // quotas have cgroup v2 as their one honest locus.
+        if budget.max_processes.is_none() && budget.max_cpu_millicores.is_none() {
             return Ok(None);
         }
         let Some(base) = self.delegated_base() else {
             bail!(
-                "process/memory quotas require a delegated cgroup v2 subtree; \
+                "process/cpu quotas require a delegated cgroup v2 subtree; \
                  refusing to run without OS-enforced limits"
             );
         };
@@ -955,7 +954,6 @@ print(s.recv(4).decode())\n",
             )
             .await
             .expect("linux bridge execute");
-        std::env::remove_var("A3S_SANDBOX_RELAY");
         assert_eq!(output.exit_code, 0, "stderr={}", output.stderr);
         assert_eq!(output.stdout.trim(), "pong");
         upstream_task.await.unwrap();
@@ -1044,7 +1042,6 @@ print('denied-ok')\n",
             )
             .await
             .expect("linux deny bridge execute");
-        std::env::remove_var("A3S_SANDBOX_RELAY");
         assert_eq!(output.exit_code, 0, "stderr={}", output.stderr);
         assert_eq!(output.stdout.trim(), "denied-ok");
         mediator.shutdown().await;
@@ -1147,7 +1144,6 @@ print(s.recv(4).decode())\n",
             )
             .await
             .expect("linux socks bridge execute");
-        std::env::remove_var("A3S_SANDBOX_RELAY");
         assert_eq!(output.exit_code, 0, "stderr={}", output.stderr);
         assert_eq!(output.stdout.trim(), "pong");
         upstream_task.await.unwrap();
@@ -1226,7 +1222,6 @@ print('socks-denied-ok')\n",
             )
             .await
             .expect("linux socks bridge deny execute");
-        std::env::remove_var("A3S_SANDBOX_RELAY");
         assert_eq!(output.exit_code, 0, "stderr={}", output.stderr);
         assert_eq!(output.stdout.trim(), "socks-denied-ok");
         mediator.shutdown().await;

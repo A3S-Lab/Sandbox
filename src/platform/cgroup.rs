@@ -110,7 +110,8 @@ impl DelegatedBase {
     pub fn probe() -> Result<Self> {
         let base = CgroupControl::probe_delegated_base()?;
         // Enable the controllers we need top-down before creating children.
-        enable_controllers(&base)?;
+        enable_controllers(&base)
+            .context("no usable delegated cgroup v2 subtree; process quotas fail closed")?;
         Ok(Self { base })
     }
 

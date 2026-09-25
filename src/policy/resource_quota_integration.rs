@@ -58,13 +58,24 @@ fn quota_policy_refuses_at_construction_without_delegation() {
 #[cfg(target_os = "linux")]
 #[tokio::test]
 async fn cgroup_process_quota_bounds_the_process_tree() {
+    // Probe with a baseline sandbox first: on hosts without a delegated
+    // subtree the quota policy itself must refuse at construction, which is
+    // this test's other half.
+    let probe_workspace = tempfile::tempdir().unwrap();
+    let probe = NativeSandbox::new(probe_workspace.path()).unwrap();
+    if !probe.capabilities().resource_process_limit {
+        let workspace = tempfile::tempdir().unwrap();
+        let error = NativeSandbox::with_policy(workspace.path(), quota_policy(Some(8), None))
+            .expect_err("without delegation the quota policy must refuse");
+        assert!(
+            error.to_string().contains("process limit"),
+            "refusal must be a capability failure: {error}"
+        );
+        return;
+    }
     let workspace = tempfile::tempdir().unwrap();
     let sandbox =
         NativeSandbox::with_policy(workspace.path(), quota_policy(Some(8), None)).unwrap();
-    if !sandbox.capabilities().resource_process_limit {
-        eprintln!("skipping: host has no delegated cgroup v2 subtree (fail-closed branch covered)");
-        return;
-    }
     // 64 concurrent children must hit the pids ceiling: forks start failing
     // with EAGAIN well before the tree can reach 64 sleepers.
     let command = "for i in $(seq 1 64); do (sleep 5 &) done; wait 2>/dev/null; echo gate11-done";

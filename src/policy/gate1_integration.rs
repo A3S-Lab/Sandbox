@@ -253,13 +253,20 @@ fn gate1_native_sandbox_rejects_unenforcible_policy() {
     );
     assert!(error.contains("max_call_depth"), "{error}");
 
-    // Unix cannot claim process-tree quotas without cgroup; Windows Job can.
+    // Windows Job Objects can always enforce pids quotas; Linux enforces
+    // them through delegated cgroup v2, so `ensure_policy_enforceable` is
+    // probe-scoped there and must match the sandbox's own capabilities.
     let mut process_policy = SandboxPolicy::a3s_bash_baseline();
     process_policy.resources.max_processes = Some(32);
-    if cfg!(windows) {
+    let can_enforce = sandbox.capabilities().resource_process_limit;
+    if cfg!(windows) || can_enforce {
         sandbox
             .ensure_policy_enforceable(&process_policy)
-            .expect("Windows Job Object can enforce max_processes");
+            .expect("backend claiming pids quotas must accept them");
+        assert!(
+            can_enforce,
+            "non-Windows acceptance requires a probed cgroup fence"
+        );
     } else {
         let error = sandbox
             .ensure_policy_enforceable(&process_policy)
