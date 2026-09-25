@@ -132,6 +132,9 @@ pub struct ResourceLimits {
     pub max_call_depth: Option<u32>,
     pub max_processes: Option<u32>,
     pub max_memory_bytes: Option<u64>,
+    /// CPU ceiling in millicores (1000 = one full core), enforced through
+    /// cgroup v2 `cpu.max` on Linux. Gate 11.
+    pub max_cpu_millicores: Option<u32>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -159,6 +162,7 @@ impl Default for ResourceLimits {
             max_call_depth: None,
             max_processes: None,
             max_memory_bytes: None,
+            max_cpu_millicores: None,
         }
     }
 }
@@ -332,6 +336,9 @@ impl SandboxPolicy {
         }
         if self.resources.max_processes.is_some() && !capabilities.resource_process_limit {
             bail!("process limit requested but backend cannot enforce it; fail closed");
+        }
+        if self.resources.max_cpu_millicores.is_some() && !capabilities.resource_cpu_limit {
+            bail!("cpu limit requested but backend cannot enforce it; fail closed");
         }
         if self.resources.max_call_depth.is_some() {
             bail!("max_call_depth is not enforceable by the OS process boundary; fail closed");

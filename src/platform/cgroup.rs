@@ -68,6 +68,14 @@ impl CgroupControl {
         }
     }
 
+    /// Cap CPU at `millicores`/1000 cores via `cpu.max` with a 100 ms
+    /// period (e.g. 500 millicores → "50000 100000").
+    pub fn set_cpu_millicores(&self, millicores: u32) -> Result<()> {
+        const PERIOD_MICROS: u64 = 100_000;
+        let quota = (millicores as u64) * (PERIOD_MICROS / 1000);
+        write_control(&self.dir, "cpu.max", &format!("{quota} {PERIOD_MICROS}"))
+    }
+
     /// Move `pid` (and, by inheritance, its whole future tree) into this
     /// cgroup.
     pub fn attach(&self, pid: u32) -> Result<()> {
@@ -155,7 +163,10 @@ pub(crate) fn enable_controllers(base: &Path) -> Result<()> {
         wanted.push_str("+pids ");
     }
     if !enabled.contains(&"memory") {
-        wanted.push_str("+memory");
+        wanted.push_str("+memory ");
+    }
+    if !enabled.contains(&"cpu") {
+        wanted.push_str("+cpu");
     }
     let wanted = wanted.trim();
     if wanted.is_empty() {
@@ -207,6 +218,22 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    fn cpu_cap_roundtrips_when_delegated() {
+        let Ok(base) = DelegatedBase::probe() else {
+            return;
+        };
+        let control = base.create("gate11-cpu").expect("create cgroup");
+        control.set_cpu_millicores(500).expect("cpu.max");
+        let read_back = std::fs::read_to_string(control.dir().join("cpu.max")).expect("read back");
+        assert_eq!(
+            read_back.trim(),
+            "50000 100000",
+            "500 millicores of a 100ms period"
+        );
+        control.cleanup();
     }
 
     #[test]

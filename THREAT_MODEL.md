@@ -33,6 +33,7 @@ binary are trusted.
 | resource_output_limit | claimed | claimed | claimed |
 | resource_memory_limit | fail-closed | claimed | claimed |
 | resource_process_limit | fail-closed | claimed | claimed |
+| resource_cpu_limit | fail-closed | claimed | fail-closed |
 
 `resource_process_limit` on Linux rides a runtime cgroup-delegation probe; construction fails closed without one.
 <!-- capability-matrix:end -->

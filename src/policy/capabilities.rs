@@ -17,6 +17,7 @@ pub struct BackendCapabilities {
     pub resource_output_limit: bool,
     pub resource_memory_limit: bool,
     pub resource_process_limit: bool,
+    pub resource_cpu_limit: bool,
 }
 
 impl BackendCapabilities {
@@ -45,6 +46,8 @@ impl BackendCapabilities {
             // Linux claims pids quotas through delegated cgroup v2; the
             // runtime probe at construction fails closed without one.
             resource_process_limit: cfg!(any(windows, target_os = "linux")),
+            // CPU quotas have exactly one honest locus: cgroup v2 cpu.max.
+            resource_cpu_limit: cfg!(target_os = "linux"),
         }
     }
 
@@ -134,6 +137,12 @@ pub fn capability_matrix() -> Vec<CapabilityMatrixRow> {
             macos: false,
             linux: true,
             windows: true,
+        },
+        CapabilityMatrixRow {
+            surface: "resource_cpu_limit",
+            macos: false,
+            linux: true,
+            windows: false,
         },
     ]
 }
@@ -267,6 +276,7 @@ mod tests {
             "resource_output_limit" => caps.resource_output_limit,
             "resource_memory_limit" => caps.resource_memory_limit,
             "resource_process_limit" => caps.resource_process_limit,
+            "resource_cpu_limit" => caps.resource_cpu_limit,
             other => panic!("matrix row {other} has no capability field"),
         };
         for row in capability_matrix() {

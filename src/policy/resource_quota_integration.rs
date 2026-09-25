@@ -15,6 +15,15 @@ fn quota_policy(max_processes: Option<u32>, max_memory_bytes: Option<u64>) -> Sa
     policy
 }
 
+#[test]
+fn zero_cpu_quota_refuses_at_resolve() {
+    let mut policy = quota_policy(None, None);
+    policy.resources.max_cpu_millicores = Some(0);
+    let error = crate::policy::ResolvedResourceBudget::resolve(&policy.resources, 30_000)
+        .expect_err("zero cpu quota must refuse");
+    assert!(error.to_string().contains("max_cpu_millicores"), "{error}");
+}
+
 #[cfg(not(any(windows, target_os = "linux")))]
 #[test]
 fn platforms_without_quota_enforcement_refuse_at_construction() {

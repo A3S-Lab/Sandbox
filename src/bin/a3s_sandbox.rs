@@ -185,6 +185,7 @@ fn print_capabilities_json(report: &CapabilityReport) -> Result<()> {
             "resource_output_limit": caps.resource_output_limit,
             "resource_memory_limit": caps.resource_memory_limit,
             "resource_process_limit": caps.resource_process_limit,
+            "resource_cpu_limit": caps.resource_cpu_limit,
         }
     });
     println!("{payload}");

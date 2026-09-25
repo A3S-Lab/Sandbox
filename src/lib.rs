@@ -247,6 +247,9 @@ impl NativeSandbox {
         if !capabilities.resource_process_limit {
             unavailable.push("resource_process_limit");
         }
+        if !capabilities.resource_cpu_limit {
+            unavailable.push("resource_cpu_limit");
+        }
         CapabilityReport {
             backend: self.backend(),
             capabilities,

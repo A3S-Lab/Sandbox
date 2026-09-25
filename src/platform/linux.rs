@@ -48,6 +48,7 @@ impl PlatformSandbox {
         let mut capabilities = crate::policy::BackendCapabilities::native_gate2();
         if self.cgroup_base.is_none() {
             capabilities.resource_process_limit = false;
+            capabilities.resource_cpu_limit = false;
         }
         capabilities
     }
@@ -114,7 +115,10 @@ impl PlatformSandbox {
     ) -> Result<Option<super::cgroup::CgroupControl>> {
         use std::sync::atomic::{AtomicU64, Ordering};
         static CGROUP_SEQ: AtomicU64 = AtomicU64::new(0);
-        if budget.max_processes.is_none() && budget.max_memory_bytes.is_none() {
+        if budget.max_processes.is_none()
+            && budget.max_memory_bytes.is_none()
+            && budget.max_cpu_millicores.is_none()
+        {
             return Ok(None);
         }
         let Some(base) = &self.cgroup_base else {
@@ -138,6 +142,9 @@ impl PlatformSandbox {
         }
         if let Some(bytes) = budget.max_memory_bytes {
             control.set_memory_max(bytes)?;
+        }
+        if let Some(millicores) = budget.max_cpu_millicores {
+            control.set_cpu_millicores(millicores)?;
         }
         Ok(Some(control))
     }

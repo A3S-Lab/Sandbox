@@ -11,6 +11,7 @@ pub struct ResolvedResourceBudget {
     pub max_output_bytes: usize,
     pub max_processes: Option<u32>,
     pub max_memory_bytes: Option<u64>,
+    pub max_cpu_millicores: Option<u32>,
 }
 
 impl ResolvedResourceBudget {
@@ -35,6 +36,9 @@ impl ResolvedResourceBudget {
         if let Some(0) = policy.max_memory_bytes {
             bail!("policy max_memory_bytes must be greater than zero when set");
         }
+        if let Some(0) = policy.max_cpu_millicores {
+            bail!("policy max_cpu_millicores must be greater than zero when set");
+        }
         if policy.max_call_depth.is_some() {
             bail!(
                 "max_call_depth is not enforceable by the OS process boundary; fail closed \
@@ -47,6 +51,7 @@ impl ResolvedResourceBudget {
             max_output_bytes: policy.max_output_bytes,
             max_processes: policy.max_processes,
             max_memory_bytes: policy.max_memory_bytes,
+            max_cpu_millicores: policy.max_cpu_millicores,
         })
     }
 
@@ -63,6 +68,9 @@ impl ResolvedResourceBudget {
         }
         if self.max_memory_bytes.is_some() && !capabilities.resource_memory_limit {
             bail!("memory limit requested but backend cannot enforce it; fail closed");
+        }
+        if self.max_cpu_millicores.is_some() && !capabilities.resource_cpu_limit {
+            bail!("cpu limit requested but backend cannot enforce it; fail closed");
         }
         Ok(())
     }
