@@ -3,16 +3,17 @@
 Authoritative status board for the enterprise GA objective. Update only from
 live evidence (CI, local collectors, release artifacts, reviewer attestation).
 
-Last engineering update: 2026-09-25 — **`v0.2.0` on `main`** (credential
-containment, Linux mediated SOCKS, typed policy grants); release publish in
-progress — CI on the release commit and Release-page provenance are
-re-verified as part of the publish flow.
+Last engineering update: 2026-09-25 — **`v0.2.0` published**.
+CI green on the release commit `031849a` (windows/macos/ubuntu); GitHub
+Release carries SHA256SUMS, provenance.json, SBOM, EVIDENCE.md, and
+darwin-arm64 binaries. macOS host evidence collector fixed for bash 3.2
+empty-array expansion during this cut.
 
 ## Claim split (do not collapse)
 
 | Claim | Meaning | Status |
 | --- | --- | --- |
-| **A. Deny-all production boundary** | Default A3S Bash profile is fail-closed OS isolation; mediation off | **Shipped for `v0.1.5`; re-cut as `v0.2.0`** — feature release on the same fail-closed default; CI on the release commit re-verified during publish |
+| **A. Deny-all production boundary** | Default A3S Bash profile is fail-closed OS isolation; mediation off | **Shipped: `v0.1.5`, re-cut as `v0.2.0`** — CI green on the release commit, Release page carries provenance |
 | **B. Mediated-network-as-default** | Any profile may turn mediation on by default | **Blocked** on independent review sign-off |
 
 Enterprise GA for this crate means **A is shipped and evidenced**, and **B stays
@@ -35,8 +36,9 @@ explicitly refused** until an independent reviewer signs
 
 ### CI runs
 
-- Tag commit `eec5229`: https://github.com/A3S-Lab/Sandbox/actions/runs/36084293634 (windows/ubuntu/macos success)
-- Tip `5b2e46d`: https://github.com/A3S-Lab/Sandbox/actions/runs/36084473762 (windows/ubuntu/macos success)
+- `v0.2.0` release commit `031849a`: https://github.com/A3S-Lab/Sandbox/actions/runs/36152909937 (windows/ubuntu/macos success)
+- `v0.1.5` tag commit `eec5229`: https://github.com/A3S-Lab/Sandbox/actions/runs/36084293634 (windows/ubuntu/macos success)
+- `v0.1.5` tip `5b2e46d`: https://github.com/A3S-Lab/Sandbox/actions/runs/36084473762 (windows/ubuntu/macos success)
 
 ## Publish path
 
