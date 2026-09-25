@@ -8,6 +8,7 @@ mod capabilities;
 mod decide;
 mod digest;
 mod enforced;
+pub(crate) use enforced::secret_env_name_is_reserved;
 mod mediate;
 mod model;
 mod normalize;
@@ -62,3 +63,5 @@ pub(crate) use enforced::path_ancestors;
 #[cfg(any(target_os = "linux", windows))]
 pub(crate) use enforced::requires_directory_placeholder;
 pub(crate) use enforced::{resolve_executable, EnforcedPolicy};
+#[cfg(test)]
+mod gate8_integration;

@@ -20,6 +20,7 @@ pub enum ReasonCode {
     OutputLimit,
     Timeout,
     CompileOverlayRejected,
+    SecretRequiresMediation,
 }
 
 /// What surface produced the decision.
@@ -30,6 +31,7 @@ pub enum AuditSurface {
     Network,
     Process,
     PolicyCompile,
+    Environment,
 }
 
 /// One attributable sandbox decision. Targets must already be redacted.

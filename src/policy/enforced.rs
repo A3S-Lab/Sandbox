@@ -373,6 +373,81 @@ fn validate_denied_workspace_entries(workspace: &Path, paths: &[PathBuf]) -> Res
     Ok(())
 }
 
+/// Host environment keys composed into every child before explicit entries.
+const SAFE_ENV_KEYS: &[&str] = &[
+    "PATH",
+    "USER",
+    "USERNAME",
+    "LOGNAME",
+    "SHELL",
+    "LANG",
+    "LC_ALL",
+    "LC_CTYPE",
+    "TZ",
+    "TERM",
+    "COLORTERM",
+    "NO_COLOR",
+    "CI",
+    "CARGO_HOME",
+    "RUSTUP_HOME",
+    "RUSTC_WRAPPER",
+    "GOPATH",
+    "GOROOT",
+    "GOMODCACHE",
+    "NVM_DIR",
+    "FNM_DIR",
+    "VOLTA_HOME",
+    "BUN_INSTALL",
+    "DENO_DIR",
+    "PNPM_HOME",
+    "JAVA_HOME",
+    "GRADLE_USER_HOME",
+    "MAVEN_HOME",
+    "SDKROOT",
+    "DEVELOPER_DIR",
+    "PKG_CONFIG_PATH",
+    "LIBRARY_PATH",
+    "CPATH",
+    "CC",
+    "CXX",
+    "AR",
+    "SYSTEMROOT",
+    "SYSTEMDRIVE",
+    "WINDIR",
+    "COMSPEC",
+    "PATHEXT",
+    "PSMODULEPATH",
+    "PROGRAMDATA",
+    "PROGRAMFILES",
+    "PROGRAMFILES(X86)",
+    "PROGRAMW6432",
+    "COMMONPROGRAMFILES",
+    "COMMONPROGRAMFILES(X86)",
+    "COMMONPROGRAMW6432",
+    "PROCESSOR_ARCHITECTURE",
+    "NUMBER_OF_PROCESSORS",
+    "OS",
+    "HOMEDRIVE",
+    "HOMEPATH",
+    "PUBLIC",
+    "ALLUSERSPROFILE",
+];
+
+/// Keys composed child environments force to the private scratch directory.
+const REHOME_ENV_KEYS: &[&str] = &[
+    "HOME",
+    "USERPROFILE",
+    "APPDATA",
+    "LOCALAPPDATA",
+    "TMPDIR",
+    "TMP",
+    "TEMP",
+    "XDG_CACHE_HOME",
+    "XDG_CONFIG_HOME",
+    "XDG_DATA_HOME",
+    "XDG_STATE_HOME",
+];
+
 fn compose_child_env(
     explicit: Option<&HashMap<String, String>>,
     scratch: &Path,
@@ -380,67 +455,8 @@ fn compose_child_env(
     mediator_pipe_name: Option<&str>,
     socks_mediator_port: Option<u16>,
 ) -> Result<BTreeMap<OsString, OsString>> {
-    const SAFE_KEYS: &[&str] = &[
-        "PATH",
-        "USER",
-        "USERNAME",
-        "LOGNAME",
-        "SHELL",
-        "LANG",
-        "LC_ALL",
-        "LC_CTYPE",
-        "TZ",
-        "TERM",
-        "COLORTERM",
-        "NO_COLOR",
-        "CI",
-        "CARGO_HOME",
-        "RUSTUP_HOME",
-        "RUSTC_WRAPPER",
-        "GOPATH",
-        "GOROOT",
-        "GOMODCACHE",
-        "NVM_DIR",
-        "FNM_DIR",
-        "VOLTA_HOME",
-        "BUN_INSTALL",
-        "DENO_DIR",
-        "PNPM_HOME",
-        "JAVA_HOME",
-        "GRADLE_USER_HOME",
-        "MAVEN_HOME",
-        "SDKROOT",
-        "DEVELOPER_DIR",
-        "PKG_CONFIG_PATH",
-        "LIBRARY_PATH",
-        "CPATH",
-        "CC",
-        "CXX",
-        "AR",
-        "SYSTEMROOT",
-        "SYSTEMDRIVE",
-        "WINDIR",
-        "COMSPEC",
-        "PATHEXT",
-        "PSMODULEPATH",
-        "PROGRAMDATA",
-        "PROGRAMFILES",
-        "PROGRAMFILES(X86)",
-        "PROGRAMW6432",
-        "COMMONPROGRAMFILES",
-        "COMMONPROGRAMFILES(X86)",
-        "COMMONPROGRAMW6432",
-        "PROCESSOR_ARCHITECTURE",
-        "NUMBER_OF_PROCESSORS",
-        "OS",
-        "HOMEDRIVE",
-        "HOMEPATH",
-        "PUBLIC",
-        "ALLUSERSPROFILE",
-    ];
-
     let mut environment = BTreeMap::new();
-    for key in SAFE_KEYS {
+    for key in SAFE_ENV_KEYS {
         if let Some(value) = std::env::var_os(key) {
             environment.insert(OsString::from(key), value);
         }
@@ -498,75 +514,84 @@ fn compose_child_env(
     }
 
     let scratch = scratch.as_os_str().to_os_string();
-    for key in [
-        "HOME",
-        "USERPROFILE",
-        "APPDATA",
-        "LOCALAPPDATA",
-        "TMPDIR",
-        "TMP",
-        "TEMP",
-        "XDG_CACHE_HOME",
-        "XDG_CONFIG_HOME",
-        "XDG_DATA_HOME",
-        "XDG_STATE_HOME",
-    ] {
+    for key in REHOME_ENV_KEYS {
         environment.insert(OsString::from(key), scratch.clone());
     }
     Ok(environment)
 }
 
+/// Proxy keys scrubbed from child environments; mediation re-adds its own.
+const PROXY_ENV_KEYS: &[&str] = &[
+    "HTTP_PROXY",
+    "HTTPS_PROXY",
+    "ALL_PROXY",
+    "NO_PROXY",
+    "http_proxy",
+    "https_proxy",
+    "all_proxy",
+    "no_proxy",
+    "FTP_PROXY",
+    "ftp_proxy",
+];
+
 fn scrub_proxy_environment(environment: &mut BTreeMap<OsString, OsString>) {
-    const PROXY_KEYS: &[&str] = &[
-        "HTTP_PROXY",
-        "HTTPS_PROXY",
-        "ALL_PROXY",
-        "NO_PROXY",
-        "http_proxy",
-        "https_proxy",
-        "all_proxy",
-        "no_proxy",
-        "FTP_PROXY",
-        "ftp_proxy",
-    ];
     environment.retain(|key, _| {
         let key = key.to_string_lossy();
-        !PROXY_KEYS
+        !PROXY_ENV_KEYS
             .iter()
             .any(|blocked| key.eq_ignore_ascii_case(blocked))
     });
 }
 
+/// Shell/runtime bootstrap keys stripped from child environments so the
+/// command string cannot inject code through them.
+const BOOTSTRAP_INJECTION_KEYS: &[&str] = &[
+    "BASH_ENV",
+    "ENV",
+    "NODE_OPTIONS",
+    "NODE_PATH",
+    "PYTHONHOME",
+    "PYTHONPATH",
+    "PYTHONSTARTUP",
+    "PYTHONINSPECT",
+    "RUBYOPT",
+    "RUBYLIB",
+    "PERL5OPT",
+    "PERL5LIB",
+    "LUA_INIT",
+    "JAVA_TOOL_OPTIONS",
+    "JDK_JAVA_OPTIONS",
+    "_JAVA_OPTIONS",
+    "LD_PRELOAD",
+    "LD_LIBRARY_PATH",
+    "DYLD_INSERT_LIBRARIES",
+    "DYLD_LIBRARY_PATH",
+];
+
 fn remove_bootstrap_injection_variables(environment: &mut BTreeMap<OsString, OsString>) {
-    const BLOCKED: &[&str] = &[
-        "BASH_ENV",
-        "ENV",
-        "NODE_OPTIONS",
-        "NODE_PATH",
-        "PYTHONHOME",
-        "PYTHONPATH",
-        "PYTHONSTARTUP",
-        "PYTHONINSPECT",
-        "RUBYOPT",
-        "RUBYLIB",
-        "PERL5OPT",
-        "PERL5LIB",
-        "LUA_INIT",
-        "JAVA_TOOL_OPTIONS",
-        "JDK_JAVA_OPTIONS",
-        "_JAVA_OPTIONS",
-        "LD_PRELOAD",
-        "LD_LIBRARY_PATH",
-        "DYLD_INSERT_LIBRARIES",
-        "DYLD_LIBRARY_PATH",
-    ];
     environment.retain(|key, _| {
         let key = key.to_string_lossy();
-        !BLOCKED
+        !BOOTSTRAP_INJECTION_KEYS
             .iter()
             .any(|blocked| key.eq_ignore_ascii_case(blocked))
             && !key.to_ascii_uppercase().starts_with("LUA_INIT_")
     });
+}
+
+/// Environment names a secret entry may never occupy: keys the composed child
+/// environment forcibly overwrites or strips, plus toolchain bootstrap keys a
+/// sentinel would silently break. Gate 8 fail-closed rule.
+pub(crate) fn secret_env_name_is_reserved(name: &str) -> bool {
+    [
+        REHOME_ENV_KEYS,
+        PROXY_ENV_KEYS,
+        SAFE_ENV_KEYS,
+        BOOTSTRAP_INJECTION_KEYS,
+    ]
+    .into_iter()
+    .any(|group| group.iter().any(|key| name.eq_ignore_ascii_case(key)))
+        || name.eq_ignore_ascii_case("A3S_SANDBOX_MEDIATOR_PIPE")
+        || name.eq_ignore_ascii_case("A3S_SANDBOX_MEDIATOR_PIPE_HANDLE")
 }
 
 pub(crate) fn resolve_executable(

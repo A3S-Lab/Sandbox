@@ -385,6 +385,38 @@ capabilities visible to callers; default A3S Bash profile remains fail-closed.
 Follow `docs/RELEASE_CHECKLIST.md` and `docs/INDEPENDENT_REVIEW.md`.
 Run `./scripts/collect-release-evidence.sh` before cutting a tag.
 
+### Gate 8 — Credential containment (secrets never land)
+
+**Status:** In progress — slice 1 complete: host-held secret environment
+entries via `NativeSandbox::execute_with_secrets`. Secret values never reach
+the child: each entry is delivered as an `a3s:secret:<NAME>` sentinel
+(`SECRET_ENV_SENTINEL_PREFIX`), and because a sentinel nothing re-injects
+would silently strand the secret, entries refuse before spawn unless
+`features.mediated_network` is on. Reserved names (re-homed, proxy-scrubbed,
+toolchain, mediator, and injection keys), collisions with explicit env
+entries, and malformed entries all fail closed. Injection and refusal are
+auditable (`AuditSurface::Environment`, `ReasonCode::SecretRequiresMediation`);
+secret bytes never reach the child environment, captured output, audit log,
+or policy digest. Evidence: `policy::gate8_integration` plus full local gates.
+
+**Residual:** egress re-injection at the mediation point (Gate 4 CONNECT
+first, absolute-form HTTP only — TLS interception stays a non-goal);
+cross-OS CI evidence for the new matrix; box `secret_environment`
+macOS/Windows execution parity is a `crates/box` follow-up.
+
+**Why:** the field's strongest credential pattern (mask + egress-side
+injection) keeps secrets out of the boundary entirely; path deny-lists alone
+leave plaintext secrets inside the sandbox for the lifetime of the process
+tree.
+
+- Host-held secret store contract (typed `SecretRef`, never bytes in
+  policy/config/state). Slice 1 passes the per-request map; a store trait
+  waits for a real consumer.
+- Mediator re-injection for allowlisted egress only; unlisted egress carries
+  sentinels only. **Exit:** falsifiable negative tests prove secret bytes
+  never appear in guest env/filesystem when `SecretRef`s are used, and the
+  per-platform capability matrix is updated.
+
 ## Target architecture
 
 ```text

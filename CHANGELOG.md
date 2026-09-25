@@ -1,5 +1,17 @@
 ## [Unreleased]
 
+### Added
+
+- Gate 8 slice 1 — host-held secret environment entries via
+  `NativeSandbox::execute_with_secrets`. Secret values never reach the child
+  process: each entry is delivered as an `a3s:secret:<NAME>` sentinel, the
+  host re-injects real bytes only at a mediation point (later slice).
+  Entries fail closed before spawn when `mediated_network` is off, when a
+  name is reserved (re-homed, scrubbed, toolchain, or mediator keys), when a
+  name collides with an explicit env entry, or when an entry is malformed.
+  Sentinel injection is auditable (`AuditSurface::Environment`); secret bytes
+  never reach the audit log, policy digest, or captured output.
+
 ## [0.1.5] - 2026-09-25
 
 ### Fixed

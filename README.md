@@ -73,6 +73,8 @@ The default A3S Bash profile is intentionally strict:
   credential inode;
 - child environments are sanitized, temporary state is redirected, and shell
   injection variables are removed;
+- host-held secret environment entries are delivered only as redacted
+  sentinels and refuse to run without an active mediation boundary;
 - deadlines terminate the complete descendant tree, and output capture stays
   bounded;
 - a missing launcher, unavailable namespace, or failed capability probe returns

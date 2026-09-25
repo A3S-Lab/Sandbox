@@ -44,6 +44,12 @@ const PROBE_MARKER: &str = "a3s-native-sandbox-ready";
 /// Maximum stdout and stderr bytes retained for a command.
 pub const MAX_OUTPUT_SIZE: usize = 100 * 1024;
 
+/// Prefix of the redacted placeholder a child observes for a host-held secret
+/// environment entry. Gate 8 slice 1: real secret bytes never enter the child
+/// environment; the host re-injects them only at a mediation point in a later
+/// slice.
+pub const SECRET_ENV_SENTINEL_PREFIX: &str = "a3s:secret:";
+
 /// Windows host commands use the same PowerShell 7 executable as the
 /// AppContainer backend. `powershell.exe` is a different binary and is not
 /// part of this contract.
@@ -292,6 +298,87 @@ impl NativeSandbox {
 
     /// Execute a command inside the configured native boundary.
     pub async fn execute(&self, request: CommandRequest) -> Result<CommandOutput> {
+        self.execute_inner(request, new_command_id()).await
+    }
+
+    /// Execute a command with host-held secret environment entries.
+    ///
+    /// Secret values never reach the child: each entry is delivered as a
+    /// [`SECRET_ENV_SENTINEL_PREFIX`] placeholder and the host re-injects the
+    /// real value only at a mediation point. Because a sentinel nothing
+    /// re-injects would silently strand the secret, entries refuse to run
+    /// unless the policy actually enables the mediated-network boundary.
+    /// Malformed names, values, reserved environment names, and collisions
+    /// with explicit entries all fail closed before spawn.
+    pub async fn execute_with_secrets(
+        &self,
+        mut request: CommandRequest,
+        secrets: Option<Arc<HashMap<String, String>>>,
+    ) -> Result<CommandOutput> {
+        let command_id = new_command_id();
+        let Some(secrets) = secrets.filter(|map| !map.is_empty()) else {
+            return self.execute_inner(request, command_id).await;
+        };
+        if !self.policy.features.mediated_network {
+            self.audit.record(AuditEvent::from_parts(AuditEventParts {
+                session_id: self.session_id.clone(),
+                command_id: command_id.clone(),
+                policy_digest: policy_digest(&self.policy),
+                backend: self.backend().into(),
+                surface: AuditSurface::Environment,
+                decision: AccessDecision::Deny,
+                reason_code: ReasonCode::SecretRequiresMediation,
+                target_redacted: "<secret-env>".into(),
+            }));
+            bail!(
+                "secret environment entries require mediated_network; refusing to run \
+                 secrets without a mediation boundary"
+            );
+        }
+        for (name, value) in secrets.iter() {
+            if name.is_empty() || name.contains('=') || name.contains('\0') || value.contains('\0')
+            {
+                bail!("invalid secret environment entry: {name:?}");
+            }
+            if policy::secret_env_name_is_reserved(name) {
+                bail!("secret environment entry uses a reserved environment name: {name}");
+            }
+            if request
+                .env
+                .as_ref()
+                .is_some_and(|env| env.contains_key(name))
+            {
+                bail!(
+                    "secret environment entry {name} collides with an explicit \
+                     command environment entry"
+                );
+            }
+        }
+        let mut merged = request.env.as_deref().cloned().unwrap_or_default();
+        for name in secrets.keys() {
+            merged.insert(name.clone(), format!("{SECRET_ENV_SENTINEL_PREFIX}{name}"));
+        }
+        request.env = Some(Arc::new(merged));
+        let mut names: Vec<&str> = secrets.keys().map(String::as_str).collect();
+        names.sort_unstable();
+        self.audit.record(AuditEvent::from_parts(AuditEventParts {
+            session_id: self.session_id.clone(),
+            command_id: command_id.clone(),
+            policy_digest: policy_digest(&self.policy),
+            backend: self.backend().into(),
+            surface: AuditSurface::Environment,
+            decision: AccessDecision::Allow,
+            reason_code: ReasonCode::PolicyAllow,
+            target_redacted: format!("<secret-env:{}>", names.join(",")),
+        }));
+        self.execute_inner(request, command_id).await
+    }
+
+    async fn execute_inner(
+        &self,
+        request: CommandRequest,
+        command_id: String,
+    ) -> Result<CommandOutput> {
         if request.timeout_ms == 0 {
             bail!("native sandbox command timeout must be greater than zero");
         }
@@ -303,7 +390,6 @@ impl NativeSandbox {
             .tempdir()
             .context("failed to create native sandbox scratch directory")?;
         let digest = policy_digest(&self.policy);
-        let command_id = new_command_id();
         // Snapshot so concurrent replace_policy cannot race a running command.
         let policy_doc = self.policy.clone();
 
