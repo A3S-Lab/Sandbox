@@ -39,7 +39,7 @@ mod grant;
 #[cfg(test)]
 mod grant_integration;
 
-pub use capabilities::BackendCapabilities;
+pub use capabilities::{capability_matrix, capability_matrix_markdown, BackendCapabilities};
 pub use decide::{decide_network, decide_read, decide_write, AccessDecision};
 pub use digest::policy_digest;
 pub use grant::{apply_network_grant_to_policy, NetworkGrant};

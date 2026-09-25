@@ -52,6 +52,10 @@ async fn run() -> Result<ExitCode> {
             print_capabilities_json(&report)?;
             Ok(ExitCode::SUCCESS)
         }
+        "matrix" => {
+            print!("{}", a3s_sandbox::capability_matrix_markdown());
+            Ok(ExitCode::SUCCESS)
+        }
         "exec" => {
             let (workspace, command) = parse_exec(&args)?;
             let sandbox = NativeSandbox::new(&workspace)?;
@@ -78,7 +82,7 @@ async fn run() -> Result<ExitCode> {
 fn print_usage() {
     eprintln!(
         "Usage:\n  \
-         a3s-sandbox probe [--workspace PATH]\n  \
+         a3s-sandbox probe [--workspace PATH]\n  matrix\n  \
          a3s-sandbox digest [--workspace PATH]\n  \
          a3s-sandbox capabilities [--workspace PATH]\n  \
          a3s-sandbox exec [--workspace PATH] -- <command>\n  \

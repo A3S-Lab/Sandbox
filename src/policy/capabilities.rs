@@ -54,6 +54,111 @@ impl BackendCapabilities {
     }
 }
 
+/// One row of the per-platform claim matrix — the single source of truth
+/// rendered by `a3s-sandbox matrix` and asserted against the docs.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CapabilityMatrixRow {
+    pub surface: &'static str,
+    pub macos: bool,
+    pub linux: bool,
+    pub windows: bool,
+}
+
+/// The claim matrix, compiled from the same constants as
+/// [`BackendCapabilities::native_gate2`]. Docs embed the rendered table
+/// between sentinels; tests fail when either side drifts.
+pub fn capability_matrix() -> Vec<CapabilityMatrixRow> {
+    vec![
+        CapabilityMatrixRow {
+            surface: "filesystem_path_policy",
+            macos: true,
+            linux: true,
+            windows: true,
+        },
+        CapabilityMatrixRow {
+            surface: "filesystem_readonly_mounts",
+            macos: true,
+            linux: true,
+            windows: true,
+        },
+        CapabilityMatrixRow {
+            surface: "filesystem_ephemeral_writes",
+            macos: false,
+            linux: true,
+            windows: false,
+        },
+        CapabilityMatrixRow {
+            surface: "network_deny_all",
+            macos: true,
+            linux: true,
+            windows: true,
+        },
+        CapabilityMatrixRow {
+            surface: "mediated_http",
+            macos: true,
+            linux: true,
+            windows: true,
+        },
+        CapabilityMatrixRow {
+            surface: "mediated_socks",
+            macos: true,
+            linux: true,
+            windows: false,
+        },
+        CapabilityMatrixRow {
+            surface: "unix_socket_allowlist",
+            macos: true,
+            linux: false,
+            windows: false,
+        },
+        CapabilityMatrixRow {
+            surface: "resource_timeout",
+            macos: true,
+            linux: true,
+            windows: true,
+        },
+        CapabilityMatrixRow {
+            surface: "resource_output_limit",
+            macos: true,
+            linux: true,
+            windows: true,
+        },
+        CapabilityMatrixRow {
+            surface: "resource_memory_limit",
+            macos: false,
+            linux: true,
+            windows: true,
+        },
+        CapabilityMatrixRow {
+            surface: "resource_process_limit",
+            macos: false,
+            linux: true,
+            windows: true,
+        },
+    ]
+}
+
+/// Render the matrix as the markdown block the docs embed.
+pub fn capability_matrix_markdown() -> String {
+    let cell = |claimed: bool| if claimed { "claimed" } else { "fail-closed" };
+    let mut out =
+        String::from("| Surface | macOS | Linux | Windows |\n| --- | --- | --- | --- |\n");
+    for row in capability_matrix() {
+        out.push_str(&format!(
+            "| {} | {} | {} | {} |\n",
+            row.surface,
+            cell(row.macos),
+            cell(row.linux),
+            cell(row.windows)
+        ));
+    }
+    out.push_str(
+        "\n`resource_process_limit` on Linux rides a runtime cgroup-delegation probe; \
+         construction fails closed without one.\n",
+    );
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -144,6 +249,67 @@ mod tests {
         assert_eq!(
             caps.mediated_http,
             cfg!(any(target_os = "macos", target_os = "linux", windows))
+        );
+    }
+
+    #[test]
+    fn gate13_matrix_rows_match_this_platforms_capabilities() {
+        let caps = BackendCapabilities::native_gate2();
+        let field = |surface: &str| match surface {
+            "filesystem_path_policy" => caps.filesystem_path_policy,
+            "filesystem_readonly_mounts" => caps.filesystem_readonly_mounts,
+            "filesystem_ephemeral_writes" => caps.filesystem_ephemeral_writes,
+            "network_deny_all" => caps.network_deny_all,
+            "mediated_http" => caps.mediated_http,
+            "mediated_socks" => caps.mediated_socks,
+            "unix_socket_allowlist" => caps.unix_socket_allowlist,
+            "resource_timeout" => caps.resource_timeout,
+            "resource_output_limit" => caps.resource_output_limit,
+            "resource_memory_limit" => caps.resource_memory_limit,
+            "resource_process_limit" => caps.resource_process_limit,
+            other => panic!("matrix row {other} has no capability field"),
+        };
+        for row in capability_matrix() {
+            let here = if cfg!(target_os = "macos") {
+                row.macos
+            } else if cfg!(target_os = "linux") {
+                row.linux
+            } else {
+                row.windows
+            };
+            assert_eq!(
+                here,
+                field(row.surface),
+                "matrix row {} drifts from native_gate2 on this platform",
+                row.surface
+            );
+        }
+    }
+
+    #[test]
+    fn gate13_threat_model_embeds_the_generated_capability_matrix() {
+        let doc = std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/THREAT_MODEL.md"))
+            .expect("THREAT_MODEL.md is part of the crate");
+        let begin = "<!-- capability-matrix:begin";
+        let end = "<!-- capability-matrix:end -->";
+        let Some(start) = doc.find(begin) else {
+            panic!("THREAT_MODEL.md lost the capability-matrix begin sentinel");
+        };
+        let Some(stop) = doc[start..].find(end) else {
+            panic!("THREAT_MODEL.md lost the capability-matrix end sentinel");
+        };
+        let content_start = doc[start..]
+            .find('\n')
+            .map(|offset| start + offset + 1)
+            .unwrap_or(start);
+        let embedded = doc[content_start..start + stop]
+            .trim()
+            .replace("\r\n", "\n");
+        let generated = capability_matrix_markdown().trim().replace("\r\n", "\n");
+        assert_eq!(
+            embedded, generated,
+            "THREAT_MODEL.md claim matrix drifted from `a3s-sandbox matrix`; \
+             regenerate it and commit"
         );
     }
 }
