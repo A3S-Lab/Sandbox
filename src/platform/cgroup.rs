@@ -82,9 +82,20 @@ impl CgroupControl {
         write_control(&self.dir, "cgroup.procs", &pid.to_string())
     }
 
-    /// Best-effort removal after the tree exited.
+    /// Best-effort removal after the tree exited. cgroupfs can report the
+    /// directory busy for a scheduling cycle after the last process leaves;
+    /// retry briefly instead of failing the caller.
     pub fn cleanup(&self) {
-        let _ = std::fs::remove_dir_all(&self.dir);
+        for attempt in 0..10 {
+            match std::fs::remove_dir_all(&self.dir) {
+                Ok(()) => return,
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => return,
+                Err(_) if attempt < 9 => {
+                    std::thread::sleep(std::time::Duration::from_millis(50));
+                }
+                Err(_) => return,
+            }
+        }
     }
 
     #[cfg(test)]
@@ -209,7 +220,15 @@ mod tests {
                     std::fs::read_to_string(control.dir().join("pids.max")).expect("read back");
                 assert_eq!(read_back.trim(), "16");
                 control.cleanup();
-                assert!(!control.dir().exists(), "cleanup must remove the cgroup");
+                let removed = (0..20).any(|_| {
+                    if !control.dir().exists() {
+                        true
+                    } else {
+                        std::thread::sleep(std::time::Duration::from_millis(50));
+                        false
+                    }
+                });
+                assert!(removed, "cleanup must remove the cgroup");
             }
             Err(error) => {
                 let message = error.to_string();

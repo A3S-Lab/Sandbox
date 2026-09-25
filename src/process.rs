@@ -336,7 +336,11 @@ pub(super) async fn run_tokio_command(
         .stderr(std::process::Stdio::piped())
         .kill_on_drop(true);
     configure_process_group(&mut command);
-    apply_budget_pre_exec(&mut command, budget)?;
+    #[cfg(target_os = "linux")]
+    let cgroup_attached = cgroup.is_some();
+    #[cfg(not(target_os = "linux"))]
+    let cgroup_attached = false;
+    apply_budget_pre_exec(&mut command, budget, cgroup_attached)?;
 
     let mut child = command
         .spawn()
@@ -381,12 +385,13 @@ pub(super) async fn run_tokio_command(
 fn apply_budget_pre_exec(
     command: &mut Command,
     budget: &crate::policy::ResolvedResourceBudget,
+    #[allow(unused_variables)] cgroup_attached: bool,
 ) -> Result<()> {
     let budget = *budget;
     // Tokio's Command inherits std's unix extensions for pre_exec.
     unsafe {
         command.pre_exec(move || {
-            crate::policy::resources::apply_unix_rlimits(&budget)
+            crate::policy::resources::apply_unix_rlimits(&budget, cgroup_attached)
                 .map_err(|error| std::io::Error::other(error.to_string()))
         });
     }

@@ -84,8 +84,11 @@ impl ResolvedResourceBudget {
 /// - macOS cannot lower address-space rlimits; memory must fail closed earlier
 ///   via capabilities.
 #[cfg(unix)]
-pub(crate) fn apply_unix_rlimits(budget: &ResolvedResourceBudget) -> Result<()> {
-    if budget.max_processes.is_some() {
+pub(crate) fn apply_unix_rlimits(
+    budget: &ResolvedResourceBudget,
+    cgroup_attached: bool,
+) -> Result<()> {
+    if budget.max_processes.is_some() && !cgroup_attached {
         bail!(
             "process limit requested but Unix backends cannot enforce a process-tree \
              quota without cgroup (or equivalent); fail closed"
