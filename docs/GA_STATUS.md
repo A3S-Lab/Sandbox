@@ -3,13 +3,14 @@
 Authoritative status board for the enterprise GA objective. Update only from
 live evidence (CI, local collectors, release artifacts, reviewer attestation).
 
-Last engineering update: 2026-09-25 — **`v0.1.5` tagged** at `eec5229` on `main`.
+Last engineering update: 2026-09-25 — **`v0.1.5` on `main`**; CI green;
+GitHub Release assets still pending `gh` auth.
 
 ## Claim split (do not collapse)
 
 | Claim | Meaning | Status |
 | --- | --- | --- |
-| **A. Deny-all production boundary** | Default A3S Bash profile is fail-closed OS isolation; mediation off | **In progress** — code on `main` + tag `v0.1.5`; awaiting CI green + GitHub Release assets |
+| **A. Deny-all production boundary** | Default A3S Bash profile is fail-closed OS isolation; mediation off | **Nearly complete** — code + tag + CI green; Release asset upload open |
 | **B. Mediated-network-as-default** | Any profile may turn mediation on by default | **Blocked** on independent review sign-off |
 
 Enterprise GA for this crate means **A is shipped and evidenced**, and **B stays
@@ -20,23 +21,30 @@ explicitly refused** until an independent reviewer signs
 
 | Requirement | Evidence | Status |
 | --- | --- | --- |
-| Windows AppContainer suite | Local full suite + soak 256 + CONNECT proof | Verified locally |
-| WSL2 native-FS suite | Local full suite + soak 256 + SBOM/provenance | Verified locally |
-| ACL hang fix | `SetKernelObjectSecurity` for non-inheriting grants | On `main` @ `eec5229` |
+| Windows / Linux / macOS CI | Actions run on `eec5229` (`v0.1.5`) and tip `5b2e46d` — all `check (*)` success | **Verified** |
+| Windows AppContainer local | Full suite + soak 256 + CONNECT live proof | Verified locally |
+| WSL2 native-FS local | Full suite + soak 256 + SBOM/provenance | Verified locally |
+| ACL hang fix | `SetKernelObjectSecurity` for non-inheriting grants | On `main` |
 | Default mediation off | `gate7_release_invariants` | On `main` |
-| Code on default branch | `origin/main` @ `eec5229` | **Done** |
+| Code on default branch | `origin/main` includes `eec5229`+ | **Done** |
 | Annotated tag | `v0.1.5` → `eec5229` | **Done** |
-| CI matrix green on tip | Actions on `main` / tag | **Verify** |
-| GitHub Release + provenance assets | Release page with SHA256/SBOM/EVIDENCE | **Open** (`gh` auth required) |
+| GitHub Release + provenance assets | Release page for `v0.1.5` | **Open** — `gh` unauthenticated here |
 | Independent review (Claim B only) | External attestation | **Open** |
+
+### CI runs
+
+- Tag commit `eec5229`: https://github.com/A3S-Lab/Sandbox/actions/runs/36084293634 (windows/ubuntu/macos success)
+- Tip `5b2e46d`: https://github.com/A3S-Lab/Sandbox/actions/runs/36084473762 (windows/ubuntu/macos success)
 
 ## Publish path
 
 ```text
-main @ eec5229 = v0.1.5
-Attach assets (after gh auth):
+main tip @ 5b2e46d
+tag v0.1.5 -> eec5229
+After: gh auth login   # or GH_TOKEN
   ./scripts/publish-ga-release.sh
-# or manually: collect-release-evidence + gh release create v0.1.5 ...
+# or: collect evidence then
+#   gh release create v0.1.5 ./release-out/* --notes-file docs/RELEASE_NOTES_0.1.5.md
 ```
 
 ## First-principles refusal
