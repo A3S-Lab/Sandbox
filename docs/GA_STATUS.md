@@ -3,14 +3,13 @@
 Authoritative status board for the enterprise GA objective. Update only from
 live evidence (CI, local collectors, release artifacts, reviewer attestation).
 
-Last engineering update: 2026-09-25 — candidate `0.1.5` on
-`release/0.1.5-windows-wsl-ga` @ `5050fea`.
+Last engineering update: 2026-09-25 — **`v0.1.5` tagged** at `eec5229` on `main`.
 
 ## Claim split (do not collapse)
 
 | Claim | Meaning | Status |
 | --- | --- | --- |
-| **A. Deny-all production boundary** | Default A3S Bash profile is fail-closed OS isolation; mediation off | **Ready after** merge + `v0.1.5` GitHub Release with provenance |
+| **A. Deny-all production boundary** | Default A3S Bash profile is fail-closed OS isolation; mediation off | **In progress** — code on `main` + tag `v0.1.5`; awaiting CI green + GitHub Release assets |
 | **B. Mediated-network-as-default** | Any profile may turn mediation on by default | **Blocked** on independent review sign-off |
 
 Enterprise GA for this crate means **A is shipped and evidenced**, and **B stays
@@ -21,33 +20,24 @@ explicitly refused** until an independent reviewer signs
 
 | Requirement | Evidence | Status |
 | --- | --- | --- |
-| Windows AppContainer suite | Local `cargo test --all-targets -- --test-threads=1` → 161 lib + 3 CLI | Verified locally |
-| Windows soak ≥256 | `GATE7_SOAK_ROUNDS=256` soak test → ok ~427s | Verified locally |
-| Windows CONNECT live proof | `windows_appcontainer_named_pipe_connect_allow_deny_and_blocks_raw_egress` | Verified locally |
-| WSL2 native-FS suite | `scripts/run-wsl-ga-tests.sh` / evidence collector → 175+3+1 | Verified locally |
-| WSL soak ≥256 + SBOM/provenance | `collect-release-evidence.sh` → `release-out/EVIDENCE.wsl.md` | Verified locally |
-| ACL hang fix | `SetKernelObjectSecurity` path + Temp pollution root cause | In `4bb995e`+ |
-| Default mediation off | `gate7_release_invariants` | In tree |
-| CI matrix green on tip | GitHub Actions on PR/main | **Open** — PR not created |
-| Tag `v0.1.5` + Release assets | GitHub Release + SHA256/provenance | **Open** |
-| Independent review (Claim B only) | External attestation | **Open** — cannot be self-signed |
+| Windows AppContainer suite | Local full suite + soak 256 + CONNECT proof | Verified locally |
+| WSL2 native-FS suite | Local full suite + soak 256 + SBOM/provenance | Verified locally |
+| ACL hang fix | `SetKernelObjectSecurity` for non-inheriting grants | On `main` @ `eec5229` |
+| Default mediation off | `gate7_release_invariants` | On `main` |
+| Code on default branch | `origin/main` @ `eec5229` | **Done** |
+| Annotated tag | `v0.1.5` → `eec5229` | **Done** |
+| CI matrix green on tip | Actions on `main` / tag | **Verify** |
+| GitHub Release + provenance assets | Release page with SHA256/SBOM/EVIDENCE | **Open** (`gh` auth required) |
+| Independent review (Claim B only) | External attestation | **Open** |
 
-## Branch / publish path
+## Publish path
 
 ```text
-origin/release/0.1.5-windows-wsl-ga @ 5050fea  (last successful push)
-PR create URL:
-https://github.com/A3S-Lab/Sandbox/pull/new/release/0.1.5-windows-wsl-ga
-
-One-shot after auth (Claim A only):
+main @ eec5229 = v0.1.5
+Attach assets (after gh auth):
   ./scripts/publish-ga-release.sh
+# or manually: collect-release-evidence + gh release create v0.1.5 ...
 ```
-
-### Current environment blockers (2026-09-25)
-
-- `gh` unauthenticated → cannot open PR / create Release via API
-- `agent-browser` cannot launch Chrome in this environment
-- intermittent `git@github.com` SSH `Connection closed` → cannot push/tag until SSH recovers
 
 ## First-principles refusal
 
@@ -56,4 +46,5 @@ Do **not** mark enterprise GA complete by:
 - treating local green as a substitute for CI on the release commit;
 - self-signing `INDEPENDENT_REVIEW.md`;
 - enabling `mediated_network` on the default profile;
-- claiming Claim B when only Claim A evidence exists.
+- claiming Claim B when only Claim A evidence exists;
+- claiming Claim A complete before the GitHub Release carries provenance.
