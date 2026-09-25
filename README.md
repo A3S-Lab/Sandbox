@@ -156,9 +156,10 @@ Release packaging helpers:
 ```
 
 See [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md),
-[docs/INDEPENDENT_REVIEW.md](docs/INDEPENDENT_REVIEW.md), and
-[docs/WINDOWS_WSL_GA.md](docs/WINDOWS_WSL_GA.md) for the production release
-gate (including Windows host + WSL2 native-FS evidence). Collect local evidence
+[docs/INDEPENDENT_REVIEW.md](docs/INDEPENDENT_REVIEW.md),
+[docs/WINDOWS_WSL_GA.md](docs/WINDOWS_WSL_GA.md), and
+[docs/GA_STATUS.md](docs/GA_STATUS.md) for the production release gate
+(including Windows host + WSL2 native-FS evidence). Collect local evidence
 with:
 
 ```bash
