@@ -161,8 +161,25 @@ fn probe_base(base: &Path) -> Result<()> {
     }
     let probe = base.join(format!("a3s-sandbox-probe-{}", std::process::id()));
     std::fs::create_dir(&probe).with_context(|| format!("cannot create {}", probe.display()))?;
-    let _ = std::fs::remove_dir(&probe);
-    Ok(())
+    // Validate the full operation quota enforcement depends on: creating
+    // the directory is worthless if attaching a process is denied (observed
+    // on hosted runners whose user slice allows mkdir but not cgroup.procs
+    // writes). Spawn a throwaway child and attach its real pid.
+    let probe_result = (|| -> Result<()> {
+        let mut child = std::process::Command::new("/bin/true")
+            .stdin(std::process::Stdio::null())
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .spawn()
+            .context("cannot spawn the attach probe child")?;
+        let pid = child.id();
+        let wait_status = child.wait();
+        write_control(&probe, "cgroup.procs", &pid.to_string())?;
+        let _ = wait_status;
+        Ok(())
+    })();
+    let _ = std::fs::remove_dir_all(&probe);
+    probe_result.with_context(|| format!("cgroup attach denied under {}", base.display()))
 }
 
 /// Enable `+pids +memory` for children of `base` (top-down delegation rule).
