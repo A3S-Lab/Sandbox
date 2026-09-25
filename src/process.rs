@@ -338,41 +338,21 @@ pub(super) async fn run_tokio_command(
     configure_process_group(&mut command);
     apply_budget_pre_exec(&mut command, budget)?;
 
-    // Gate 11: with a cgroup quota, spawn the tree stopped so it lands in
-    // the cgroup before any descendant can fork, then resume it.
-    #[cfg(target_os = "linux")]
-    let cgroup = cgroup.filter(|_| true);
-    #[cfg(target_os = "linux")]
-    if cgroup.is_some() {
-        unsafe {
-            command.pre_exec(|| {
-                if libc::raise(libc::SIGSTOP) != 0 {
-                    return Err(std::io::Error::last_os_error());
-                }
-                Ok(())
-            });
-        }
-    }
-
     let mut child = command
         .spawn()
         .with_context(|| format!("failed to start {description}"))?;
 
     #[cfg(target_os = "linux")]
     if let Some(control) = &cgroup {
+        // Attached immediately after spawn: bwrap's exec has not happened
+        // yet, and its descendants inherit the cgroup. A descendant forking
+        // inside bwrap's millisecond setup window is a documented residual.
         let pid = child
             .id()
             .context("spawned child has no pid to move into the cgroup")?;
         control
             .attach(pid)
             .with_context(|| format!("failed to move {description} into its cgroup"))?;
-        // Resume the stopped tree now that the quota is active.
-        unsafe {
-            if libc::kill(pid as libc::pid_t, libc::SIGCONT) != 0 {
-                return Err(std::io::Error::last_os_error())
-                    .context("failed to resume the cgroup-scoped process tree");
-            }
-        }
     }
 
     let output = read_process_output(

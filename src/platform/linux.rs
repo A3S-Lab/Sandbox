@@ -23,9 +23,6 @@ const SECCOMP_FD: libc::c_int = 198;
 pub(crate) struct PlatformSandbox {
     bwrap: PathBuf,
     shell: PathBuf,
-    /// Delegated cgroup v2 base when the host provides one (Gate 11). Quota
-    /// policies fail closed through `effective_capabilities` when absent.
-    cgroup_base: Option<PathBuf>,
 }
 
 impl PlatformSandbox {
@@ -34,23 +31,27 @@ impl PlatformSandbox {
             .context("Linux native sandbox requires bubblewrap at /usr/bin/bwrap")?;
         let shell = resolve_executable("/bin/bash", workspace)
             .context("trusted Linux bash executable is unavailable")?;
-        let cgroup_base = super::cgroup::CgroupControl::probe_delegated_base().ok();
-        Ok(Self {
-            bwrap,
-            shell,
-            cgroup_base,
-        })
+        Ok(Self { bwrap, shell })
     }
 
     /// Capabilities informed by the runtime probe: without a delegated
-    /// cgroup subtree the backend cannot enforce process-tree quotas.
+    /// cgroup subtree the backend cannot enforce process-tree or CPU
+    /// quotas. Probed lazily and cached — construction stays side-effect
+    /// free for the overwhelming majority of policies.
     pub(crate) fn effective_capabilities(&self) -> crate::policy::BackendCapabilities {
         let mut capabilities = crate::policy::BackendCapabilities::native_gate2();
-        if self.cgroup_base.is_none() {
+        if self.delegated_base().is_none() {
             capabilities.resource_process_limit = false;
             capabilities.resource_cpu_limit = false;
         }
         capabilities
+    }
+
+    fn delegated_base(&self) -> Option<PathBuf> {
+        static PROBED: OnceLock<Option<PathBuf>> = OnceLock::new();
+        PROBED
+            .get_or_init(|| super::cgroup::CgroupControl::probe_delegated_base().ok())
+            .clone()
     }
 
     pub(crate) async fn execute(
@@ -121,12 +122,13 @@ impl PlatformSandbox {
         {
             return Ok(None);
         }
-        let Some(base) = &self.cgroup_base else {
+        let Some(base) = self.delegated_base() else {
             bail!(
                 "process/memory quotas require a delegated cgroup v2 subtree; \
                  refusing to run without OS-enforced limits"
             );
         };
+        let base = &base;
         super::cgroup::enable_controllers(base)
             .context("failed to enable cgroup controllers for the delegated base")?;
         let control = super::cgroup::CgroupControl::create(
