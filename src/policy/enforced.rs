@@ -92,8 +92,9 @@ pub(crate) struct EnforcedPolicy {
     /// Exact Unix-domain socket paths allowed for outbound connect (Gate 5).
     pub(crate) allow_unix_sockets: Vec<PathBuf>,
     /// Typed filesystem mount roots from the policy document (Gate 3).
-    /// Windows AppContainer ACLs grant these explicitly; toolchain PATH roots
-    /// in `allow_read` are intentionally not mutated.
+    /// Windows AppContainer ACLs grant these explicitly. User-owned PATH
+    /// binaries in `allow_read` get a separate non-inheritable execute grant;
+    /// system trees are left to their existing AppContainer ACEs.
     pub(crate) mount_roots: Vec<PathBuf>,
 }
 

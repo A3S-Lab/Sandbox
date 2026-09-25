@@ -11,7 +11,9 @@ use std::os::windows::io::{AsRawHandle, FromRawHandle, OwnedHandle};
 use std::path::{Path, PathBuf};
 use std::ptr::{null, null_mut};
 use std::sync::OnceLock;
-use windows_sys::Win32::Foundation::LocalFree;
+use windows_sys::Win32::Foundation::{
+    CloseHandle, GetLastError, LocalFree, ERROR_ACCESS_DENIED, INVALID_HANDLE_VALUE,
+};
 use windows_sys::Win32::Security::Authorization::{
     GetNamedSecurityInfoW, SetEntriesInAclW, SetNamedSecurityInfoW, EXPLICIT_ACCESS_W,
     GRANT_ACCESS, REVOKE_ACCESS, SET_ACCESS, SE_FILE_OBJECT, TRUSTEE_IS_SID, TRUSTEE_IS_UNKNOWN,
@@ -20,16 +22,50 @@ use windows_sys::Win32::Security::Isolation::{
     CreateAppContainerProfile, DeriveAppContainerSidFromAppContainerName,
 };
 use windows_sys::Win32::Security::{
-    FreeSid, GetLengthSid, GetSecurityDescriptorControl, ACL, DACL_SECURITY_INFORMATION,
-    NO_INHERITANCE, PROTECTED_DACL_SECURITY_INFORMATION, PSID, SE_DACL_PROTECTED,
-    SUB_CONTAINERS_AND_OBJECTS_INHERIT, UNPROTECTED_DACL_SECURITY_INFORMATION,
+    FreeSid, GetLengthSid, GetSecurityDescriptorControl, InitializeSecurityDescriptor,
+    SetKernelObjectSecurity, SetSecurityDescriptorDacl, ACL, DACL_SECURITY_INFORMATION,
+    NO_INHERITANCE, PROTECTED_DACL_SECURITY_INFORMATION, PSID, SECURITY_DESCRIPTOR,
+    SE_DACL_PROTECTED, SUB_CONTAINERS_AND_OBJECTS_INHERIT, UNPROTECTED_DACL_SECURITY_INFORMATION,
 };
 use windows_sys::Win32::Storage::FileSystem::{
-    DELETE, FILE_DELETE_CHILD, FILE_GENERIC_EXECUTE, FILE_GENERIC_READ, FILE_GENERIC_WRITE,
-    FILE_TRAVERSE,
+    CreateFileW, DELETE, FILE_DELETE_CHILD, FILE_FLAG_BACKUP_SEMANTICS, FILE_GENERIC_EXECUTE,
+    FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE,
+    FILE_TRAVERSE, OPEN_EXISTING,
 };
 
 const HRESULT_ALREADY_EXISTS: u32 = 0x8007_00b7;
+const READ_CONTROL: u32 = 0x0002_0000;
+const WRITE_DAC: u32 = 0x0004_0000;
+/// WindowsApps execution aliases and other reparse stubs often return this
+/// when CreateFile tries to open them for WRITE_DAC.
+const ERROR_CANT_RESOLVE_FILENAME: u32 = 1920;
+
+fn is_skippable_acl_error(code: u32) -> bool {
+    code == ERROR_ACCESS_DENIED || code == ERROR_CANT_RESOLVE_FILENAME
+}
+
+#[derive(Debug)]
+struct AclDenied {
+    path: PathBuf,
+}
+
+impl std::fmt::Display for AclDenied {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            formatter,
+            "Windows denied a filesystem ACL change for {}",
+            self.path.display()
+        )
+    }
+}
+
+impl std::error::Error for AclDenied {}
+
+fn acl_denied(path: &Path) -> anyhow::Error {
+    anyhow::Error::new(AclDenied {
+        path: path.to_path_buf(),
+    })
+}
 
 #[derive(Debug, Clone)]
 pub(super) struct SidBuffer {
@@ -136,8 +172,46 @@ pub(super) fn appcontainer_profile_name() -> String {
 
 pub(super) struct ExecutionAcls<'a> {
     sid: &'a SidBuffer,
-    paths: Vec<(PathBuf, DaclSnapshot)>,
+    paths: Vec<(PathBuf, DaclSnapshot, bool)>,
     modified: HashSet<PathBuf>,
+}
+
+fn system_tree_prefixes() -> Vec<PathBuf> {
+    let mut prefixes = [
+        "WINDIR",
+        "PROGRAMFILES",
+        "PROGRAMFILES(X86)",
+        "PROGRAMW6432",
+    ]
+    .into_iter()
+    .filter_map(std::env::var_os)
+    .map(PathBuf::from)
+    .filter(|path| path.is_absolute())
+    .collect::<Vec<_>>();
+    // Store execution aliases are not real binaries; opening them for WRITE_DAC
+    // returns ERROR_CANT_RESOLVE_FILENAME and must not fail the sandbox.
+    if let Some(local_app_data) = std::env::var_os("LOCALAPPDATA") {
+        let windows_apps = PathBuf::from(local_app_data)
+            .join("Microsoft")
+            .join("WindowsApps");
+        if windows_apps.is_absolute() {
+            prefixes.push(windows_apps);
+        }
+    }
+    prefixes
+}
+
+fn is_toolchain_binary(path: &Path) -> bool {
+    if !path.is_file() {
+        return false;
+    }
+    let Some(extension) = path.extension().and_then(|extension| extension.to_str()) else {
+        return false;
+    };
+    matches!(
+        extension.to_ascii_lowercase().as_str(),
+        "exe" | "dll" | "cmd" | "bat" | "com" | "node"
+    )
 }
 
 impl<'a> ExecutionAcls<'a> {
@@ -167,10 +241,13 @@ impl<'a> ExecutionAcls<'a> {
                 | FILE_DELETE_CHILD,
             GRANT_ACCESS,
         )?;
-        // Do not recursively mutate arbitrary PATH or toolchain roots. Windows
-        // propagates inheritable ACEs through those host trees, which is both
-        // expensive and too broad. System/package tools retain their existing
-        // AppContainer grants; workspace-local tools are covered above.
+        // System trees already carry AppContainer grants. User-owned PATH
+        // binaries do not; grant those files without propagating ACEs.
+        guard.grant_user_toolchain_binaries(
+            &policy.allow_read,
+            &policy.workspace,
+            &policy.scratch,
+        )?;
         // Typed policy mounts (Gate 3 RO/RW knowledge trees) are granted
         // explicitly — they sit outside workspace/scratch and otherwise stay
         // invisible to the AppContainer.
@@ -226,13 +303,75 @@ impl<'a> ExecutionAcls<'a> {
             .filter(|ancestor| ancestor.parent().is_some())
             .collect::<Vec<_>>();
         for ancestor in ancestors.into_iter().rev() {
-            self.modify_with_inheritance(
+            // The caller often cannot rewrite `C:\` or `C:\Users`. Skip only
+            // that denial; closer ancestors still receive the package SID.
+            if let Err(error) = self.modify_with_inheritance(
                 ancestor,
                 FILE_TRAVERSE,
                 GRANT_ACCESS,
                 NO_INHERITANCE,
                 false,
-            )?;
+            ) {
+                if error.downcast_ref::<AclDenied>().is_none() {
+                    return Err(error);
+                }
+            }
+        }
+        Ok(())
+    }
+
+    /// Non-inheritable read/execute for binaries in user-owned PATH directories.
+    ///
+    /// System directories are skipped: the caller often cannot rewrite them,
+    /// and they already allow AppContainer execute. Inheritance is never set,
+    /// so this does not walk `node_modules` or the user profile.
+    fn grant_user_toolchain_binaries(
+        &mut self,
+        allow_read: &[PathBuf],
+        workspace: &Path,
+        scratch: &Path,
+    ) -> Result<()> {
+        let protected = system_tree_prefixes();
+        for root in allow_read {
+            if root == workspace || root == scratch || !root.is_dir() {
+                continue;
+            }
+            if protected.iter().any(|prefix| root.starts_with(prefix)) {
+                continue;
+            }
+            self.grant_ancestor_traversal(root)?;
+            if let Err(error) = self.modify_with_inheritance(
+                root,
+                FILE_GENERIC_READ | FILE_GENERIC_EXECUTE,
+                GRANT_ACCESS,
+                NO_INHERITANCE,
+                false,
+            ) {
+                if error.downcast_ref::<AclDenied>().is_none() {
+                    return Err(error);
+                }
+                continue;
+            }
+            let Ok(entries) = std::fs::read_dir(root) else {
+                continue;
+            };
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if !is_toolchain_binary(&path) {
+                    continue;
+                }
+                if let Err(error) = self.modify_with_inheritance(
+                    &path,
+                    FILE_GENERIC_READ | FILE_GENERIC_EXECUTE,
+                    GRANT_ACCESS,
+                    NO_INHERITANCE,
+                    false,
+                ) {
+                    if error.downcast_ref::<AclDenied>().is_none() {
+                        return Err(error);
+                    }
+                }
+            }
         }
         Ok(())
     }
@@ -268,26 +407,39 @@ impl<'a> ExecutionAcls<'a> {
         inheritance: u32,
         protect_dacl: bool,
     ) -> Result<()> {
-        if !self.modified.contains(path) {
+        let local_only = inheritance == NO_INHERITANCE && !protect_dacl;
+        let tracked = self.modified.contains(path);
+        if !tracked {
             let snapshot = capture_path_dacl(path)?;
             self.modified.insert(path.to_path_buf());
-            self.paths.push((path.to_path_buf(), snapshot));
+            self.paths.push((path.to_path_buf(), snapshot, local_only));
         }
-        modify_path_acl(
+        if let Err(error) = modify_path_acl(
             path,
             self.sid,
             permissions,
             access_mode,
             inheritance,
             protect_dacl,
-        )?;
+        ) {
+            if !tracked {
+                self.paths.pop();
+                self.modified.remove(path);
+            }
+            return Err(error);
+        }
         Ok(())
     }
 
     pub(super) fn restore(&mut self) -> Result<()> {
         let mut failure = None;
-        for (path, snapshot) in self.paths.drain(..).rev() {
-            if let Err(error) = restore_path_dacl(&path, &snapshot) {
+        for (path, snapshot, local_only) in self.paths.drain(..).rev() {
+            let restored = if local_only {
+                restore_path_dacl_locally(&path, &snapshot)
+            } else {
+                restore_path_dacl(&path, &snapshot)
+            };
+            if let Err(error) = restored {
                 if failure.is_none() {
                     failure = Some(
                         error.context(format!("failed to restore the ACL for {}", path.display())),
@@ -343,6 +495,9 @@ fn capture_path_dacl(path: &Path) -> Result<DaclSnapshot> {
             &mut descriptor,
         )
     };
+    if is_skippable_acl_error(status) {
+        return Err(acl_denied(path));
+    }
     if status != 0 {
         bail!(
             "GetNamedSecurityInfoW failed for {} with error {}",
@@ -416,6 +571,92 @@ fn restore_path_dacl(path: &Path, snapshot: &DaclSnapshot) -> Result<()> {
     Ok(())
 }
 
+fn restore_path_dacl_locally(path: &Path, snapshot: &DaclSnapshot) -> Result<()> {
+    let security_path = win32_process_path(path);
+    let wide = wide_null(security_path.as_os_str());
+    let acl = snapshot
+        .words
+        .as_ref()
+        .map_or(null_mut(), |words| words.as_ptr().cast_mut().cast::<ACL>());
+    let inheritance = if snapshot.protected {
+        PROTECTED_DACL_SECURITY_INFORMATION
+    } else {
+        UNPROTECTED_DACL_SECURITY_INFORMATION
+    };
+    set_dacl_on_object(path, &wide, acl, DACL_SECURITY_INFORMATION | inheritance)
+}
+
+fn set_dacl_on_object(
+    path: &Path,
+    wide: &[u16],
+    acl: *mut ACL,
+    security_information: u32,
+) -> Result<()> {
+    let raw = unsafe {
+        CreateFileW(
+            wide.as_ptr(),
+            READ_CONTROL | WRITE_DAC,
+            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+            null(),
+            OPEN_EXISTING,
+            FILE_FLAG_BACKUP_SEMANTICS,
+            null_mut(),
+        )
+    };
+    if raw == INVALID_HANDLE_VALUE {
+        let code = unsafe { GetLastError() };
+        if is_skippable_acl_error(code) {
+            return Err(acl_denied(path));
+        }
+        bail!(
+            "opening {} to update its DACL failed with Windows error {code}",
+            path.display()
+        );
+    }
+    let mut descriptor = SECURITY_DESCRIPTOR::default();
+    let descriptor_ptr = &mut descriptor as *mut SECURITY_DESCRIPTOR as *mut c_void;
+    let initialized = unsafe { InitializeSecurityDescriptor(descriptor_ptr, 1) };
+    if initialized == 0 {
+        unsafe {
+            CloseHandle(raw);
+        }
+        return Err(last_windows_error(
+            "initialize a security descriptor for a non-propagating ACL update",
+        ));
+    }
+    let dacl_set = unsafe { SetSecurityDescriptorDacl(descriptor_ptr, 1, acl, 0) };
+    if dacl_set == 0 {
+        unsafe {
+            CloseHandle(raw);
+        }
+        return Err(last_windows_error(
+            "attach a DACL for a non-propagating ACL update",
+        ));
+    }
+    // SetNamedSecurityInfo and SetSecurityInfo both propagate inheritable
+    // ACEs that were already on the directory. SetKernelObjectSecurity updates
+    // only this object, which is required for ancestor traverse grants.
+    let updated = unsafe { SetKernelObjectSecurity(raw, security_information, descriptor_ptr) };
+    let code = if updated == 0 {
+        unsafe { GetLastError() }
+    } else {
+        0
+    };
+    unsafe {
+        CloseHandle(raw);
+    }
+    if is_skippable_acl_error(code) {
+        return Err(acl_denied(path));
+    }
+    if code != 0 {
+        bail!(
+            "SetKernelObjectSecurity failed for {} with error {code}",
+            path.display()
+        );
+    }
+    Ok(())
+}
+
 fn modify_path_acl(
     path: &Path,
     sid: &SidBuffer,
@@ -481,6 +722,12 @@ fn modify_path_acl(
     } else {
         DACL_SECURITY_INFORMATION
     };
+    // SetNamedSecurityInfo rewrites the merged DACL and then walks every
+    // descendant of an inheritable ACE already on that directory. A traverse
+    // grant on an ancestor must not walk the user profile.
+    if inheritance == NO_INHERITANCE && !protect_dacl {
+        return set_dacl_on_object(path, &wide, new_acl, security_information);
+    }
     let status = unsafe {
         SetNamedSecurityInfoW(
             wide.as_ptr(),
@@ -492,6 +739,9 @@ fn modify_path_acl(
             null(),
         )
     };
+    if is_skippable_acl_error(status) {
+        return Err(acl_denied(path));
+    }
     if status != 0 {
         bail!(
             "SetNamedSecurityInfoW failed for {} with error {}",
@@ -518,6 +768,9 @@ fn query_path_dacl(path: &Path, wide: &[u16]) -> Result<(*mut ACL, LocalAllocati
             &mut descriptor,
         )
     };
+    if is_skippable_acl_error(status) {
+        return Err(acl_denied(path));
+    }
     if status != 0 {
         bail!(
             "GetNamedSecurityInfoW failed for {} with error {}",
@@ -784,5 +1037,24 @@ mod tests {
         let err = unsafe { GetLastError() };
         assert_eq!(err, 5, "expected ERROR_ACCESS_DENIED (5), got {err}");
         drop(server);
+    }
+
+    #[test]
+    fn windows_apps_execution_aliases_are_not_acl_targets() {
+        let Some(local_app_data) = std::env::var_os("LOCALAPPDATA") else {
+            return;
+        };
+        let windows_apps = PathBuf::from(local_app_data)
+            .join("Microsoft")
+            .join("WindowsApps");
+        assert!(
+            system_tree_prefixes()
+                .iter()
+                .any(|prefix| prefix == &windows_apps),
+            "WindowsApps must be skipped; alias stubs return ERROR_CANT_RESOLVE_FILENAME"
+        );
+        assert!(is_skippable_acl_error(ERROR_ACCESS_DENIED));
+        assert!(is_skippable_acl_error(ERROR_CANT_RESOLVE_FILENAME));
+        assert!(!is_skippable_acl_error(32));
     }
 }

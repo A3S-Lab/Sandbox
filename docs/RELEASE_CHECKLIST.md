@@ -18,6 +18,8 @@ Verified by `policy::gate7_release_invariants` plus CI on each OS:
 - [x] `cargo test --all-targets` green on macOS, Linux, **and** Windows CI for
   the release commit (includes
   `windows_appcontainer_named_pipe_connect_allow_deny_and_blocks_raw_egress`)
+- [x] WSL2 Linux suite green on a **native** ext4/xfs path (not `/mnt/<drive>`),
+  via `scripts/run-wsl-ga-tests.sh` (bubblewrap required)
 
 ## Capability matrix (claim only with live proof)
 
@@ -34,9 +36,12 @@ Verified by `policy::gate7_release_invariants` plus CI on each OS:
 - [x] In-command symlink race + overlapping same-workspace executes
 - [x] CONNECT protocol fuzz corpus (`policy/gate7_fuzz.rs`)
 - [x] Soak (≥64 baseline executes; `GATE7_SOAK_ROUNDS`) + starter p50 benchmarks
+  — enterprise GA target: record ≥256 rounds via
+  `collect-release-evidence.ps1` / `collect-release-evidence.sh` before tag
 - [x] SBOM generator: `./scripts/generate-sbom.sh`
 - [x] Checksums / signatures helper: `./scripts/sign-release.sh <artifacts...>`
-- [x] Local evidence collector: `./scripts/collect-release-evidence.sh`
+- [x] Local evidence collector: `./scripts/collect-release-evidence.sh` (+ Windows
+  `scripts/collect-release-evidence.ps1`)
 - [x] Independent review package: `docs/INDEPENDENT_REVIEW.md`
 
 ## Independent review (external)
@@ -45,14 +50,15 @@ Verified by `policy::gate7_release_invariants` plus CI on each OS:
 - [ ] Reviewer confirms mediator fencing on each claiming OS
 - [ ] Reviewer sign-off recorded (PR comment or release attestation)
 - [ ] Mediated network is **not** made the default profile without that sign-off
+- [x] Windows + WSL local evidence recorded in [`WINDOWS_WSL_GA.md`](WINDOWS_WSL_GA.md)
 
 ## Versioning
 
 - [x] `CHANGELOG.md` entry for the release
 - [x] Crate version bumped intentionally (immutable crates.io versions)
-- [x] Tag matches the signed artifact commit SHA (`v0.1.3`)
-- [x] Provenance JSON attached to a published GitHub Release
-
+- [x] Tag matches the signed artifact commit SHA (`v0.1.5` when this release
+  is tagged; prior production tag `v0.1.3`)
+- [ ] Provenance JSON attached to a published GitHub Release for `v0.1.5`
 ## Explicit non-goals for this release
 
 - TLS interception

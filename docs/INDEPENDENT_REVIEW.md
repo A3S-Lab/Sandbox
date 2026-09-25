@@ -35,6 +35,8 @@ Review `a3s-sandbox` native OS fences and host-supervised mediators for:
 | SBOM | `./scripts/generate-sbom.sh` |
 | Checksums / signatures | `./scripts/sign-release.sh <bins>` |
 | Local evidence bundle | `./scripts/collect-release-evidence.sh` → `release-out/` |
+| Windows host evidence | `powershell -File scripts/collect-release-evidence.ps1` → `release-out/EVIDENCE.windows.md` |
+| WSL2 Linux evidence | Native FS only: `scripts/run-wsl-ga-tests.sh` + [`WINDOWS_WSL_GA.md`](WINDOWS_WSL_GA.md) |
 
 ## Sign-off template
 

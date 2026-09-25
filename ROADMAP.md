@@ -100,12 +100,18 @@ cargo test --all-targets
 
 Known Gate 0 debts (tracked, not ignored):
 
-- Windows executions serialized in one host process (shared ACL/device-map state).
 - Residual pre-planted package-store hardlinks to non-credential outside files.
-- No structured denial telemetry yet (operators cannot explain denials uniformly).
 - Resource limits: policy timeout + output ceilings everywhere; Windows Job
   process/memory; Linux memory via `RLIMIT_AS`; unenforceable quotas fail closed.
 - Network is deny-all only (correct default; insufficient for opt-in tool fetch).
+
+Closed (do not re-open without evidence):
+
+- Windows ancestor ACL hangs on `%TEMP%` / profile parents: fixed by
+  `SetKernelObjectSecurity` for non-inheriting grants (see CHANGELOG Unreleased).
+- Windows per-workspace serialization: narrowed to per-workspace ACL gate + short
+  DOS-drive allocation lock (Gate 6).
+- Structured denial telemetry: Gate 2 `AuditEvent` / `AuditLog`.
 
 ## Capability backlog (ranked)
 
@@ -350,10 +356,11 @@ CONNECT protocol fuzz corpus, release-checklist invariant tests
 signing/provenance + `scripts/collect-release-evidence.sh`,
 `docs/RELEASE_CHECKLIST.md`, and `docs/INDEPENDENT_REVIEW.md` are in tree.
 
-**Residual:** multi-hour soak evidence attached to a release, fuller throughput
-benches, signed release artifacts on a real tag, **independent security
-review** before any profile makes mediated network the default. Windows
-`mediated_http` is claimed after live AppContainer pipe proof on Windows CI;
+**Residual:** signed release artifacts on a real tag, **independent security
+review** before any profile makes mediated network the default. Extended soak
+evidence (≥256 rounds) has been collected locally on Windows and WSL2 (see
+`docs/WINDOWS_WSL_GA.md`); attach the `release-out/` bundle when cutting the
+tag. Windows `mediated_http` is claimed after live AppContainer pipe proof;
 Linux HTTP CONNECT is claimed; Linux/Windows SOCKS and unix allowlists remain
 fail-closed.
 

@@ -139,6 +139,7 @@ impl PlatformSandbox {
                     &self.powershell,
                     &self.profile.sid,
                     &policy.workspace,
+                    &policy.scratch,
                     &request.command,
                     environment,
                     &budget,
@@ -318,6 +319,9 @@ struct WindowsChild {
     workspace_drive: WorkspaceDrive,
     /// Keeps the inherited mediation client handle alive for the guest.
     _mediator_client: Option<OwnedHandle>,
+    /// Long scripts are launched with `-File` so the command line stays under
+    /// the Windows 32767-character limit. Removed after the process exits.
+    script_file: ScriptFile,
 }
 
 struct WorkspaceDrive {
@@ -398,10 +402,74 @@ impl Drop for WorkspaceDrive {
     }
 }
 
+const MAX_POWERSHELL_COMMAND_CHARS: usize = 30_000;
+
+struct ScriptFile(Option<PathBuf>);
+
+impl Drop for ScriptFile {
+    fn drop(&mut self) {
+        if let Some(path) = self.0.take() {
+            let _ = std::fs::remove_file(path);
+        }
+    }
+}
+
+fn powershell_arguments(
+    powershell: &Path,
+    scratch: &Path,
+    wrapped: &str,
+) -> Result<(Vec<OsString>, ScriptFile)> {
+    let encoded = encode_powershell_command(wrapped);
+    let encoded_arguments = powershell_flags(
+        powershell,
+        vec![OsString::from("-EncodedCommand"), OsString::from(encoded)],
+    );
+    if join_windows_arguments(&encoded_arguments)
+        .encode_utf16()
+        .count()
+        <= MAX_POWERSHELL_COMMAND_CHARS
+    {
+        return Ok((encoded_arguments, ScriptFile(None)));
+    }
+
+    std::fs::create_dir_all(scratch)
+        .with_context(|| format!("create scratch {}", scratch.display()))?;
+    let unique = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|elapsed| elapsed.as_nanos())
+        .unwrap_or(0);
+    let path = scratch.join(format!("a3s-command-{}-{unique}.ps1", std::process::id()));
+    // -File does not turn a failed cmdlet into a non-zero process exit.
+    // -EncodedCommand does. Keep that kernel signal for deny checks.
+    let file_body = format!("trap {{ exit 1 }}\n{wrapped}\nif (-not $?) {{ exit 1 }}\n");
+    std::fs::write(&path, file_body.as_bytes())
+        .with_context(|| format!("write PowerShell script {}", path.display()))?;
+    let file_arguments = powershell_flags(
+        powershell,
+        vec![OsString::from("-File"), path.as_os_str().to_os_string()],
+    );
+    Ok((file_arguments, ScriptFile(Some(path))))
+}
+
+fn powershell_flags(powershell: &Path, tail: Vec<OsString>) -> Vec<OsString> {
+    let mut arguments = vec![
+        powershell.as_os_str().to_os_string(),
+        OsString::from("-NoLogo"),
+        OsString::from("-NoProfile"),
+        OsString::from("-NonInteractive"),
+        OsString::from("-ExecutionPolicy"),
+        OsString::from("Bypass"),
+    ];
+    arguments.extend(tail);
+    arguments
+}
+
+#[allow(clippy::too_many_arguments)] // AppContainer spawn needs identity, FS roots, and optional pipe.
 fn spawn_appcontainer_process(
     powershell: &Path,
     sid: &SidBuffer,
     workspace: &Path,
+    scratch: &Path,
     script: &str,
     environment: std::collections::BTreeMap<std::ffi::OsString, std::ffi::OsString>,
     budget: &ResolvedResourceBudget,
@@ -447,17 +515,7 @@ fn spawn_appcontainer_process(
     let workspace_script =
         format!("Set-Location -LiteralPath '{workspace_literal}' -ErrorAction Stop\n{script}");
     let wrapped = build_powershell_command(&workspace_script);
-    let encoded = encode_powershell_command(&wrapped);
-    let arguments = [
-        powershell.as_os_str().to_os_string(),
-        "-NoLogo".into(),
-        "-NoProfile".into(),
-        "-NonInteractive".into(),
-        "-ExecutionPolicy".into(),
-        "Bypass".into(),
-        "-EncodedCommand".into(),
-        encoded.into(),
-    ];
+    let (arguments, script_file) = powershell_arguments(powershell, scratch, &wrapped)?;
     let mut command_line = wide_null(OsStr::new(&join_windows_arguments(&arguments)));
     let application = wide_null(powershell.as_os_str());
     let current_directory = wide_null(workspace_drive.root().as_os_str());
@@ -521,6 +579,7 @@ fn spawn_appcontainer_process(
         stderr: stderr_read,
         workspace_drive,
         _mediator_client: mediator_client,
+        script_file,
     })
 }
 
@@ -583,6 +642,7 @@ async fn capture_process(
         stderr,
         mut workspace_drive,
         _mediator_client,
+        script_file: _script_file,
     } = child;
     let wait_handle = duplicate_handle(&process)?;
     let mut wait = tokio::task::spawn_blocking(move || {

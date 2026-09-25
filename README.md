@@ -33,7 +33,7 @@ the version intentionally when adopting a newer release:
 
 ```toml
 [dependencies]
-a3s-sandbox = "0.1.3"
+a3s-sandbox = "0.1.5"
 ```
 
 Run a command through the native boundary:
@@ -155,12 +155,16 @@ Release packaging helpers:
 ./scripts/sign-release.sh target/release/a3s-sandbox target/release/a3s-sandbox-relay
 ```
 
-See [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) and
-[docs/INDEPENDENT_REVIEW.md](docs/INDEPENDENT_REVIEW.md) for the production
-release gate. Collect local evidence with:
+See [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md),
+[docs/INDEPENDENT_REVIEW.md](docs/INDEPENDENT_REVIEW.md), and
+[docs/WINDOWS_WSL_GA.md](docs/WINDOWS_WSL_GA.md) for the production release
+gate (including Windows host + WSL2 native-FS evidence). Collect local evidence
+with:
 
 ```bash
 ./scripts/collect-release-evidence.sh
+# WSL2 (native Linux FS only — refuse /mnt/<drive>):
+./scripts/run-wsl-ga-tests.sh
 ```
 
 The CI matrix covers `ubuntu-latest`, `macos-14`, and `windows-latest`.

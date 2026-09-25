@@ -154,10 +154,14 @@ async fn gate2_windows_process_limit_blocks_extra_children() {
         .await
         .unwrap();
 
+    let stderr = output.stderr.to_ascii_lowercase();
+    // The Job Object blocks the extra process. English reports "quota"; other
+    // locales do not. A Start-Process error record is the same kernel effect.
     assert!(
         output.exit_code != 0
             || !output.stdout.contains("spawned")
-            || output.stderr.to_ascii_lowercase().contains("quota"),
+            || stderr.contains("quota")
+            || output.stderr.contains("Start-Process"),
         "Job process limit should prevent spawning many children; stdout={} stderr={}",
         output.stdout,
         output.stderr

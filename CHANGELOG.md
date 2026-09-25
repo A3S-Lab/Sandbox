@@ -1,5 +1,32 @@
 ## [Unreleased]
 
+## [0.1.5] - 2026-09-25
+
+### Fixed
+
+- Windows AppContainer ACL updates on ancestor directories (for example `%TEMP%`)
+  use `SetKernelObjectSecurity` for non-inheriting grants. `SetNamedSecurityInfoW`
+  was walking every descendant that already carried inheritable ACEs, which hung
+  host executes after many sandbox runs polluted Temp DACLs.
+- Windows user-owned PATH toolchains receive a non-inheritable execute grant;
+  system trees and `WindowsApps` execution aliases are skipped. Alias stubs that
+  return `ERROR_CANT_RESOLVE_FILENAME` (1920) fail soft like access denied.
+- Long PowerShell guest commands fall back to `-File` under scratch when the
+  encoded command line would exceed the Windows limit.
+- PowerShell compat shim adds `test` / `grep` / `printf` helpers and preserves
+  `$LASTEXITCODE` for deny checks.
+- Job Object process-limit tests accept non-English Start-Process failure text.
+- Shell scripts use LF via `.gitattributes` so WSL/Linux can execute Gate 7 SBOM
+  helpers checked out on Windows.
+
+### Added
+
+- WSL GA runner: `scripts/run-wsl-ga-tests.sh` (refuses `/mnt/<drive>` 9p paths).
+- Windows evidence collector: `scripts/collect-release-evidence.ps1`.
+- Bash evidence collector auto-uses `--test-threads=1` on Windows and records
+  live AppContainer named-pipe CONNECT proof when run on Windows.
+- WSL/Windows GA evidence notes: `docs/WINDOWS_WSL_GA.md`.
+
 ## [0.1.4] - 2026-09-16
 
 ### Fixed
