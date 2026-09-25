@@ -75,7 +75,7 @@ async fn gate4_connect_mediator_allow_and_deny_integration() {
         port: Some(upstream_port),
         path_prefix: None,
     });
-    let mediator = ConnectMediator::bind(policy).await.unwrap();
+    let mediator = ConnectMediator::bind(policy, None).await.unwrap();
 
     let mut client = TcpStream::connect(mediator.listen_addr()).await.unwrap();
     client

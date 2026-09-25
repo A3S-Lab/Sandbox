@@ -5,7 +5,7 @@
 //! AppContainer inherited named pipe). These helpers define the decision
 //! surface the mediator must enforce without silent broadening.
 
-use super::model::{NetworkAllowRule, SandboxPolicy};
+use super::model::{NetworkAllowRule, SandboxPolicy, SecretHeaderInjection};
 use super::AccessDecision;
 
 /// Request shape the mediator evaluates. No DNS resolution here—callers pass
@@ -93,6 +93,34 @@ fn rule_matches(rule: &NetworkAllowRule, request: &MediatedHttpRequest) -> bool 
         None => true,
         Some(prefix) => request.path == *prefix || request.path.starts_with(&format!("{prefix}/")),
     }
+}
+
+/// Every secret injection rule matching this request, in policy order.
+///
+/// Injection rules never authorize: `decide_mediated_http` remains the only
+/// network authority. A matching rule only decorates an allowed request with
+/// its host-held secret header.
+pub fn matching_secret_injections<'a>(
+    policy: &'a SandboxPolicy,
+    request: &MediatedHttpRequest,
+) -> Vec<&'a SecretHeaderInjection> {
+    policy
+        .secret_injections
+        .iter()
+        .filter(|injection| {
+            host_eq(&injection.host, &request.host)
+                && injection
+                    .port
+                    .map(|port| port == request.port)
+                    .unwrap_or(true)
+                && match &injection.path_prefix {
+                    None => true,
+                    Some(prefix) => {
+                        request.path == *prefix || request.path.starts_with(&format!("{prefix}/"))
+                    }
+                }
+        })
+        .collect()
 }
 
 fn host_eq(expected: &str, actual: &str) -> bool {
@@ -251,6 +279,99 @@ mod tests {
         assert_eq!(
             decide_mediated_socks(&path_limited, "api.example.com", 443),
             AccessDecision::Deny
+        );
+    }
+
+    fn injection(
+        host: &str,
+        port: Option<u16>,
+        path_prefix: Option<&str>,
+        header: &str,
+        secret_env: &str,
+    ) -> SecretHeaderInjection {
+        SecretHeaderInjection {
+            host: host.into(),
+            port,
+            path_prefix: path_prefix.map(str::to_string),
+            header: header.into(),
+            value_prefix: "Bearer ".into(),
+            secret_env: secret_env.into(),
+        }
+    }
+
+    fn http_request(host: &str, port: u16, path: &str) -> MediatedHttpRequest {
+        MediatedHttpRequest {
+            host: host.into(),
+            port,
+            path: path.into(),
+        }
+    }
+
+    #[test]
+    fn injections_apply_only_on_matching_origin_and_path() {
+        let mut policy = mediated_policy(vec![NetworkAllowRule {
+            host: "api.example.com".into(),
+            port: Some(443),
+            path_prefix: None,
+        }]);
+        policy.secret_injections = vec![injection(
+            "api.example.com",
+            Some(443),
+            Some("/v1"),
+            "Authorization",
+            "API_TOKEN",
+        )];
+
+        let matched = matching_secret_injections(
+            &policy,
+            &http_request("api.example.com", 443, "/v1/models"),
+        );
+        assert_eq!(matched.len(), 1);
+        assert_eq!(matched[0].secret_env, "API_TOKEN");
+
+        assert!(
+            matching_secret_injections(&policy, &http_request("api.example.com", 443, "/v2"))
+                .is_empty()
+        );
+        assert!(
+            matching_secret_injections(&policy, &http_request("api.example.com", 8443, "/v1"))
+                .is_empty()
+        );
+        assert!(matching_secret_injections(
+            &policy,
+            &http_request("other.example.com", 443, "/v1")
+        )
+        .is_empty());
+    }
+
+    #[test]
+    fn injection_host_match_is_case_insensitive_without_aliasing() {
+        let mut policy = mediated_policy(vec![NetworkAllowRule {
+            host: "api.example.com".into(),
+            port: None,
+            path_prefix: None,
+        }]);
+        policy.secret_injections = vec![injection("API.EXAMPLE.COM", None, None, "X-Api-Key", "K")];
+
+        assert_eq!(
+            matching_secret_injections(&policy, &http_request("api.example.com", 80, "/")).len(),
+            1,
+            "host matching must stay case-insensitive"
+        );
+        assert!(
+            matching_secret_injections(&policy, &http_request("203.0.113.10", 80, "/")).is_empty()
+        );
+    }
+
+    #[test]
+    fn injections_without_allow_rule_authorize_nothing() {
+        let mut policy = mediated_policy(vec![]);
+        policy.network.allow.clear();
+        policy.secret_injections = vec![injection("api.example.com", None, None, "X-Api-Key", "K")];
+        assert_eq!(
+            decide_mediated_http(&policy, &http_request("api.example.com", 80, "/")),
+            AccessDecision::Deny,
+            "injection rules decorate allowed requests; network.allow stays the only authority"
         );
     }
 }

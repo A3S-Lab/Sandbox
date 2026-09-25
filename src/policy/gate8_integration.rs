@@ -11,7 +11,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::policy::{AccessDecision, NetworkAllowRule, SandboxPolicy};
+use crate::policy::{AccessDecision, NetworkAllowRule, SandboxPolicy, SecretHeaderInjection};
 use crate::{AuditSurface, CommandRequest, NativeSandbox, ReasonCode, SECRET_ENV_SENTINEL_PREFIX};
 
 const SECRET_NAME: &str = "A3S_GATE8_TOKEN";
@@ -258,4 +258,114 @@ async fn gate8_secret_bytes_absent_from_audit_and_digest_stable() {
         !injection.target_redacted.contains(SECRET_VALUE),
         "audit targets must stay redacted"
     );
+}
+
+// -- Gate 8 slice 2: egress re-injection at the mediation point --------------
+
+#[cfg(not(windows))]
+#[tokio::test]
+async fn gate8_egress_reinjection_delivers_secret_without_landing_it() {
+    use tokio::io::{AsyncBufReadExt, AsyncWriteExt};
+    use tokio::net::TcpListener;
+
+    let upstream = TcpListener::bind(std::net::SocketAddr::from(([127, 0, 0, 1], 0)))
+        .await
+        .unwrap();
+    let upstream_port = upstream.local_addr().unwrap().port();
+    let upstream_task = tokio::spawn(async move {
+        let (raw, _) = upstream.accept().await.unwrap();
+        let mut stream = tokio::io::BufReader::new(raw);
+        let mut head = Vec::new();
+        loop {
+            let mut line = Vec::new();
+            match stream.read_until(b'\n', &mut line).await {
+                Ok(0) | Err(_) => return String::new(),
+                Ok(_) if line == b"\r\n" || line == b"\n" => break,
+                Ok(_) => head.extend_from_slice(&line),
+            }
+        }
+        let head = String::from_utf8_lossy(&head).into_owned();
+        assert!(
+            head.contains(&format!("Authorization: Bearer {SECRET_VALUE}")),
+            "upstream must observe the injected secret: {head:?}"
+        );
+        assert!(
+            !head.contains("a3s:secret:"),
+            "sentinels must never be forwarded upstream: {head:?}"
+        );
+        stream
+            .write_all(b"HTTP/1.1 200 OK\r\nContent-Length: 8\r\nConnection: close\r\n\r\ntoken-ok")
+            .await
+            .unwrap();
+        head
+    });
+
+    let workspace = tempfile::tempdir().unwrap();
+    let mut policy = mediated_policy_for_port(upstream_port);
+    policy.secret_injections.push(SecretHeaderInjection {
+        host: "127.0.0.1".into(),
+        port: Some(upstream_port),
+        path_prefix: Some("/v1".into()),
+        header: "Authorization".into(),
+        value_prefix: "Bearer ".into(),
+        secret_env: SECRET_NAME.into(),
+    });
+    let sandbox = NativeSandbox::with_policy(workspace.path(), policy).unwrap();
+
+    let script = format!(
+        r#"python3 - <<'PY'
+import os, socket
+proxy = os.environ["HTTP_PROXY"].rsplit(":", 1)
+port = int(proxy[-1])
+s = socket.create_connection(("127.0.0.1", port))
+s.sendall("GET http://127.0.0.1:{upstream_port}/v1/token HTTP/1.1\r\nAccept: */*\r\n\r\n".encode())
+data = b""
+while True:
+    chunk = s.recv(4096)
+    if not chunk:
+        break
+    data += chunk
+body = data.split(b"\r\n\r\n", 1)[1]
+print(body.decode())
+PY"#
+    );
+    let output = sandbox
+        .execute_with_secrets(
+            CommandRequest {
+                command: script,
+                timeout_ms: 30_000,
+                output_observer: None,
+                env: None,
+            },
+            secret_map(SECRET_NAME, SECRET_VALUE),
+        )
+        .await
+        .unwrap();
+    assert_eq!(output.exit_code, 0, "stderr: {}", output.stderr);
+    assert!(
+        output.stdout.contains("token-ok"),
+        "stdout={} stderr={}",
+        output.stdout,
+        output.stderr
+    );
+    assert!(
+        !output.stdout.contains(SECRET_VALUE) && !output.stderr.contains(SECRET_VALUE),
+        "secret bytes must not appear in guest-visible output"
+    );
+    assert!(
+        !format!("{:?}", sandbox.audit_log().snapshot()).contains(SECRET_VALUE),
+        "secret bytes must never reach the audit log"
+    );
+    upstream_task.await.unwrap();
+}
+
+fn mediated_policy_for_port(port: u16) -> SandboxPolicy {
+    let mut policy = SandboxPolicy::a3s_bash_baseline();
+    policy.features.mediated_network = true;
+    policy.network.allow.push(NetworkAllowRule {
+        host: "127.0.0.1".into(),
+        port: Some(port),
+        path_prefix: None,
+    });
+    policy
 }

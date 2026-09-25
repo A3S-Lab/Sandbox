@@ -2,6 +2,16 @@
 
 ### Added
 
+- Gate 8 slice 2 — egress re-injection at the mediation point. The host
+  CONNECT/HTTP mediator now mediates absolute-form plain-HTTP requests
+  (`GET http://host/path`) under the same `network.allow` authority, and
+  matching `SecretHeaderInjection` rules inject `{header}: {value_prefix}`
+  + the host-held secret, replacing any client-supplied instance (guest
+  sentinels are swallowed, never forwarded). `https://` absolute forms
+  refuse (TLS interception stays a non-goal); chunked bodies refuse;
+  bodies cap at 1 MiB; missing or control-character-bearing secrets fail
+  closed before any upstream byte. All mediator binds carry the
+  per-execution secret map (`MediationContext`).
 - Gate 8 slice 1 — host-held secret environment entries via
   `NativeSandbox::execute_with_secrets`. Secret values never reach the child
   process: each entry is delivered as an `a3s:secret:<NAME>` sentinel, the

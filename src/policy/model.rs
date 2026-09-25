@@ -18,6 +18,28 @@ pub struct SandboxPolicy {
     pub sockets: SocketRules,
     pub resources: ResourceLimits,
     pub features: FeatureFlags,
+    /// Gate 8 egress transforms. Decoration only: a request is allowed by the
+    /// `network.allow` list alone, and matching injection rules add one secret
+    /// header each. TLS interception stays a non-goal, so these apply only to
+    /// absolute-form plain-HTTP mediation.
+    pub secret_injections: Vec<SecretHeaderInjection>,
+}
+
+/// Inject `{header}: {value_prefix}<secret>` into an allowed absolute-form
+/// plain-HTTP request whose origin and path match. The secret value lives in
+/// the per-request secret map (see `NativeSandbox::execute_with_secrets`),
+/// never in this document: only its env-entry name is recorded here.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SecretHeaderInjection {
+    pub host: String,
+    pub port: Option<u16>,
+    pub path_prefix: Option<String>,
+    /// HTTP header name to inject, replacing any client-supplied instance.
+    pub header: String,
+    /// Literal prefix before the secret value (for example `"Bearer "`).
+    pub value_prefix: String,
+    /// Name of the secret env entry holding the value.
+    pub secret_env: String,
 }
 
 /// Filesystem allow/deny sets. Deny wins over allow. Write exceptions apply
@@ -150,6 +172,7 @@ impl Default for SandboxPolicy {
             sockets: SocketRules::default(),
             resources: ResourceLimits::default(),
             features: FeatureFlags::default(),
+            secret_injections: Vec::new(),
         }
     }
 }
@@ -226,6 +249,12 @@ impl SandboxPolicy {
         if self.network.default != NetworkDefault::DenyAll {
             bail!("network default must be DenyAll (mediation is allowlist-only)");
         }
+        if !self.secret_injections.is_empty() && !self.features.mediated_network {
+            bail!(
+                "secret_injections require features.mediated_network; refuse secret \
+                 egress transforms without a mediation boundary"
+            );
+        }
 
         for rule in &self.network.allow {
             if rule.host.is_empty() || rule.host.contains(['/', '\\', ' ']) {
@@ -235,6 +264,45 @@ impl SandboxPolicy {
                 if !prefix.starts_with('/') || prefix.contains("..") {
                     bail!(
                         "network allow path_prefix must be an absolute path without '..': {:?}",
+                        prefix
+                    );
+                }
+            }
+        }
+
+        for injection in &self.secret_injections {
+            if injection.host.is_empty() || injection.host.contains(['/', '\\', ' ']) {
+                bail!("invalid secret injection host: {:?}", injection.host);
+            }
+            if injection.header.is_empty() || !injection.header.chars().all(is_http_token_char) {
+                bail!(
+                    "invalid secret injection header name: {:?}",
+                    injection.header
+                );
+            }
+            if injection
+                .value_prefix
+                .bytes()
+                .any(|byte| matches!(byte, b'\r' | b'\n' | 0))
+            {
+                bail!(
+                    "secret injection value_prefix must not contain control characters: {:?}",
+                    injection.header
+                );
+            }
+            if injection.secret_env.is_empty()
+                || injection.secret_env.contains(['=', '\0'])
+                || super::secret_env_name_is_reserved(&injection.secret_env)
+            {
+                bail!(
+                    "invalid secret injection secret_env name: {:?}",
+                    injection.secret_env
+                );
+            }
+            if let Some(prefix) = &injection.path_prefix {
+                if !prefix.starts_with('/') || prefix.contains("..") {
+                    bail!(
+                        "secret injection path_prefix must be an absolute path without '..': {:?}",
                         prefix
                     );
                 }
@@ -307,6 +375,18 @@ impl SandboxPolicy {
 fn sort_path_rules(rules: &mut Vec<PathRule>) {
     let set: BTreeSet<_> = rules.drain(..).collect();
     rules.extend(set);
+}
+
+/// RFC 7230 `tchar`: characters allowed in an HTTP header name.
+fn is_http_token_char(char: char) -> bool {
+    matches!(
+        char,
+        '!' | '#' | '$' | '%' | '&' | '\'' | '*' | '+' | '-' | '.' | '^' | '_' | '`' | '|'
+            | '~'
+            | '0'..='9'
+            | 'a'..='z'
+            | 'A'..='Z'
+    )
 }
 
 fn validate_path_rule(rule: &PathRule) -> Result<()> {

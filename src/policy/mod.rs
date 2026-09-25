@@ -40,12 +40,13 @@ pub use capabilities::BackendCapabilities;
 pub use decide::{decide_network, decide_read, decide_write, AccessDecision};
 pub use digest::policy_digest;
 pub use mediate::{
-    decide_mediated_connect, decide_mediated_http, decide_mediated_socks, MediatedHttpRequest,
+    decide_mediated_connect, decide_mediated_http, decide_mediated_socks,
+    matching_secret_injections, MediatedHttpRequest,
 };
 pub use model::{
     FeatureFlags, FilesystemMount, FilesystemRules, MountMode, NetworkAllowRule, NetworkDefault,
-    NetworkRules, PathRule, ResourceLimits, SandboxPolicy, SessionWriteMode, SocketRules,
-    POLICY_VERSION,
+    NetworkRules, PathRule, ResourceLimits, SandboxPolicy, SecretHeaderInjection, SessionWriteMode,
+    SocketRules, POLICY_VERSION,
 };
 pub use normalize::{normalize_policy_path, NormalizedPath};
 pub use resources::ResolvedResourceBudget;

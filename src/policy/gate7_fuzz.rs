@@ -92,7 +92,7 @@ async fn gate7_fuzz_mediator_survives_malformed_tcp_payloads_without_upstream() 
         );
     });
 
-    let mediator = ConnectMediator::bind(allow_policy("127.0.0.1", upstream_addr.port()))
+    let mediator = ConnectMediator::bind(allow_policy("127.0.0.1", upstream_addr.port()), None)
         .await
         .unwrap();
 
@@ -174,7 +174,7 @@ async fn gate7_fuzz_mediator_still_allows_well_formed_connect_after_garbage() {
         stream.write_all(b"ok!!").await.unwrap();
     });
 
-    let mediator = ConnectMediator::bind(allow_policy("127.0.0.1", upstream_addr.port()))
+    let mediator = ConnectMediator::bind(allow_policy("127.0.0.1", upstream_addr.port()), None)
         .await
         .unwrap();
 

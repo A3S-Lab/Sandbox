@@ -132,7 +132,7 @@ async fn gate7_connect_mediator_rejects_non_connect_method() {
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
     use tokio::net::TcpStream;
 
-    let mediator = ConnectMediator::bind(mediated_http_policy("127.0.0.1", 9))
+    let mediator = ConnectMediator::bind(mediated_http_policy("127.0.0.1", 9), None)
         .await
         .unwrap();
     let mut client = TcpStream::connect(mediator.listen_addr()).await.unwrap();
@@ -701,7 +701,7 @@ async fn gate7_benchmark_connect_mediator_allow_p50_under_budget() {
         }
     });
 
-    let mediator = ConnectMediator::bind(mediated_http_policy("127.0.0.1", upstream_port))
+    let mediator = ConnectMediator::bind(mediated_http_policy("127.0.0.1", upstream_port), None)
         .await
         .unwrap();
     let addr = mediator.listen_addr();

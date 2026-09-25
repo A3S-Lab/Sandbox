@@ -397,12 +397,28 @@ toolchain, mediator, and injection keys), collisions with explicit env
 entries, and malformed entries all fail closed. Injection and refusal are
 auditable (`AuditSurface::Environment`, `ReasonCode::SecretRequiresMediation`);
 secret bytes never reach the child environment, captured output, audit log,
-or policy digest. Evidence: `policy::gate8_integration` plus full local gates.
+or policy digest.
 
-**Residual:** egress re-injection at the mediation point (Gate 4 CONNECT
-first, absolute-form HTTP only — TLS interception stays a non-goal);
-cross-OS CI evidence for the new matrix; box `secret_environment`
-macOS/Windows execution parity is a `crates/box` follow-up.
+**Status (slice 2):** complete — egress re-injection at the mediation point.
+The mediator now handles absolute-form plain-HTTP requests
+(`GET http://host[:port]/path`) under the same `network.allow` authority as
+CONNECT, and typed `SecretHeaderInjection` rules (`host`/`port`/
+`path_prefix`/`header`/`value_prefix`/`secret_env`) inject the host-held
+value, replacing any client-supplied instance so guest sentinels cannot leak
+upstream. `https://` absolute forms and chunked bodies refuse; request
+bodies cap at 1 MiB; a missing or control-character-bearing secret fails
+closed before any upstream byte. Injection rules never authorize:
+`decide_mediated_http` remains the only authority. Every mediator bind
+(`bind`, `bind_unix`, `bind_named_pipe*`) carries the per-execution secret
+map, so Linux/Windows bridges get injection with the same core. Evidence:
+`policy::gate8_integration` live e2e (guest → proxy → injected upstream),
+`network::connect` absolute-form live tests, `policy::mediate` matching
+units; Linux and Windows cfg paths cross-checked by `cargo check --target`.
+
+**Residual:** SOCKS-side secret transforms (only meaningful with a
+credential-aware SOCKS consumer); cross-OS CI evidence for the new tests;
+box `secret_environment` macOS/Windows execution parity is a `crates/box`
+follow-up.
 
 **Why:** the field's strongest credential pattern (mask + egress-side
 injection) keeps secrets out of the boundary entirely; path deny-lists alone
@@ -412,10 +428,10 @@ tree.
 - Host-held secret store contract (typed `SecretRef`, never bytes in
   policy/config/state). Slice 1 passes the per-request map; a store trait
   waits for a real consumer.
-- Mediator re-injection for allowlisted egress only; unlisted egress carries
-  sentinels only. **Exit:** falsifiable negative tests prove secret bytes
-  never appear in guest env/filesystem when `SecretRef`s are used, and the
-  per-platform capability matrix is updated.
+- ~~Mediator re-injection for allowlisted egress only~~ ✅ slice 2.
+  **Exit:** falsifiable negative tests prove secret bytes never appear in
+  guest env/filesystem when `SecretRef`s are used, sentinels never reach
+  upstream, and the per-platform capability matrix is updated.
 
 ## Target architecture
 

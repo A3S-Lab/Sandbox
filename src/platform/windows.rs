@@ -1194,10 +1194,14 @@ mod tests {
         let (server, client) = sandbox
             .create_mediation_pipe(&pipe_name)
             .expect("connected mediation pipe pair");
-        let mediator =
-            ConnectMediator::bind_named_pipe_connected(document.clone(), pipe_name.clone(), server)
-                .await
-                .expect("connected CONNECT named-pipe mediator");
+        let mediator = ConnectMediator::bind_named_pipe_connected(
+            document.clone(),
+            pipe_name.clone(),
+            server,
+            None,
+        )
+        .await
+        .expect("connected CONNECT named-pipe mediator");
 
         let mut policy = EnforcedPolicy::compile(
             &SandboxPolicy::a3s_bash_baseline(),
@@ -1278,10 +1282,14 @@ $client.Dispose()
         let (deny_server, deny_client) = sandbox
             .create_mediation_pipe(&deny_pipe)
             .expect("deny mediation pipe pair");
-        let deny_mediator =
-            ConnectMediator::bind_named_pipe_connected(document, deny_pipe.clone(), deny_server)
-                .await
-                .expect("deny CONNECT mediator");
+        let deny_mediator = ConnectMediator::bind_named_pipe_connected(
+            document,
+            deny_pipe.clone(),
+            deny_server,
+            None,
+        )
+        .await
+        .expect("deny CONNECT mediator");
         policy.mediator_pipe_name = Some(deny_pipe);
 
         let deny_script = format!(

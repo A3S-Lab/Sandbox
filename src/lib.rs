@@ -27,14 +27,14 @@ pub use observability::{AuditEvent, AuditEventParts, AuditLog, AuditSurface, Rea
 pub use policy::{
     decide_mediated_connect, decide_mediated_http, decide_mediated_socks, decide_network,
     decide_read, decide_write, ensure_policy_not_broader, hard_link_count,
-    hard_link_count_for_open_file, is_protected_workspace_path, normalize_policy_path,
-    policy_digest, sensitive_paths, should_skip_workspace_scan_directory,
+    hard_link_count_for_open_file, is_protected_workspace_path, matching_secret_injections,
+    normalize_policy_path, policy_digest, sensitive_paths, should_skip_workspace_scan_directory,
     workspace_credential_hardlink_aliases, workspace_hardlink_paths, workspace_sensitive_paths,
     AccessDecision, BackendCapabilities, FeatureFlags, FilesystemMount, FilesystemRules,
     MediatedHttpRequest, MountMode, NetworkAllowRule, NetworkDefault, NetworkRules, NormalizedPath,
     PathRule, PolicyUpdateOptions, ResolvedResourceBudget, ResourceLimits, SandboxPolicy,
-    SessionWriteMode, SocketRules, POLICY_VERSION, PROTECTED_WORKSPACE_DIRECTORIES,
-    PROTECTED_WORKSPACE_FILES,
+    SecretHeaderInjection, SessionWriteMode, SocketRules, POLICY_VERSION,
+    PROTECTED_WORKSPACE_DIRECTORIES, PROTECTED_WORKSPACE_FILES,
 };
 
 const DEFAULT_TIMEOUT_MS: u64 = 120_000;
@@ -298,7 +298,7 @@ impl NativeSandbox {
 
     /// Execute a command inside the configured native boundary.
     pub async fn execute(&self, request: CommandRequest) -> Result<CommandOutput> {
-        self.execute_inner(request, new_command_id()).await
+        self.execute_inner(request, new_command_id(), None).await
     }
 
     /// Execute a command with host-held secret environment entries.
@@ -317,7 +317,7 @@ impl NativeSandbox {
     ) -> Result<CommandOutput> {
         let command_id = new_command_id();
         let Some(secrets) = secrets.filter(|map| !map.is_empty()) else {
-            return self.execute_inner(request, command_id).await;
+            return self.execute_inner(request, command_id, None).await;
         };
         if !self.policy.features.mediated_network {
             self.audit.record(AuditEvent::from_parts(AuditEventParts {
@@ -354,6 +354,25 @@ impl NativeSandbox {
                 );
             }
         }
+        // Gate 8 slice 2: every policy injection must resolve against this
+        // request's secrets, and its value must be header-safe. Otherwise the
+        // mediator would either strand the rule or split headers upstream.
+        for injection in &self.policy.secret_injections {
+            let Some(value) = secrets.get(&injection.secret_env) else {
+                bail!(
+                    "policy secret_injections reference secret {} which was not \
+                     provided for this command; refusing to run with a stranded rule",
+                    injection.secret_env
+                );
+            };
+            if value.bytes().any(|byte| matches!(byte, b'\r' | b'\n' | 0)) {
+                bail!(
+                    "invalid secret value for {}: control characters would break \
+                     the injected header",
+                    injection.secret_env
+                );
+            }
+        }
         let mut merged = request.env.as_deref().cloned().unwrap_or_default();
         for name in secrets.keys() {
             merged.insert(name.clone(), format!("{SECRET_ENV_SENTINEL_PREFIX}{name}"));
@@ -371,13 +390,14 @@ impl NativeSandbox {
             reason_code: ReasonCode::PolicyAllow,
             target_redacted: format!("<secret-env:{}>", names.join(",")),
         }));
-        self.execute_inner(request, command_id).await
+        self.execute_inner(request, command_id, Some(secrets)).await
     }
 
     async fn execute_inner(
         &self,
         request: CommandRequest,
         command_id: String,
+        secrets: Option<Arc<HashMap<String, String>>>,
     ) -> Result<CommandOutput> {
         if request.timeout_ms == 0 {
             bail!("native sandbox command timeout must be greater than zero");
@@ -408,7 +428,7 @@ impl NativeSandbox {
             {
                 let sock = scratch.path().join("mediator.sock");
                 http_mediator = Some(
-                    crate::ConnectMediator::bind_unix(policy_doc.clone(), &sock)
+                    crate::ConnectMediator::bind_unix(policy_doc.clone(), &sock, secrets.clone())
                         .await
                         .context("failed to start host Unix CONNECT mediator")?,
                 );
@@ -418,7 +438,7 @@ impl NativeSandbox {
             #[cfg(target_os = "macos")]
             {
                 http_mediator = Some(
-                    crate::ConnectMediator::bind(policy_doc.clone())
+                    crate::ConnectMediator::bind(policy_doc.clone(), secrets.clone())
                         .await
                         .context("failed to start host CONNECT mediator")?,
                 );
@@ -444,6 +464,7 @@ impl NativeSandbox {
                         policy_doc.clone(),
                         pipe_name.clone(),
                         server,
+                        secrets.clone(),
                     )
                     .await
                     .context("failed to start connected AppContainer CONNECT mediator")?,

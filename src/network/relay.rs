@@ -268,10 +268,13 @@ mod tests {
             stream.write_all(b"world").await.unwrap();
         });
 
-        let mediator =
-            ConnectMediator::bind_unix(origin_policy("127.0.0.1", upstream_addr.port()), &sock)
-                .await
-                .unwrap();
+        let mediator = ConnectMediator::bind_unix(
+            origin_policy("127.0.0.1", upstream_addr.port()),
+            &sock,
+            None,
+        )
+        .await
+        .unwrap();
 
         let relay = TcpUnixRelay::bind(SocketAddr::from(([127, 0, 0, 1], 0)), &sock)
             .await

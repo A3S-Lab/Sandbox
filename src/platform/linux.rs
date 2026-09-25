@@ -823,7 +823,7 @@ mod tests {
             crate::policy::BackendCapabilities::native_gate2(),
         )
         .unwrap();
-        let mediator = ConnectMediator::bind_unix(document, &sock)
+        let mediator = ConnectMediator::bind_unix(document, &sock, None)
             .await
             .expect("unix CONNECT mediator");
         policy.mediator_unix_path = Some(sock.clone());
@@ -910,7 +910,7 @@ print(s.recv(4).decode())\n",
             crate::policy::BackendCapabilities::native_gate2(),
         )
         .unwrap();
-        let mediator = ConnectMediator::bind_unix(document, &sock)
+        let mediator = ConnectMediator::bind_unix(document, &sock, None)
             .await
             .expect("unix CONNECT mediator");
         policy.mediator_unix_path = Some(sock.clone());
