@@ -11,7 +11,9 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::policy::{AccessDecision, NetworkAllowRule, SandboxPolicy, SecretHeaderInjection};
+#[cfg(not(windows))]
+use crate::policy::SecretHeaderInjection;
+use crate::policy::{AccessDecision, NetworkAllowRule, SandboxPolicy};
 use crate::{AuditSurface, CommandRequest, NativeSandbox, ReasonCode, SECRET_ENV_SENTINEL_PREFIX};
 
 const SECRET_NAME: &str = "A3S_GATE8_TOKEN";
@@ -359,6 +361,7 @@ PY"#
     upstream_task.await.unwrap();
 }
 
+#[cfg(not(windows))]
 fn mediated_policy_for_port(port: u16) -> SandboxPolicy {
     let mut policy = SandboxPolicy::a3s_bash_baseline();
     policy.features.mediated_network = true;

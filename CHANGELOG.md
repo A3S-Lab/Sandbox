@@ -2,6 +2,16 @@
 
 ### Added
 
+- Gate 9 slice 1 — Linux `mediated_socks` claimed via the HTTP bridge fence
+  family. New `Socks5Mediator::bind_unix` hosts the SOCKS5 mediator on a
+  bind-mounted scratch socket; the in-guest relay wrapper starts one
+  TCP→Unix relay per mediated protocol (`GUEST_SOCKS_CONNECT_RELAY_PORT`
+  24732 alongside HTTP 24731) with per-relay PID capture and cleanup, and
+  `ALL_PROXY` points at the guest relay. Live wire tests prove allowed
+  tunnels, ruleset denials, and socket cleanup. `mediated_socks` capability
+  is now `cfg!(any(target_os = "macos", target_os = "linux"))`; macOS
+  behavior unchanged; Windows SOCKS and non-macOS unix-socket allowlists
+  stay fail-closed.
 - Gate 8 slice 2 — egress re-injection at the mediation point. The host
   CONNECT/HTTP mediator now mediates absolute-form plain-HTTP requests
   (`GET http://host/path`) under the same `network.allow` authority, and

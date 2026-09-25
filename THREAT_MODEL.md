@@ -48,7 +48,7 @@ limits (see SECURITY.md).
 | --- | --- | --- |
 | Socket creation deny | `socket` / `socketpair` → EPERM | seccomp unit + Gate 0 network test |
 | Ephemeral scratch | `--tmpfs` on scratch when requested | Gate 3 |
-| Mediated HTTP / SOCKS | HTTP **claimed**; SOCKS not | Live netns bridge tests; SOCKS fail-closed |
+| Mediated HTTP / SOCKS | Both **claimed**: HTTP via TCP→Unix relay; SOCKS5 via in-guest relay to the Unix SOCKS mediator (`linux_socks_bridge_wire_*`) | Live netns bridge tests |
 | Unix-socket allowlist | **Not claimed** | `unix_socket_allowlist` false |
 
 ### Why mediation is not claimed
@@ -58,13 +58,12 @@ cannot allow only `127.0.0.1:<mediator>`. Sharing the host net and allowing
 `AF_INET` would grant full egress—an overfit. A guest netns isolates host
 loopback, so the host mediator is unreachable without an explicit bridge.
 
-**Foundation (claimed for HTTP):** bind-mounted Unix CONNECT mediator +
-in-guest TCP→Unix relay (`a3s-sandbox-relay`) + `--unshare-net` + socket-allow
-seccomp mode. Live guest tests prove allow tunnels, denied CONNECT, and raw
-egress failure. `mediated_socks` / `unix_socket_allowlist` stay false.
-
-**Residual Gate 5 work:** Linux SOCKS relay path; Windows SOCKS / Unix-socket
-allowlists — see `policy/gate5_windows_bridge.rs`.
+**Foundation (claimed for HTTP and SOCKS5):** bind-mounted host Unix
+mediators + in-guest TCP→Unix relays (`a3s-sandbox-relay`, one per mediated
+protocol) + `--unshare-net` + socket-allow seccomp mode. Live guest tests
+prove allow tunnels, denied requests, and raw egress failure for both
+protocols. `unix_socket_allowlist` stays false: path-granular connect
+allowlisting has no cBPF enforcement path.
 
 ## Windows (AppContainer + Job)
 

@@ -42,7 +42,8 @@ impl PlatformSandbox {
         let _pins = WorkspacePins::acquire(policy)?;
         let budget = ResolvedResourceBudget::resolve(&policy.resources, request.timeout_ms)?;
         budget.validate_for_backend(crate::policy::BackendCapabilities::native_gate2())?;
-        let allow_network_sockets = policy.mediator_unix_path.is_some();
+        let allow_network_sockets =
+            policy.mediator_unix_path.is_some() || policy.socks_mediator_unix_path.is_some();
         let seccomp = write_seccomp_filter(&policy.scratch, allow_network_sockets)?;
         let mut command = Command::new(&self.bwrap);
         configure_base_arguments(&mut command, policy)?;
@@ -53,14 +54,20 @@ impl PlatformSandbox {
         }
         configure_environment(&mut command, policy, request.env.as_deref())?;
         configure_seccomp_fd(&mut command, &seccomp)?;
-        let guest_command = if let Some(sock) = &policy.mediator_unix_path {
-            let relay_bin = crate::stage_relay_into_scratch(&policy.scratch)
-                .context("failed to stage guest CONNECT relay into scratch")?;
-            crate::wrap_command_with_guest_relay(&relay_bin, sock, &request.command)
-                .context("failed to wrap guest command with CONNECT relay")?
-        } else {
-            request.command.clone()
-        };
+        let guest_command =
+            if policy.mediator_unix_path.is_some() || policy.socks_mediator_unix_path.is_some() {
+                let relay_bin = crate::stage_relay_into_scratch(&policy.scratch)
+                    .context("failed to stage guest relay into scratch")?;
+                crate::wrap_command_with_guest_relays(
+                    &relay_bin,
+                    policy.mediator_unix_path.as_deref(),
+                    policy.socks_mediator_unix_path.as_deref(),
+                    &request.command,
+                )
+                .context("failed to wrap guest command with mediation relays")?
+            } else {
+                request.command.clone()
+            };
         command
             .arg("--")
             .arg(&self.shell)
@@ -968,6 +975,188 @@ print('denied-ok')\n",
         std::env::remove_var("A3S_SANDBOX_RELAY");
         assert_eq!(output.exit_code, 0, "stderr={}", output.stderr);
         assert_eq!(output.stdout.trim(), "denied-ok");
+        mediator.shutdown().await;
+    }
+
+    #[tokio::test]
+    async fn linux_socks_bridge_wire_allows_allowed_connect() {
+        use crate::network::Socks5Mediator;
+        use crate::policy::NetworkAllowRule;
+        use tokio::net::TcpListener;
+        use tokio::sync::Mutex;
+
+        static RELAY_ENV_LOCK: Mutex<()> = Mutex::const_new(());
+        let _guard = RELAY_ENV_LOCK.lock().await;
+
+        let workspace = tempfile::tempdir().unwrap();
+        let scratch = tempfile::tempdir().unwrap();
+        let sock = scratch.path().join("socks-mediator.sock");
+
+        let upstream = TcpListener::bind(std::net::SocketAddr::from(([127, 0, 0, 1], 0)))
+            .await
+            .unwrap();
+        let upstream_port = upstream.local_addr().unwrap().port();
+        let upstream_task = tokio::spawn(async move {
+            use tokio::io::{AsyncReadExt, AsyncWriteExt};
+            let (mut stream, _) = upstream.accept().await.unwrap();
+            let mut buf = [0u8; 4];
+            stream.read_exact(&mut buf).await.unwrap();
+            assert_eq!(&buf, b"ping");
+            stream.write_all(b"pong").await.unwrap();
+        });
+
+        let mut document = crate::policy::SandboxPolicy::a3s_bash_baseline();
+        document.features.mediated_socks = true;
+        document.network.allow.push(NetworkAllowRule {
+            host: "127.0.0.1".into(),
+            port: Some(upstream_port),
+            path_prefix: None,
+        });
+        // Wire fields armed directly: this test is the live proof the
+        // BackendCapabilities::mediated_socks claim rides on, exactly like
+        // the HTTP bridge proof.
+        let mut policy = EnforcedPolicy::compile(
+            &crate::policy::SandboxPolicy::a3s_bash_baseline(),
+            workspace.path(),
+            scratch.path(),
+            crate::policy::BackendCapabilities::native_gate2(),
+        )
+        .unwrap();
+        let mediator = Socks5Mediator::bind_unix(document, &sock)
+            .await
+            .expect("unix SOCKS mediator");
+        policy.socks_mediator_unix_path = Some(sock.clone());
+        policy.socks_mediator_port = Some(crate::GUEST_SOCKS_CONNECT_RELAY_PORT);
+
+        let test_exe = std::env::current_exe().expect("test exe");
+        let relay_bin = test_exe
+            .parent()
+            .and_then(|p| p.parent())
+            .map(|debug| debug.join("a3s-sandbox-relay"))
+            .expect("resolve target/debug");
+        assert!(
+            relay_bin.is_file(),
+            "expected relay at {} (run cargo test --bins first if missing)",
+            relay_bin.display()
+        );
+        std::env::set_var("A3S_SANDBOX_RELAY", &relay_bin);
+
+        let sandbox = PlatformSandbox::new(workspace.path()).unwrap();
+        let probe = workspace.path().join("socks_probe.py");
+        std::fs::write(
+            &probe,
+            format!(
+                "import socket\n\
+s = socket.create_connection(('127.0.0.1', {port}))\n\
+s.sendall(b'\\x05\\x01\\x00')\n\
+method = s.recv(2)\n\
+assert method == b'\\x05\\x00', method\n\
+host = b'127.0.0.1'\n\
+s.sendall(b'\\x05\\x01\\x00\\x03' + bytes([len(host)]) + host + ({up}).to_bytes(2, 'big'))\n\
+reply = s.recv(10)\n\
+assert reply[1] == 0, reply\n\
+s.sendall(b'ping')\n\
+print(s.recv(4).decode())\n",
+                port = crate::GUEST_SOCKS_CONNECT_RELAY_PORT,
+                up = upstream_port
+            ),
+        )
+        .unwrap();
+        let command = format!("python3 {}", probe.display());
+        let output = sandbox
+            .execute(
+                &policy,
+                crate::CommandRequest {
+                    command,
+                    timeout_ms: 30_000,
+                    output_observer: None,
+                    env: None,
+                },
+            )
+            .await
+            .expect("linux socks bridge execute");
+        std::env::remove_var("A3S_SANDBOX_RELAY");
+        assert_eq!(output.exit_code, 0, "stderr={}", output.stderr);
+        assert_eq!(output.stdout.trim(), "pong");
+        upstream_task.await.unwrap();
+        mediator.shutdown().await;
+    }
+
+    #[tokio::test]
+    async fn linux_socks_bridge_wire_denies_forbidden_connect() {
+        use crate::network::Socks5Mediator;
+        use crate::policy::NetworkAllowRule;
+        use tokio::sync::Mutex;
+
+        static RELAY_ENV_LOCK: Mutex<()> = Mutex::const_new(());
+        let _guard = RELAY_ENV_LOCK.lock().await;
+
+        let workspace = tempfile::tempdir().unwrap();
+        let scratch = tempfile::tempdir().unwrap();
+        let sock = scratch.path().join("socks-deny.sock");
+
+        let mut document = crate::policy::SandboxPolicy::a3s_bash_baseline();
+        document.features.mediated_socks = true;
+        document.network.allow.push(NetworkAllowRule {
+            host: "allowed.example".into(),
+            port: Some(443),
+            path_prefix: None,
+        });
+        let mut policy = EnforcedPolicy::compile(
+            &crate::policy::SandboxPolicy::a3s_bash_baseline(),
+            workspace.path(),
+            scratch.path(),
+            crate::policy::BackendCapabilities::native_gate2(),
+        )
+        .unwrap();
+        let mediator = Socks5Mediator::bind_unix(document, &sock)
+            .await
+            .expect("unix SOCKS mediator");
+        policy.socks_mediator_unix_path = Some(sock.clone());
+        policy.socks_mediator_port = Some(crate::GUEST_SOCKS_CONNECT_RELAY_PORT);
+
+        let test_exe = std::env::current_exe().expect("test exe");
+        let relay_bin = test_exe
+            .parent()
+            .and_then(|p| p.parent())
+            .map(|debug| debug.join("a3s-sandbox-relay"))
+            .expect("resolve target/debug");
+        assert!(relay_bin.is_file(), "missing {}", relay_bin.display());
+        std::env::set_var("A3S_SANDBOX_RELAY", &relay_bin);
+
+        let sandbox = PlatformSandbox::new(workspace.path()).unwrap();
+        let probe = workspace.path().join("socks_deny_probe.py");
+        std::fs::write(
+            &probe,
+            format!(
+                "import socket\n\
+s = socket.create_connection(('127.0.0.1', {port}))\n\
+s.sendall(b'\\x05\\x01\\x00')\n\
+assert s.recv(2) == b'\\x05\\x00'\n\
+s.sendall(b'\\x05\\x01\\x00\\x03\\x09127.0.0.1\\x00\\x09')\n\
+reply = s.recv(10)\n\
+assert reply[1] == 2, reply\n\
+print('socks-denied-ok')\n",
+                port = crate::GUEST_SOCKS_CONNECT_RELAY_PORT
+            ),
+        )
+        .unwrap();
+        let command = format!("python3 {}", probe.display());
+        let output = sandbox
+            .execute(
+                &policy,
+                crate::CommandRequest {
+                    command,
+                    timeout_ms: 30_000,
+                    output_observer: None,
+                    env: None,
+                },
+            )
+            .await
+            .expect("linux socks bridge deny execute");
+        std::env::remove_var("A3S_SANDBOX_RELAY");
+        assert_eq!(output.exit_code, 0, "stderr={}", output.stderr);
+        assert_eq!(output.stdout.trim(), "socks-denied-ok");
         mediator.shutdown().await;
     }
 }

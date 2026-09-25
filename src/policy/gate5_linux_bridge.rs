@@ -1,15 +1,20 @@
-//! Linux mediation bridge: claimed HTTP CONNECT path + residual checklist.
+//! Linux mediation bridge: claimed HTTP CONNECT + SOCKS5 paths + residuals.
 //!
-//! Live guest evidence (`platform::linux::tests::linux_bridge_wire_*`) proves
-//! allow tunnels, denied CONNECT, and raw egress failure under `--unshare-net`.
-//! `mediated_http` is therefore claimed on Linux. SOCKS and Unix-socket
-//! allowlists remain fail-closed until separate fences ship.
+//! Live guest evidence (`platform::linux::tests::linux_bridge_wire_*` and
+//! `linux_socks_bridge_wire_*`) proves allow tunnels, denied requests, and
+//! raw egress failure under `--unshare-net`, for both the HTTP CONNECT
+//! mediator and the Unix SOCKS5 mediator behind the same in-guest relay
+//! fence. `mediated_http` and `mediated_socks` are therefore claimed on
+//! Linux. Unix-socket allowlists remain fail-closed (seccomp cBPF cannot
+//! dereference connect sockaddr paths).
 
 use crate::policy::{BackendCapabilities, NetworkAllowRule, SandboxPolicy};
-use crate::{posix_shell_single_quote, GUEST_HTTP_CONNECT_RELAY_PORT};
+use crate::{
+    posix_shell_single_quote, GUEST_HTTP_CONNECT_RELAY_PORT, GUEST_SOCKS_CONNECT_RELAY_PORT,
+};
 
 #[test]
-fn gate5_linux_mediated_http_is_claimed_socks_remain_unclaimed() {
+fn gate5_linux_mediated_http_and_socks_are_claimed_unix_allowlists_are_not() {
     let caps = BackendCapabilities::native_gate2();
     if cfg!(target_os = "linux") {
         assert!(
@@ -17,8 +22,12 @@ fn gate5_linux_mediated_http_is_claimed_socks_remain_unclaimed() {
             "Linux claims mediated_http after live netns bridge proof"
         );
         assert!(
-            !caps.mediated_socks && !caps.unix_socket_allowlist,
-            "Linux must not claim SOCKS/unix allowlists without fences"
+            caps.mediated_socks,
+            "Linux claims mediated_socks via the Unix SOCKS mediator + relay fence"
+        );
+        assert!(
+            !caps.unix_socket_allowlist,
+            "Linux must not claim unix-socket allowlists without path-granular fences"
         );
     }
 }
@@ -46,6 +55,7 @@ fn gate5_linux_mediated_http_policy_compiles_on_linux_capabilities() {
 #[test]
 fn gate5_linux_bridge_foundation_apis_are_present() {
     assert_eq!(GUEST_HTTP_CONNECT_RELAY_PORT, 24731);
+    assert_eq!(GUEST_SOCKS_CONNECT_RELAY_PORT, 24732);
     assert_eq!(posix_shell_single_quote("a'b"), "'a'\\''b'");
 }
 

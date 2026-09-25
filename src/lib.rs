@@ -19,9 +19,9 @@ mod process;
 
 pub use network::{
     default_guest_relay_addr, posix_shell_single_quote, resolve_relay_executable,
-    stage_relay_into_scratch, wrap_command_with_guest_relay, ConnectMediator,
-    ConnectMediatorHandle, Socks5Mediator, Socks5MediatorHandle, TcpUnixRelay, TcpUnixRelayHandle,
-    GUEST_HTTP_CONNECT_RELAY_PORT,
+    stage_relay_into_scratch, wrap_command_with_guest_relay, wrap_command_with_guest_relays,
+    ConnectMediator, ConnectMediatorHandle, Socks5Mediator, Socks5MediatorHandle, TcpUnixRelay,
+    TcpUnixRelayHandle, GUEST_HTTP_CONNECT_RELAY_PORT, GUEST_SOCKS_CONNECT_RELAY_PORT,
 };
 pub use observability::{AuditEvent, AuditEventParts, AuditLog, AuditSurface, ReasonCode};
 pub use policy::{
@@ -478,16 +478,35 @@ impl NativeSandbox {
             }
         }
         let mut socks_mediator = None;
-        if policy_doc.features.mediated_socks {
-            socks_mediator = Some(
-                crate::Socks5Mediator::bind(policy_doc.clone())
-                    .await
-                    .context("failed to start host SOCKS5 mediator")?,
-            );
-        }
-        let socks_mediator_port = socks_mediator
-            .as_ref()
-            .map(|handle| handle.listen_addr().port());
+        // Platform cfg arms assign different subsets of these fields.
+        #[allow(unused_mut)]
+        let mut socks_mediator_unix_path = None;
+        let socks_mediator_port = if policy_doc.features.mediated_socks {
+            #[cfg(target_os = "linux")]
+            {
+                let sock = scratch.path().join("socks-mediator.sock");
+                socks_mediator = Some(
+                    crate::Socks5Mediator::bind_unix(policy_doc.clone(), &sock)
+                        .await
+                        .context("failed to start host Unix SOCKS5 mediator")?,
+                );
+                socks_mediator_unix_path = Some(sock);
+                Some(crate::GUEST_SOCKS_CONNECT_RELAY_PORT)
+            }
+            #[cfg(not(target_os = "linux"))]
+            {
+                socks_mediator = Some(
+                    crate::Socks5Mediator::bind(policy_doc.clone())
+                        .await
+                        .context("failed to start host SOCKS5 mediator")?,
+                );
+                socks_mediator
+                    .as_ref()
+                    .map(|handle| handle.listen_addr().port())
+            }
+        } else {
+            None
+        };
 
         let policy = match policy::EnforcedPolicy::compile(
             &policy_doc,
@@ -500,6 +519,7 @@ impl NativeSandbox {
                 policy.mediator_unix_path = mediator_unix_path;
                 policy.mediator_pipe_name = mediator_pipe_name;
                 policy.socks_mediator_port = socks_mediator_port;
+                policy.socks_mediator_unix_path = socks_mediator_unix_path;
                 self.audit.record(AuditEvent::from_parts(AuditEventParts {
                     session_id: self.session_id.clone(),
                     command_id: command_id.clone(),

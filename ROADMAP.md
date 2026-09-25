@@ -290,31 +290,34 @@ bypass suites remain Gate 4 residual / Gate 7 assurance.
 
 ### Gate 5 — Local IPC and non-HTTP mediation
 
-**Status:** In progress — macOS Exact Unix-socket allowlists compile into
-Seatbelt `path-literal` outbound rules with live allow/deny evidence
-(`gate5_macos_allows_listed_unix_socket_and_denies_others`). Host-supervised
-SOCKS5 CONNECT mediator reuses Gate 4 origin allowlists (`decide_mediated_socks`)
-with macOS Seatbelt loopback fencing and live guest tunnel evidence
-(`gate5_macos_sandbox_socks_tunnels_allowed_connect`).
-`unix_socket_allowlist` and `mediated_socks` are true only on macOS;
-Linux/Windows fail closed. Evidence: `policy::gate5_integration`,
-`network::socks`, plus full `cargo test --all-targets` (137 lib tests on macOS
-plus CLI suite).
+**Status (Gate 9 of `docs/sandbox-optimization-roadmap.md`, slice 1):**
+complete — Linux `mediated_socks`
+claimed via the same fence family as HTTP. `Socks5Mediator::bind_unix` hosts
+the SOCKS5 mediator on a bind-mounted scratch socket; the in-guest relay now
+starts one TCP→Unix relay per mediated protocol (HTTP `24731`, SOCKS `24732`,
+per-relay PID capture and cleanup), `ALL_PROXY` points at the guest relay,
+and `--unshare-net` + socket-allow seccomp fence the netns. Live wire tests
+(`linux_socks_bridge_wire_*`) prove allowed tunnels, ruleset denials
+(`rep=0x02`), and cleanup; Unix-socket mediator tests run on every unix host.
+`mediated_socks` capability flips to `cfg!(any(macos, linux))`; macOS
+behavior unchanged. Windows SOCKS and non-macOS unix-socket allowlists stay
+fail-closed. Cross-target `cargo check --all-targets` green for linux and
+windows cfg paths; evidence: `network::socks`, `network::relay`,
+`policy::gate5_linux_bridge`.
 
-**Residual:** Linux and Windows host-supervised HTTP CONNECT bridges are
-**claimed** (`mediated_http`) after live guest proof. SOCKS and Unix-socket
-allowlists remain fail-closed on Linux/Windows. Windows guest contract is
-`A3S_SANDBOX_MEDIATOR_PIPE_HANDLE` (inherited connected pipe; not `HTTP_PROXY`).
-Unix-socket allowlists on non-macOS remain fail-closed.
+**Residual:** Windows SOCKS (needs an in-guest pipe-speaking SOCKS shim —
+zero-net AppContainers cannot reach loopback TCP); Linux/Windows
+unix-socket allowlists (no path-granular enforcement path); live Linux
+netns soak on CI for the dual-relay path.
 
 - Unix-socket path allowlists (macOS Exact Seatbelt; other platforms pending).
-- SOCKS5 mediator for non-HTTP TCP (including SSH) reusing Gate 4 fencing
-  (macOS claimed; other platforms pending).
+- SOCKS5 mediator for non-HTTP TCP (including SSH): macOS + Linux claimed;
+  Windows pending.
 - Keep TLS interception **out** unless a separate security review opts in.
 
-**Exit (partial):** Listed Unix sockets connect; unlisted sockets fail closed on
-macOS; SOCKS5 allow tunnels and deny never reach upstream on macOS; unclaimed
-platforms refuse allowlists / `mediated_socks` at compile.
+**Exit (updated):** Listed Unix sockets connect; unlisted sockets fail closed
+on macOS; SOCKS5 allow tunnels and deny never reach upstream on macOS and
+Linux; Windows refuses allowlists / `mediated_socks` at compile.
 
 ### Gate 6 — Session controls, nesting, and host integration
 

@@ -24,9 +24,10 @@ impl BackendCapabilities {
     ///
     /// Ephemeral session writes: Linux bwrap `--tmpfs` only.
     /// Mediated HTTP / SOCKS: macOS Seatbelt loopback-to-mediator fence;
-    /// Linux netns + Unix CONNECT mediator + guest TCP→Unix relay (HTTP);
+    /// Linux netns + host Unix mediators + in-guest TCP→Unix relays (HTTP and
+    /// SOCKS5, live wire proofs under `--unshare-net`);
     /// Windows AppContainer inherited named-pipe CONNECT (HTTP).
-    /// SOCKS remains macOS-only until other platforms ship equivalent fences.
+    /// Windows SOCKS / non-macOS unix-socket allowlists stay fail-closed.
     pub fn native_gate2() -> Self {
         Self {
             filesystem_path_policy: true,
@@ -34,8 +35,9 @@ impl BackendCapabilities {
             filesystem_ephemeral_writes: cfg!(target_os = "linux"),
             network_deny_all: true,
             mediated_http: cfg!(any(target_os = "macos", target_os = "linux", windows)),
-            // SOCKS5 reuses the macOS Seatbelt loopback-to-mediator fence only.
-            mediated_socks: cfg!(target_os = "macos"),
+            // SOCKS5: macOS Seatbelt loopback fence; Linux netns + Unix
+            // SOCKS mediator + guest TCP relay (same fence family as HTTP).
+            mediated_socks: cfg!(any(target_os = "macos", target_os = "linux")),
             unix_socket_allowlist: cfg!(target_os = "macos"),
             resource_timeout: true,
             resource_output_limit: true,
@@ -101,7 +103,10 @@ mod tests {
     #[test]
     fn gate5_mediated_socks_capability_matches_platform_fence() {
         let caps = BackendCapabilities::native_gate2();
-        assert_eq!(caps.mediated_socks, cfg!(target_os = "macos"));
+        assert_eq!(
+            caps.mediated_socks,
+            cfg!(any(target_os = "macos", target_os = "linux"))
+        );
         assert!(caps.network_deny_all);
     }
 

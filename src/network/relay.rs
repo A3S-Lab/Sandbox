@@ -21,6 +21,9 @@ use tokio::task::JoinHandle;
 /// Injected as `HTTP_PROXY` / `HTTPS_PROXY` when the Linux bridge is armed.
 pub const GUEST_HTTP_CONNECT_RELAY_PORT: u16 = 24731;
 
+/// Default guest listen port for the SOCKS5 relay inside the netns.
+pub const GUEST_SOCKS_CONNECT_RELAY_PORT: u16 = 24732;
+
 /// Running TCP→Unix byte relay.
 pub struct TcpUnixRelayHandle {
     listen_addr: SocketAddr,
@@ -209,22 +212,49 @@ pub fn wrap_command_with_guest_relay(
     unix_socket: &Path,
     user_command: &str,
 ) -> Result<String> {
+    wrap_command_with_guest_relays(relay_bin, Some(unix_socket), None, user_command)
+}
+
+/// Wrap a guest command with zero, one, or two TCP→Unix relays.
+///
+/// Used by the Linux netns bridge: the HTTP CONNECT relay serves
+/// `HTTP_PROXY` traffic and the SOCKS5 relay serves `ALL_PROXY` traffic;
+/// both forward guest loopback TCP into bind-mounted host Unix sockets.
+pub fn wrap_command_with_guest_relays(
+    relay_bin: &Path,
+    http_socket: Option<&Path>,
+    socks_socket: Option<&Path>,
+    user_command: &str,
+) -> Result<String> {
+    if http_socket.is_none() && socks_socket.is_none() {
+        bail!("guest relay wrapper requires at least one mediated socket");
+    }
     if !relay_bin.is_file() {
-        bail!(
-            "guest CONNECT relay binary missing at {}",
-            relay_bin.display()
-        );
+        bail!("guest relay binary missing at {}", relay_bin.display());
     }
     let relay_q = posix_shell_single_quote(&relay_bin.to_string_lossy());
-    let sock_q = posix_shell_single_quote(&unix_socket.to_string_lossy());
-    let listen = format!("127.0.0.1:{GUEST_HTTP_CONNECT_RELAY_PORT}");
-    Ok(format!(
-        "ip link set lo up 2>/dev/null || true; \
-         {relay_q} --unix {sock_q} --listen {listen} & \
-         _a3s_relay_pid=$!; \
-         trap 'kill $_a3s_relay_pid 2>/dev/null || true' EXIT INT TERM; \
-         {user_command}"
-    ))
+    let mut script = String::from("ip link set lo up 2>/dev/null || true; ");
+    let mut pids: Vec<String> = Vec::new();
+    let launch = |socket: &Path, port: u16, pids: &mut Vec<String>, script: &mut String| {
+        let sock_q = posix_shell_single_quote(&socket.to_string_lossy());
+        let pid = format!("_a3s_relay_pid{}", pids.len());
+        script.push_str(&format!(
+            "{relay_q} --unix {sock_q} --listen 127.0.0.1:{port} & {pid}=$!; "
+        ));
+        pids.push(pid);
+    };
+    if let Some(sock) = http_socket {
+        launch(sock, GUEST_HTTP_CONNECT_RELAY_PORT, &mut pids, &mut script);
+    }
+    if let Some(sock) = socks_socket {
+        launch(sock, GUEST_SOCKS_CONNECT_RELAY_PORT, &mut pids, &mut script);
+    }
+    let kill_list = pids.join(" ");
+    script.push_str(&format!(
+        "trap 'for pid in {kill_list}; do kill $pid 2>/dev/null || true; done' EXIT INT TERM; "
+    ));
+    script.push_str(user_command);
+    Ok(script)
 }
 
 /// Default guest listen address for the HTTP CONNECT relay.
@@ -366,5 +396,65 @@ mod tests {
                 0o111
             );
         }
+    }
+
+    #[cfg(unix)]
+    #[tokio::test]
+    async fn tcp_unix_relay_forwards_socks5_to_unix_mediator() {
+        let dir = tempfile::tempdir().unwrap();
+        let sock = dir.path().join("socks-bridge.sock");
+
+        let upstream = TcpListener::bind(SocketAddr::from(([127, 0, 0, 1], 0)))
+            .await
+            .unwrap();
+        let upstream_addr = upstream.local_addr().unwrap();
+        let upstream_task = tokio::spawn(async move {
+            let (mut stream, _) = upstream.accept().await.unwrap();
+            let mut buf = [0u8; 4];
+            stream.read_exact(&mut buf).await.unwrap();
+            assert_eq!(&buf, b"ping");
+            stream.write_all(b"pong").await.unwrap();
+        });
+
+        let mut policy = crate::policy::SandboxPolicy::a3s_bash_baseline();
+        policy.features.mediated_socks = true;
+        policy.network.allow.push(crate::policy::NetworkAllowRule {
+            host: "127.0.0.1".into(),
+            port: Some(upstream_addr.port()),
+            path_prefix: None,
+        });
+        let mediator = crate::Socks5Mediator::bind_unix(policy, &sock)
+            .await
+            .unwrap();
+
+        let relay = TcpUnixRelay::bind(SocketAddr::from(([127, 0, 0, 1], 0)), &sock)
+            .await
+            .unwrap();
+
+        let mut client = TcpStream::connect(relay.listen_addr()).await.unwrap();
+        // SOCKS5 greeting + no-auth method selection.
+        client.write_all(&[0x05, 0x01, 0x00]).await.unwrap();
+        let mut method = [0u8; 2];
+        client.read_exact(&mut method).await.unwrap();
+        assert_eq!(method, [0x05, 0x00]);
+
+        let host = "127.0.0.1";
+        let mut request = vec![0x05, 0x01, 0x00, 0x03, host.len() as u8];
+        request.extend_from_slice(host.as_bytes());
+        request.extend_from_slice(&upstream_addr.port().to_be_bytes());
+        client.write_all(&request).await.unwrap();
+
+        let mut reply = [0u8; 10];
+        client.read_exact(&mut reply).await.unwrap();
+        assert_eq!(reply[1], 0x00, "allowed SOCKS CONNECT must succeed");
+
+        client.write_all(b"ping").await.unwrap();
+        let mut data = [0u8; 4];
+        client.read_exact(&mut data).await.unwrap();
+        assert_eq!(&data, b"pong");
+
+        upstream_task.await.unwrap();
+        relay.shutdown().await;
+        mediator.shutdown().await;
     }
 }

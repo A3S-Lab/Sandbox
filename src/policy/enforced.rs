@@ -88,7 +88,12 @@ pub(crate) struct EnforcedPolicy {
     /// because zero-net AppContainers cannot reach loopback TCP.
     pub(crate) mediator_pipe_name: Option<String>,
     /// Loopback SOCKS5 mediator port when Gate 5 SOCKS mediation is active.
+    /// On Linux this is the guest relay port inside the unshared netns.
     pub(crate) socks_mediator_port: Option<u16>,
+    /// Host Unix SOCKS5 mediator path for the Linux netns bridge. When set,
+    /// the guest gets an in-netns relay for `ALL_PROXY` traffic pointing at
+    /// [`crate::GUEST_SOCKS_CONNECT_RELAY_PORT`].
+    pub(crate) socks_mediator_unix_path: Option<PathBuf>,
     /// Exact Unix-domain socket paths allowed for outbound connect (Gate 5).
     pub(crate) allow_unix_sockets: Vec<PathBuf>,
     /// Typed filesystem mount roots from the policy document (Gate 3).
@@ -200,6 +205,7 @@ impl EnforcedPolicy {
             mediator_unix_path: None,
             mediator_pipe_name: None,
             socks_mediator_port: None,
+            socks_mediator_unix_path: None,
             allow_unix_sockets: Vec::new(),
             mount_roots: Vec::new(),
         })
