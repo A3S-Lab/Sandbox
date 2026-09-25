@@ -27,6 +27,8 @@ case "$HOST" in
     SOAK_THREADS=(-- --nocapture --test-threads=1)
     ;;
   *)
+    # bash 3.2 (macOS) treats empty arrays as unbound under `set -u`;
+    # expand them defensively instead.
     TEST_THREADS=()
     SOAK_THREADS=(-- --nocapture)
     ;;
@@ -56,14 +58,14 @@ log "- cargo clippy --all-targets -- -D warnings: OK"
 log ""
 
 log "## tests"
-cargo test --all-targets "${TEST_THREADS[@]}"
+cargo test --all-targets ${TEST_THREADS[@]+"${TEST_THREADS[@]}"}
 log "- cargo test --all-targets: OK"
 log ""
 
 log "## Gate 7 soak (optional longer via GATE7_SOAK_ROUNDS)"
 SOAK_ROUNDS="${GATE7_SOAK_ROUNDS:-64}"
 GATE7_SOAK_ROUNDS="$SOAK_ROUNDS" \
-  cargo test --lib gate7_soak_repeated_baseline_executes_stay_stable "${SOAK_THREADS[@]}"
+  cargo test --lib gate7_soak_repeated_baseline_executes_stay_stable ${SOAK_THREADS[@]+"${SOAK_THREADS[@]}"}
 log "- soak rounds=${SOAK_ROUNDS}: OK"
 log ""
 
