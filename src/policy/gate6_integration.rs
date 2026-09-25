@@ -28,7 +28,7 @@ fn gate6_capability_report_lists_unavailable_surfaces() {
 #[test]
 fn gate6_replace_policy_refuses_silent_broadening() {
     let workspace = tempfile::tempdir().unwrap();
-    let mut sandbox = NativeSandbox::new(workspace.path()).unwrap();
+    let sandbox = NativeSandbox::new(workspace.path()).unwrap();
     let mut next = SandboxPolicy::a3s_bash_baseline();
     next.features.mediated_network = true;
     next.network.allow.push(NetworkAllowRule {
@@ -75,7 +75,7 @@ fn gate6_replace_policy_allows_narrowing_without_opt_in() {
         port: Some(443),
         path_prefix: None,
     });
-    let mut sandbox = NativeSandbox::with_policy(workspace.path(), baseline).unwrap();
+    let sandbox = NativeSandbox::with_policy(workspace.path(), baseline).unwrap();
     sandbox
         .replace_policy(
             SandboxPolicy::a3s_bash_baseline(),

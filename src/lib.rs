@@ -9,7 +9,7 @@ use anyhow::{bail, Context, Result};
 use async_trait::async_trait;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
 mod network;
 mod observability;
@@ -116,13 +116,25 @@ pub struct CommandOutput {
 }
 
 /// A fail-closed native sandbox bound to one canonical workspace.
+///
+/// The policy sits behind a lock so an authorized grant can widen it while
+/// the sandbox handle is shared (`Arc<dyn BashSandbox>` hosts). Execution
+/// snapshots the policy at start, so a concurrent replacement never affects
+/// a running command.
 #[derive(Debug)]
 pub struct NativeSandbox {
     workspace: PathBuf,
-    policy: SandboxPolicy,
+    policy: RwLock<SandboxPolicy>,
     platform: platform::PlatformSandbox,
     audit: AuditLog,
     session_id: String,
+}
+
+fn read_policy(policy: &RwLock<SandboxPolicy>) -> SandboxPolicy {
+    policy
+        .read()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
+        .clone()
 }
 
 /// Structured capability probe for Gate 6 host negotiation.
@@ -164,7 +176,7 @@ impl NativeSandbox {
         let platform = platform::PlatformSandbox::new(&workspace)?;
         Ok(Self {
             workspace,
-            policy,
+            policy: RwLock::new(policy),
             platform,
             audit: AuditLog::with_capacity(1_024),
             session_id: new_session_id(),
@@ -175,12 +187,13 @@ impl NativeSandbox {
         &self.workspace
     }
 
-    pub fn policy(&self) -> &SandboxPolicy {
-        &self.policy
+    /// A snapshot of the active policy document.
+    pub fn policy(&self) -> SandboxPolicy {
+        read_policy(&self.policy)
     }
 
     pub fn policy_digest(&self) -> String {
-        policy_digest(&self.policy)
+        policy_digest(&read_policy(&self.policy))
     }
 
     pub fn session_id(&self) -> &str {
@@ -237,21 +250,28 @@ impl NativeSandbox {
 
     /// Replace the session policy. Broadening fails closed unless opted in.
     ///
-    /// Callers must not invoke this concurrently with [`Self::execute`]; each
-    /// execute snapshots the policy document at start.
+    /// Safe to call while the handle is shared: each execute snapshots the
+    /// policy document at start, so a concurrent replacement never affects a
+    /// running command.
     pub fn replace_policy(
-        &mut self,
+        &self,
         policy: SandboxPolicy,
         options: PolicyUpdateOptions,
     ) -> Result<()> {
         policy
             .validate_for_backend(self.capabilities())
             .context("replacement sandbox policy is incompatible with this backend")?;
-        if !options.allow_broadening {
-            ensure_policy_not_broader(&self.policy, &policy)
-                .context("refusing silent policy broadening")?;
+        {
+            let mut guard = self
+                .policy
+                .write()
+                .unwrap_or_else(|poisoned| poisoned.into_inner());
+            if !options.allow_broadening {
+                ensure_policy_not_broader(&guard, &policy)
+                    .context("refusing silent policy broadening")?;
+            }
+            *guard = policy;
         }
-        self.policy = policy;
         Ok(())
     }
 
@@ -265,7 +285,7 @@ impl NativeSandbox {
     /// policy digest; every application (and every stale-digest refusal) is
     /// auditable.
     pub fn apply_network_grant(
-        &mut self,
+        &self,
         grant: policy::NetworkGrant,
         expected_base_digest: &str,
     ) -> Result<String> {
@@ -291,7 +311,8 @@ impl NativeSandbox {
                  re-approve against the current policy"
             );
         }
-        let (widened, changed) = policy::apply_network_grant_to_policy(&self.policy, &grant)?;
+        let current = read_policy(&self.policy);
+        let (widened, changed) = policy::apply_network_grant_to_policy(&current, &grant)?;
         self.replace_policy(
             widened,
             PolicyUpdateOptions {
@@ -379,11 +400,11 @@ impl NativeSandbox {
         let Some(secrets) = secrets.filter(|map| !map.is_empty()) else {
             return self.execute_inner(request, command_id, None).await;
         };
-        if !self.policy.features.mediated_network {
+        if !read_policy(&self.policy).features.mediated_network {
             self.audit.record(AuditEvent::from_parts(AuditEventParts {
                 session_id: self.session_id.clone(),
                 command_id: command_id.clone(),
-                policy_digest: policy_digest(&self.policy),
+                policy_digest: self.policy_digest(),
                 backend: self.backend().into(),
                 surface: AuditSurface::Environment,
                 decision: AccessDecision::Deny,
@@ -417,7 +438,7 @@ impl NativeSandbox {
         // Gate 8 slice 2: every policy injection must resolve against this
         // request's secrets, and its value must be header-safe. Otherwise the
         // mediator would either strand the rule or split headers upstream.
-        for injection in &self.policy.secret_injections {
+        for injection in &read_policy(&self.policy).secret_injections {
             let Some(value) = secrets.get(&injection.secret_env) else {
                 bail!(
                     "policy secret_injections reference secret {} which was not \
@@ -443,7 +464,7 @@ impl NativeSandbox {
         self.audit.record(AuditEvent::from_parts(AuditEventParts {
             session_id: self.session_id.clone(),
             command_id: command_id.clone(),
-            policy_digest: policy_digest(&self.policy),
+            policy_digest: self.policy_digest(),
             backend: self.backend().into(),
             surface: AuditSurface::Environment,
             decision: AccessDecision::Allow,
@@ -469,9 +490,10 @@ impl NativeSandbox {
             .prefix("a3s-sandbox-")
             .tempdir()
             .context("failed to create native sandbox scratch directory")?;
-        let digest = policy_digest(&self.policy);
-        // Snapshot so concurrent replace_policy cannot race a running command.
-        let policy_doc = self.policy.clone();
+        let digest = self.policy_digest();
+        // Snapshot so a concurrent replace_policy cannot race a running
+        // command.
+        let policy_doc = read_policy(&self.policy);
 
         let mut http_mediator = None;
         // Platform cfg arms assign different subsets of these fields.

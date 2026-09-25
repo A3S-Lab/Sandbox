@@ -79,7 +79,7 @@ fn gate7_path_prefix_never_authorizes_opaque_tunnels() {
 #[test]
 fn gate7_replace_policy_still_refuses_mediation_enablement() {
     let workspace = tempfile::tempdir().unwrap();
-    let mut sandbox = NativeSandbox::new(workspace.path()).unwrap();
+    let sandbox = NativeSandbox::new(workspace.path()).unwrap();
     let next = mediated_http_policy("api.example.com", 443);
     let error = sandbox
         .replace_policy(next, PolicyUpdateOptions::default())

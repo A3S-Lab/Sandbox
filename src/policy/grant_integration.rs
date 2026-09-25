@@ -14,7 +14,7 @@ use crate::{NativeSandbox, NetworkGrant, ReasonCode};
 #[test]
 fn stale_base_digest_refuses_and_leaves_policy_unchanged() {
     let workspace = tempfile::tempdir().unwrap();
-    let mut sandbox = NativeSandbox::new(workspace.path()).unwrap();
+    let sandbox = NativeSandbox::new(workspace.path()).unwrap();
     let digest_before = sandbox.policy_digest();
     let grant = NetworkGrant::new("api.example.com", Some(443)).unwrap();
     let error = sandbox
@@ -46,7 +46,7 @@ fn stale_base_digest_refuses_and_leaves_policy_unchanged() {
 #[test]
 fn applied_grant_is_auditable_with_new_digest_and_updates_the_session() {
     let workspace = tempfile::tempdir().unwrap();
-    let mut sandbox = NativeSandbox::new(workspace.path()).unwrap();
+    let sandbox = NativeSandbox::new(workspace.path()).unwrap();
     let base = sandbox.policy_digest();
     let grant = NetworkGrant::new("api.example.com", Some(443)).unwrap();
     let new_digest = sandbox.apply_network_grant(grant, &base).unwrap();
@@ -69,7 +69,7 @@ fn applied_grant_is_auditable_with_new_digest_and_updates_the_session() {
 #[test]
 fn idempotent_regrant_changes_nothing_and_records_no_new_allow_rule() {
     let workspace = tempfile::tempdir().unwrap();
-    let mut sandbox = NativeSandbox::new(workspace.path()).unwrap();
+    let sandbox = NativeSandbox::new(workspace.path()).unwrap();
     let base = sandbox.policy_digest();
     let grant = NetworkGrant::new("api.example.com", Some(443)).unwrap();
     let first = sandbox.apply_network_grant(grant.clone(), &base).unwrap();
@@ -81,7 +81,7 @@ fn idempotent_regrant_changes_nothing_and_records_no_new_allow_rule() {
 #[test]
 fn hand_built_broadening_still_refuses_without_the_explicit_opt_in() {
     let workspace = tempfile::tempdir().unwrap();
-    let mut sandbox = NativeSandbox::new(workspace.path()).unwrap();
+    let sandbox = NativeSandbox::new(workspace.path()).unwrap();
     let mut widened = sandbox.policy().clone();
     widened.features.mediated_network = true;
     widened.network.allow.push(NetworkAllowRule {
@@ -103,7 +103,7 @@ fn hand_built_broadening_still_refuses_without_the_explicit_opt_in() {
 #[test]
 fn granted_policy_authorizes_only_the_granted_subject() {
     let workspace = tempfile::tempdir().unwrap();
-    let mut sandbox = NativeSandbox::new(workspace.path()).unwrap();
+    let sandbox = NativeSandbox::new(workspace.path()).unwrap();
     let base = sandbox.policy_digest();
     sandbox
         .apply_network_grant(
@@ -113,15 +113,15 @@ fn granted_policy_authorizes_only_the_granted_subject() {
         .unwrap();
     let policy = sandbox.policy();
     assert_eq!(
-        super::decide_mediated_connect(policy, "api.example.com", 443),
+        super::decide_mediated_connect(&policy, "api.example.com", 443),
         crate::AccessDecision::Allow
     );
     assert_eq!(
-        super::decide_mediated_connect(policy, "other.example.com", 443),
+        super::decide_mediated_connect(&policy, "other.example.com", 443),
         crate::AccessDecision::Deny
     );
     assert_eq!(
-        super::decide_mediated_connect(policy, "api.example.com", 8443),
+        super::decide_mediated_connect(&policy, "api.example.com", 8443),
         crate::AccessDecision::Deny
     );
 }
@@ -147,7 +147,7 @@ async fn grant_loop_unblocks_a_denied_command_end_to_end() {
     });
 
     let workspace = tempfile::tempdir().unwrap();
-    let mut sandbox = NativeSandbox::new(workspace.path()).unwrap();
+    let sandbox = NativeSandbox::new(workspace.path()).unwrap();
     let script = format!(
         r#"python3 - <<'PY'
 import os, socket

@@ -203,7 +203,7 @@ async fn gate1_native_sandbox_integration_still_executes() {
     let workspace = tempfile::tempdir().unwrap();
     let sandbox = NativeSandbox::new(workspace.path()).unwrap();
     assert_eq!(
-        policy_digest(sandbox.policy()),
+        policy_digest(&sandbox.policy()),
         policy_digest(&SandboxPolicy::a3s_bash_baseline())
     );
     sandbox
