@@ -19,6 +19,9 @@ pub(crate) struct PlatformSandbox {
 }
 
 impl PlatformSandbox {
+    pub(crate) fn effective_capabilities(&self) -> crate::policy::BackendCapabilities {
+        crate::policy::BackendCapabilities::native_gate2()
+    }
     pub(crate) fn new(workspace: &Path) -> Result<Self> {
         Ok(Self {
             sandbox_exec: resolve_executable("/usr/bin/sandbox-exec", workspace)

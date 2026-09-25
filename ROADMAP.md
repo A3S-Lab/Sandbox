@@ -468,6 +468,30 @@ revisiting Claim B (mediated-as-default).
   path broadens without host authorization (monotonicity property tests). ✅
   crate-side; host-side pending.
 
+### Gate 10 — Resource enforcement depth (Gate 11 of `docs/sandbox-optimization-roadmap.md`)
+
+**Status:** In progress — slice 1 complete: Linux process-tree quotas via
+delegated cgroup v2. `PlatformSandbox` probes a writable delegated subtree
+(systemd user slice, then root) at construction; `effective_capabilities`
+reports `resource_process_limit` only when the probe succeeds, so quota
+policies fail closed at `with_policy` on hosts without delegation — never an
+rlimit approximation. Enforcement creates a private per-command cgroup
+(`pids.max`, `memory.max`, `memory.swap.max` pinned to 0 where present),
+spawns the tree **stopped**, moves it into the cgroup, then resumes it —
+no descendant can fork before the ceiling is active. THREAT_MODEL updated;
+evidence: `platform::cgroup` kernel roundtrip tests, live
+`policy::resource_quota_integration` fork-bomb and memory-kill tests
+(Linux CI), cross-platform refusal test, three-target clippy.
+
+**Residual:** CPU quota (`cpu.max`) needs a policy field first; disk caps per
+platform primitive; macOS memory stays an honest refusal (no quota
+primitive); swap-less hosts skip the swap pin (kernel-dependent file).
+
+- ~~Linux cgroup v2 pids/memory quotas, probe-gated, fail-closed~~ ✅
+- CPU quota + disk caps. **Exit:** policy fields validated against probed
+  capabilities; fork-bomb / allocation-storm / log-flood negative tests
+  bounded by the OS on every claiming platform.
+
 ## Target architecture
 
 ```text

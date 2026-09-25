@@ -70,3 +70,6 @@ pub(crate) use enforced::requires_directory_placeholder;
 pub(crate) use enforced::{resolve_executable, EnforcedPolicy};
 #[cfg(test)]
 mod gate8_integration;
+#[cfg(not(windows))]
+#[cfg(test)]
+mod resource_quota_integration;

@@ -23,6 +23,9 @@ const SECCOMP_FD: libc::c_int = 198;
 pub(crate) struct PlatformSandbox {
     bwrap: PathBuf,
     shell: PathBuf,
+    /// Delegated cgroup v2 base when the host provides one (Gate 11). Quota
+    /// policies fail closed through `effective_capabilities` when absent.
+    cgroup_base: Option<PathBuf>,
 }
 
 impl PlatformSandbox {
@@ -31,7 +34,22 @@ impl PlatformSandbox {
             .context("Linux native sandbox requires bubblewrap at /usr/bin/bwrap")?;
         let shell = resolve_executable("/bin/bash", workspace)
             .context("trusted Linux bash executable is unavailable")?;
-        Ok(Self { bwrap, shell })
+        let cgroup_base = super::cgroup::CgroupControl::probe_delegated_base().ok();
+        Ok(Self {
+            bwrap,
+            shell,
+            cgroup_base,
+        })
+    }
+
+    /// Capabilities informed by the runtime probe: without a delegated
+    /// cgroup subtree the backend cannot enforce process-tree quotas.
+    pub(crate) fn effective_capabilities(&self) -> crate::policy::BackendCapabilities {
+        let mut capabilities = crate::policy::BackendCapabilities::native_gate2();
+        if self.cgroup_base.is_none() {
+            capabilities.resource_process_limit = false;
+        }
+        capabilities
     }
 
     pub(crate) async fn execute(
@@ -41,7 +59,8 @@ impl PlatformSandbox {
     ) -> Result<CommandOutput> {
         let _pins = WorkspacePins::acquire(policy)?;
         let budget = ResolvedResourceBudget::resolve(&policy.resources, request.timeout_ms)?;
-        budget.validate_for_backend(crate::policy::BackendCapabilities::native_gate2())?;
+        budget.validate_for_backend(self.effective_capabilities())?;
+        let cgroup = self.prepare_cgroup(&budget)?;
         let allow_network_sockets =
             policy.mediator_unix_path.is_some() || policy.socks_mediator_unix_path.is_some();
         let seccomp = write_seccomp_filter(&policy.scratch, allow_network_sockets)?;
@@ -76,7 +95,51 @@ impl PlatformSandbox {
             .current_dir(&policy.workspace)
             .env_clear();
 
-        run_tokio_command(command, request, &budget, "Linux native sandbox command").await
+        run_tokio_command(
+            command,
+            request,
+            &budget,
+            "Linux native sandbox command",
+            cgroup,
+        )
+        .await
+    }
+
+    /// Create and pre-configure the per-command cgroup when the budget
+    /// carries process-tree quotas. Absence of a delegated subtree fails
+    /// closed here as well, matching the constructor probe.
+    fn prepare_cgroup(
+        &self,
+        budget: &ResolvedResourceBudget,
+    ) -> Result<Option<super::cgroup::CgroupControl>> {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static CGROUP_SEQ: AtomicU64 = AtomicU64::new(0);
+        if budget.max_processes.is_none() && budget.max_memory_bytes.is_none() {
+            return Ok(None);
+        }
+        let Some(base) = &self.cgroup_base else {
+            bail!(
+                "process/memory quotas require a delegated cgroup v2 subtree; \
+                 refusing to run without OS-enforced limits"
+            );
+        };
+        super::cgroup::enable_controllers(base)
+            .context("failed to enable cgroup controllers for the delegated base")?;
+        let control = super::cgroup::CgroupControl::create(
+            base,
+            &format!(
+                "{}-{}",
+                std::process::id(),
+                CGROUP_SEQ.fetch_add(1, Ordering::Relaxed)
+            ),
+        )?;
+        if let Some(max) = budget.max_processes {
+            control.set_pids_max(max)?;
+        }
+        if let Some(bytes) = budget.max_memory_bytes {
+            control.set_memory_max(bytes)?;
+        }
+        Ok(Some(control))
     }
 }
 

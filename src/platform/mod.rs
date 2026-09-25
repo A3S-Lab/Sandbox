@@ -1,6 +1,8 @@
 //! Operating-system isolation backends.
 
 #[cfg(target_os = "linux")]
+pub(crate) mod cgroup;
+#[cfg(target_os = "linux")]
 mod linux;
 #[cfg(target_os = "macos")]
 mod macos;

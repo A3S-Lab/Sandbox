@@ -329,6 +329,7 @@ pub(super) async fn run_tokio_command(
     request: CommandRequest,
     budget: &crate::policy::ResolvedResourceBudget,
     description: &str,
+    #[cfg(target_os = "linux")] cgroup: Option<crate::platform::cgroup::CgroupControl>,
 ) -> Result<CommandOutput> {
     command
         .stdout(std::process::Stdio::piped())
@@ -337,9 +338,43 @@ pub(super) async fn run_tokio_command(
     configure_process_group(&mut command);
     apply_budget_pre_exec(&mut command, budget)?;
 
+    // Gate 11: with a cgroup quota, spawn the tree stopped so it lands in
+    // the cgroup before any descendant can fork, then resume it.
+    #[cfg(target_os = "linux")]
+    let cgroup = cgroup.filter(|_| true);
+    #[cfg(target_os = "linux")]
+    if cgroup.is_some() {
+        unsafe {
+            command.pre_exec(|| {
+                if libc::raise(libc::SIGSTOP) != 0 {
+                    return Err(std::io::Error::last_os_error());
+                }
+                Ok(())
+            });
+        }
+    }
+
     let mut child = command
         .spawn()
         .with_context(|| format!("failed to start {description}"))?;
+
+    #[cfg(target_os = "linux")]
+    if let Some(control) = &cgroup {
+        let pid = child
+            .id()
+            .context("spawned child has no pid to move into the cgroup")?;
+        control
+            .attach(pid)
+            .with_context(|| format!("failed to move {description} into its cgroup"))?;
+        // Resume the stopped tree now that the quota is active.
+        unsafe {
+            if libc::kill(pid as libc::pid_t, libc::SIGCONT) != 0 {
+                return Err(std::io::Error::last_os_error())
+                    .context("failed to resume the cgroup-scoped process tree");
+            }
+        }
+    }
+
     let output = read_process_output(
         &mut child,
         budget.timeout_ms,
@@ -348,6 +383,11 @@ pub(super) async fn run_tokio_command(
     )
     .await
     .with_context(|| format!("failed to wait for {description}"))?;
+
+    #[cfg(target_os = "linux")]
+    if let Some(control) = &cgroup {
+        control.cleanup();
+    }
 
     Ok(CommandOutput {
         stdout: output.stdout,

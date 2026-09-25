@@ -42,7 +42,9 @@ impl BackendCapabilities {
             resource_timeout: true,
             resource_output_limit: true,
             resource_memory_limit: cfg!(any(windows, target_os = "linux")),
-            resource_process_limit: cfg!(windows),
+            // Linux claims pids quotas through delegated cgroup v2; the
+            // runtime probe at construction fails closed without one.
+            resource_process_limit: cfg!(any(windows, target_os = "linux")),
         }
     }
 
@@ -79,7 +81,10 @@ mod tests {
             caps.resource_memory_limit,
             cfg!(any(windows, target_os = "linux"))
         );
-        assert_eq!(caps.resource_process_limit, cfg!(windows));
+        assert_eq!(
+            caps.resource_process_limit,
+            cfg!(any(windows, target_os = "linux"))
+        );
 
         let mut policy = SandboxPolicy::a3s_bash_baseline();
         policy.resources.max_memory_bytes = Some(32 * 1024 * 1024);

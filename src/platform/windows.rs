@@ -57,6 +57,9 @@ pub(crate) struct PlatformSandbox {
 }
 
 impl PlatformSandbox {
+    pub(crate) fn effective_capabilities(&self) -> crate::policy::BackendCapabilities {
+        crate::policy::BackendCapabilities::native_gate2()
+    }
     pub(crate) fn new(workspace: &Path) -> Result<Self> {
         let powershell = resolve_powershell(workspace)?;
         let profile = AppContainerProfile::create()?;

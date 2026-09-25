@@ -7,6 +7,9 @@ use std::path::Path;
 pub(crate) struct PlatformSandbox;
 
 impl PlatformSandbox {
+    pub(crate) fn effective_capabilities(&self) -> crate::policy::BackendCapabilities {
+        crate::policy::BackendCapabilities::native_gate2()
+    }
     pub(crate) fn new(_workspace: &Path) -> Result<Self> {
         bail!(
             "the A3S native sandbox is unsupported on {}",

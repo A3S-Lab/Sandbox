@@ -26,6 +26,7 @@ binary are trusted.
 | Symlink / hardlink escape resistance | Outside secrets not leaked via planted links | Gate 0 + Gate 7 TOCTOU tests |
 | Env scrub + scratch re-home | Injection vars removed; HOME/TMP redirected | `child_environment_*` |
 | Bounded output + tree kill | Deadline and capture ceilings | Gate 2 resources |
+| Process-tree quotas (Linux) | `pids.max`/`memory.max` via delegated cgroup v2; probe-gated, fail-closed without delegation | `platform::cgroup` + `policy::resource_quota_integration` |
 | Policy spine | Unsupported features fail closed | Gate 1–6 validate/compile tests |
 
 Default A3S Bash profile never enables mediation.

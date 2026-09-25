@@ -126,6 +126,7 @@ pub struct NativeSandbox {
     workspace: PathBuf,
     policy: RwLock<SandboxPolicy>,
     platform: platform::PlatformSandbox,
+    capabilities: BackendCapabilities,
     audit: AuditLog,
     session_id: String,
 }
@@ -170,14 +171,18 @@ impl NativeSandbox {
                 workspace.display()
             );
         }
-        policy
-            .validate_for_backend(BackendCapabilities::native_gate2())
-            .context("sandbox policy is incompatible with this backend")?;
         let platform = platform::PlatformSandbox::new(&workspace)?;
+        // Runtime-probed capabilities (Gate 11): without a delegated cgroup
+        // subtree a Linux host refuses process-tree quotas at construction.
+        let capabilities = platform.effective_capabilities();
+        policy
+            .validate_for_backend(capabilities)
+            .context("sandbox policy is incompatible with this backend")?;
         Ok(Self {
             workspace,
             policy: RwLock::new(policy),
             platform,
+            capabilities,
             audit: AuditLog::with_capacity(1_024),
             session_id: new_session_id(),
         })
@@ -208,9 +213,10 @@ impl NativeSandbox {
         NATIVE_SANDBOX_BACKEND
     }
 
-    /// Backend capabilities for the compiled target. Policy must not request more.
+    /// Capabilities this sandbox instance can enforce, combining the
+    /// compiled target with the runtime probe (cgroup delegation, Gate 11).
     pub fn capabilities(&self) -> BackendCapabilities {
-        BackendCapabilities::native_gate2()
+        self.capabilities
     }
 
     /// Reject a caller policy that this backend cannot enforce.
