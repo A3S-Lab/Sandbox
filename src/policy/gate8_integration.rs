@@ -37,6 +37,26 @@ fn secret_map(name: &str, value: &str) -> Option<Arc<HashMap<String, String>>> {
     )])))
 }
 
+/// Point the Linux netns bridge at the relay binary that `cargo test
+/// --all-targets` has already built. Idempotent; a no-op off Linux.
+fn ensure_guest_relay_available() {
+    #[cfg(target_os = "linux")]
+    {
+        static ONCE: std::sync::Once = std::sync::Once::new();
+        ONCE.call_once(|| {
+            let test_exe = std::env::current_exe().expect("current test executable");
+            if let Some(debug_dir) = test_exe.parent().and_then(|parent| parent.parent()) {
+                let relay = debug_dir.join("a3s-sandbox-relay");
+                if relay.is_file() {
+                    std::env::set_var("A3S_SANDBOX_RELAY", &relay);
+                }
+            }
+        });
+    }
+    #[cfg(not(target_os = "linux"))]
+    {}
+}
+
 fn print_secret_command() -> String {
     #[cfg(windows)]
     {
@@ -76,6 +96,7 @@ fn secret_request(command: String) -> CommandRequest {
 async fn gate8_secret_env_delivers_sentinel_not_secret_to_child() {
     let workspace = tempfile::tempdir().unwrap();
     let sandbox = mediated_sandbox(workspace.path());
+    ensure_guest_relay_available();
     let output = sandbox
         .execute_with_secrets(
             secret_request(print_secret_command()),
@@ -96,6 +117,7 @@ async fn gate8_secret_env_delivers_sentinel_not_secret_to_child() {
 async fn gate8_secret_bytes_never_appear_in_child_environment_dump() {
     let workspace = tempfile::tempdir().unwrap();
     let sandbox = mediated_sandbox(workspace.path());
+    ensure_guest_relay_available();
     let output = sandbox
         .execute_with_secrets(
             secret_request(dump_env_command()),
@@ -229,6 +251,7 @@ async fn gate8_invalid_secret_entries_refuse() {
 async fn gate8_secret_bytes_absent_from_audit_and_digest_stable() {
     let workspace = tempfile::tempdir().unwrap();
     let sandbox = mediated_sandbox(workspace.path());
+    ensure_guest_relay_available();
     let digest_before = sandbox.policy_digest();
     let output = sandbox
         .execute_with_secrets(
@@ -313,6 +336,7 @@ async fn gate8_egress_reinjection_delivers_secret_without_landing_it() {
         secret_env: SECRET_NAME.into(),
     });
     let sandbox = NativeSandbox::with_policy(workspace.path(), policy).unwrap();
+    ensure_guest_relay_available();
 
     let script = format!(
         r#"python3 - <<'PY'

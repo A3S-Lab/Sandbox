@@ -53,7 +53,10 @@ fn gate7_release_claims_match_capability_matrix() {
     #[cfg(target_os = "linux")]
     {
         assert!(caps.mediated_http);
-        assert!(!caps.mediated_socks);
+        assert!(
+            caps.mediated_socks,
+            "claimed after linux_socks_bridge_wire_*"
+        );
         assert!(!caps.unix_socket_allowlist);
     }
     #[cfg(windows)]

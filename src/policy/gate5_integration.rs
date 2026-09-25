@@ -19,8 +19,9 @@ fn gate5_mediated_socks_capability_is_platform_scoped() {
     let caps = BackendCapabilities::native_gate2();
     assert_eq!(
         caps.mediated_socks,
-        cfg!(target_os = "macos"),
-        "only claim SOCKS5 mediation where OS loopback fences exist"
+        cfg!(any(target_os = "macos", target_os = "linux")),
+        "SOCKS5 mediation is claimed only where a live fence exists: macOS \
+         Seatbelt loopback and the Linux netns + Unix SOCKS mediator bridge"
     );
 }
 
@@ -45,6 +46,9 @@ fn gate5_non_macos_refuses_unix_socket_allow_rules() {
 #[cfg(not(target_os = "macos"))]
 #[test]
 fn gate5_non_macos_refuses_mediated_socks() {
+    // Linux now claims mediated_socks via the netns + Unix SOCKS mediator
+    // bridge (Gate 9 slice 1), so only platforms without a live fence —
+    // Windows — must still refuse the feature at policy validation.
     let mut policy = SandboxPolicy::a3s_bash_baseline();
     policy.features.mediated_socks = true;
     policy.network.allow.push(NetworkAllowRule {
@@ -52,6 +56,12 @@ fn gate5_non_macos_refuses_mediated_socks() {
         port: Some(443),
         path_prefix: None,
     });
+    if cfg!(target_os = "linux") {
+        policy
+            .validate_for_backend(BackendCapabilities::native_gate2())
+            .expect("Linux accepts mediated SOCKS after live wire proof");
+        return;
+    }
     let error = policy
         .validate_for_backend(BackendCapabilities::native_gate2())
         .unwrap_err()

@@ -505,21 +505,31 @@ mod tests {
             read_process_output(&mut child, 5_000, MAX_OUTPUT_SIZE, None).await
         });
 
-        tokio::time::timeout(std::time::Duration::from_secs(1), async {
+        // CI hosts can be slow to spawn the shell; allow a generous but
+        // bounded start window.
+        tokio::time::timeout(std::time::Duration::from_secs(10), async {
             while !directory.path().join("descendant-started").exists() {
                 tokio::task::yield_now().await;
             }
         })
         .await
         .expect("test process did not start");
+        let started_at = std::time::Instant::now();
         capture.abort();
         assert!(capture.await.unwrap_err().is_cancelled());
 
-        tokio::time::sleep(std::time::Duration::from_millis(2_200)).await;
-        assert!(
-            !directory.path().join("cancellation-leak").exists(),
-            "dropping process capture must kill every descendant"
-        );
+        // A surviving descendant writes the leak file two seconds after it
+        // started. Watch well past that point relative to when it actually
+        // started, instead of a fixed sleep, so a loaded host cannot
+        // misclassify a slow kill as success or vice versa.
+        let deadline = started_at + std::time::Duration::from_secs(6);
+        while std::time::Instant::now() < deadline {
+            assert!(
+                !directory.path().join("cancellation-leak").exists(),
+                "dropping process capture must kill every descendant"
+            );
+            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+        }
     }
 
     #[cfg(unix)]
