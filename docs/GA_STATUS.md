@@ -4,7 +4,7 @@ Authoritative status board for the enterprise GA objective. Update only from
 live evidence (CI, local collectors, release artifacts, reviewer attestation).
 
 Last engineering update: 2026-09-25 — candidate `0.1.5` on
-`release/0.1.5-windows-wsl-ga` @ `4bb995e`.
+`release/0.1.5-windows-wsl-ga` @ `5050fea`.
 
 ## Claim split (do not collapse)
 
@@ -26,22 +26,28 @@ explicitly refused** until an independent reviewer signs
 | Windows CONNECT live proof | `windows_appcontainer_named_pipe_connect_allow_deny_and_blocks_raw_egress` | Verified locally |
 | WSL2 native-FS suite | `scripts/run-wsl-ga-tests.sh` / evidence collector → 175+3+1 | Verified locally |
 | WSL soak ≥256 + SBOM/provenance | `collect-release-evidence.sh` → `release-out/EVIDENCE.wsl.md` | Verified locally |
-| ACL hang fix | `SetKernelObjectSecurity` path + Temp pollution root cause | In `4bb995e` |
+| ACL hang fix | `SetKernelObjectSecurity` path + Temp pollution root cause | In `4bb995e`+ |
 | Default mediation off | `gate7_release_invariants` | In tree |
-| CI matrix green on tip | GitHub Actions on PR/main | **Open** — PR not created (`gh` unauthenticated) |
-| Tag `v0.1.5` + Release assets | GitHub Release + SHA256/provenance | **Open** — needs merge + token |
+| CI matrix green on tip | GitHub Actions on PR/main | **Open** — PR not created |
+| Tag `v0.1.5` + Release assets | GitHub Release + SHA256/provenance | **Open** |
 | Independent review (Claim B only) | External attestation | **Open** — cannot be self-signed |
 
 ## Branch / publish path
 
 ```text
-origin/release/0.1.5-windows-wsl-ga @ 4bb995e
+origin/release/0.1.5-windows-wsl-ga @ 5050fea  (last successful push)
 PR create URL:
 https://github.com/A3S-Lab/Sandbox/pull/new/release/0.1.5-windows-wsl-ga
+
+One-shot after auth (Claim A only):
+  ./scripts/publish-ga-release.sh
 ```
 
-Blocked automation: `gh auth login` / `GH_TOKEN` required to open PR, watch
-checks, tag, and attach release assets from this environment.
+### Current environment blockers (2026-09-25)
+
+- `gh` unauthenticated → cannot open PR / create Release via API
+- `agent-browser` cannot launch Chrome in this environment
+- intermittent `git@github.com` SSH `Connection closed` → cannot push/tag until SSH recovers
 
 ## First-principles refusal
 
