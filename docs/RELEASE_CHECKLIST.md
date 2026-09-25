@@ -27,7 +27,7 @@ Verified by `policy::gate7_release_invariants` plus CI on each OS:
 | --- | --- | --- | --- |
 | Network deny-all | claimed | claimed | claimed |
 | Mediated HTTP CONNECT | claimed | claimed | claimed |
-| Mediated SOCKS5 | claimed | fail-closed | fail-closed |
+| Mediated SOCKS5 | claimed | claimed (live wire proof) | fail-closed |
 | Unix-socket allowlist | claimed | fail-closed | fail-closed |
 
 ## Gate 7 assurance artifacts
@@ -56,11 +56,11 @@ Verified by `policy::gate7_release_invariants` plus CI on each OS:
 
 - [x] `CHANGELOG.md` entry for the release
 - [x] Crate version bumped intentionally (immutable crates.io versions)
-- [x] Tag matches the signed artifact commit SHA (`v0.1.5` when this release
-  is tagged; prior production tag `v0.1.3`)
-- [ ] Provenance JSON attached to a published GitHub Release for `v0.1.5`
+- [x] Tag matches the signed artifact commit SHA (`v0.2.0` when this release
+  is tagged; prior production tags `v0.1.5`, `v0.1.3`)
+- [ ] Provenance JSON attached to a published GitHub Release for `v0.2.0`
 ## Explicit non-goals for this release
 
 - TLS interception
 - Windows SOCKS / Unix-socket allowlists without dedicated fences
-- Linux SOCKS / Unix-socket allowlists without dedicated fences
+- Linux / Windows Unix-socket allowlists without path-granular enforcement

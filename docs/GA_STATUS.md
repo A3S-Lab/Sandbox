@@ -3,14 +3,16 @@
 Authoritative status board for the enterprise GA objective. Update only from
 live evidence (CI, local collectors, release artifacts, reviewer attestation).
 
-Last engineering update: 2026-09-25 — **`v0.1.5` on `main`**; CI green;
-GitHub Release assets still pending `gh` auth.
+Last engineering update: 2026-09-25 — **`v0.2.0` on `main`** (credential
+containment, Linux mediated SOCKS, typed policy grants); release publish in
+progress — CI on the release commit and Release-page provenance are
+re-verified as part of the publish flow.
 
 ## Claim split (do not collapse)
 
 | Claim | Meaning | Status |
 | --- | --- | --- |
-| **A. Deny-all production boundary** | Default A3S Bash profile is fail-closed OS isolation; mediation off | **Nearly complete** — code + tag + CI green; Release asset upload open |
+| **A. Deny-all production boundary** | Default A3S Bash profile is fail-closed OS isolation; mediation off | **Shipped for `v0.1.5`; re-cut as `v0.2.0`** — feature release on the same fail-closed default; CI on the release commit re-verified during publish |
 | **B. Mediated-network-as-default** | Any profile may turn mediation on by default | **Blocked** on independent review sign-off |
 
 Enterprise GA for this crate means **A is shipped and evidenced**, and **B stays

@@ -33,7 +33,7 @@ the version intentionally when adopting a newer release:
 
 ```toml
 [dependencies]
-a3s-sandbox = "0.1.5"
+a3s-sandbox = "0.2.0"
 ```
 
 Run a command through the native boundary:
