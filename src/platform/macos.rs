@@ -298,6 +298,36 @@ mod tests {
     }
 
     #[test]
+    fn monorepo_seatbelt_profile_fits_compiled_data_limit() {
+        let workspace = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let workspace = workspace.canonicalize().unwrap();
+        let scratch = tempfile::tempdir().unwrap();
+        let policy = EnforcedPolicy::for_execution(&workspace, scratch.path()).unwrap();
+        let profile = compile_profile(&policy).unwrap();
+        let profile_path = scratch.path().join("seatbelt.sb");
+        std::fs::write(&profile_path, &profile).unwrap();
+        let output = std::process::Command::new("/usr/bin/sandbox-exec")
+            .arg("-f")
+            .arg(&profile_path)
+            .arg("/usr/bin/true")
+            .output()
+            .expect("sandbox-exec");
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        assert!(
+            !stderr.contains("exceeds maximum"),
+            "profile_bytes={} deny_read={} stderr={stderr}",
+            profile.len(),
+            policy.deny_read.len(),
+        );
+        assert!(
+            output.status.success(),
+            "profile_bytes={} deny_read={} stderr={stderr}",
+            profile.len(),
+            policy.deny_read.len(),
+        );
+    }
+
+    #[test]
     fn escaped_path_quotes_special_characters() {
         let path = Path::new("/tmp/a3s sandbox/quote\"file");
         assert_eq!(

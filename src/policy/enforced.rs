@@ -7,9 +7,9 @@ use std::path::{Path, PathBuf};
 
 const MAX_WORKSPACE_SCAN_ENTRIES: usize = 1_000_000;
 const MAX_WORKSPACE_SCAN_DEPTH: usize = 64;
-/// Separate budget for rare credential-inode hunts inside package/build stores.
-/// Ordinary monorepos never enter this path because discovered secrets keep
-/// `nlink == 1`.
+/// Budget for walks that enter package stores or other trees the source scan
+/// skips: credential-inode hunts, and hard-link name accounting.
+/// The source walk stays on [`MAX_WORKSPACE_SCAN_ENTRIES`].
 const MAX_CREDENTIAL_ALIAS_SCAN_ENTRIES: usize = 5_000_000;
 
 /// Workspace-relative directories that can alter the agent, repository, or
@@ -855,12 +855,16 @@ pub fn workspace_sensitive_paths(workspace: &Path) -> Result<Vec<PathBuf>> {
     Ok(paths)
 }
 
-/// Discover source-tree files with multiple hard-link aliases.
+/// Discover source-tree files that still have a hard-link name outside the
+/// workspace.
 ///
-/// Package/build stores (`node_modules`, `target`) and protected control-plane
-/// directories are skipped: bulk multi-link artifacts there blow Seatbelt
-/// profile limits, while credential aliases inside those trees are recovered
-/// separately via [`workspace_credential_hardlink_aliases`].
+/// A link whose every directory entry is inside the workspace, including
+/// names under `node_modules` or `target`, is an internal duplicate. Those
+/// paths stay out of the Seatbelt deny set. A path stays denied when its
+/// link count is greater than the number of names found in the workspace,
+/// or when that count cannot be proven. Credential aliases inside package
+/// stores are recovered separately via
+/// [`workspace_credential_hardlink_aliases`].
 pub fn workspace_hardlink_paths(workspace: &Path) -> Result<Vec<PathBuf>> {
     let mut hardlinks = scan_workspace_security(workspace)?.source_hardlinks;
     deduplicate_paths(&mut hardlinks);
@@ -873,11 +877,32 @@ struct WorkspaceSecurityScan {
     source_hardlinks: Vec<PathBuf>,
 }
 
-/// Single walk that collects nested `.env*` paths and source-tree hardlinks.
+struct HardlinkAccount {
+    nlink: u64,
+    names_found: u64,
+    source_paths: Vec<PathBuf>,
+    /// Every in-workspace name found on this scan. Empty when a remembered
+    /// proof was reused.
+    names: Vec<PathBuf>,
+    /// `names_found` was set from a remembered proof. Do not overwrite it.
+    remembered: bool,
+}
+
+/// Collect nested `.env*` paths and source files whose hard-link names are
+/// not all inside the workspace.
+///
+/// The source walk skips package stores and does not count names inside
+/// protected directories. Those names are counted afterwards, and only while
+/// a source link is still short of its link count. A count that cannot be
+/// finished fails the scan so the profile is not compiled from a partial set.
 fn scan_workspace_security(workspace: &Path) -> Result<WorkspaceSecurityScan> {
     let mut pending = vec![(workspace.to_path_buf(), 0usize, true)];
     let mut scanned = 0usize;
     let mut scan = WorkspaceSecurityScan::default();
+    let mut accounts: HashMap<FileIdentity, HardlinkAccount> = HashMap::new();
+    let mut node_module_roots = Vec::new();
+    let mut target_roots = Vec::new();
+    let mut later_name_roots = Vec::new();
 
     while let Some((directory, depth, collect_hardlinks)) = pending.pop() {
         let Some(entries) = workspace_scan_result(std::fs::read_dir(&directory), || {
@@ -923,10 +948,31 @@ fn scan_workspace_security(workspace: &Path) -> Result<WorkspaceSecurityScan> {
                 continue;
             }
             if file_type.is_dir() {
-                if should_skip_workspace_scan_directory(&file_name) {
+                // A store under a protected directory is counted with that
+                // directory. Recording it again would count the same names twice.
+                if is_git_directory(&file_name) {
+                    if collect_hardlinks {
+                        later_name_roots.push(path);
+                    }
+                    continue;
+                }
+                if is_package_or_build_store_directory(&file_name) {
+                    if collect_hardlinks {
+                        if file_name
+                            .to_str()
+                            .is_some_and(|name| name.eq_ignore_ascii_case("target"))
+                        {
+                            target_roots.push(path);
+                        } else {
+                            node_module_roots.push(path);
+                        }
+                    }
                     continue;
                 }
                 ensure_workspace_scan_depth(depth, &path)?;
+                if collect_hardlinks && is_protected_workspace_directory(&file_name) {
+                    later_name_roots.push(path.clone());
+                }
                 let child_collect_hardlinks =
                     collect_hardlinks && !is_protected_workspace_directory(&file_name);
                 pending.push((path, depth + 1, child_collect_hardlinks));
@@ -947,12 +993,231 @@ fn scan_workspace_security(workspace: &Path) -> Result<WorkspaceSecurityScan> {
             if metadata.file_type().is_symlink() || !metadata.is_file() {
                 continue;
             }
-            if hard_link_count(&path, &metadata) > 1 {
-                scan.source_hardlinks.push(path);
+            let nlink = hard_link_count(&path, &metadata);
+            if nlink <= 1 {
+                continue;
             }
+            let Some(identity) = FileIdentity::from_path(&path, &metadata) else {
+                scan.source_hardlinks.push(path);
+                continue;
+            };
+            let account = accounts.entry(identity).or_insert(HardlinkAccount {
+                nlink: 0,
+                names_found: 0,
+                source_paths: Vec::new(),
+                names: Vec::new(),
+                remembered: false,
+            });
+            account.nlink = account.nlink.max(nlink);
+            account.names_found = account.names_found.saturating_add(1);
+            account.names.push(path.clone());
+            account.source_paths.push(path);
+        }
+    }
+
+    // A remembered proof is reused only when every recorded name still has
+    // this link count. Replacing an in-workspace twin with an outside name
+    // fails that check and forces a fresh count.
+    apply_remembered_hardlinks(&mut accounts);
+    // Protected trees are small. Count them before package stores so a link
+    // that lives there does not force a walk of every `target` directory.
+    later_name_roots.sort_by_key(|path| {
+        path.file_name()
+            .and_then(|name| name.to_str())
+            .is_some_and(|name| name.eq_ignore_ascii_case(".git"))
+    });
+    later_name_roots.reverse();
+    count_workspace_hardlink_names(&later_name_roots, &mut accounts)?;
+    // Pop walks the last root first. Reverse the shallow-first sort so the
+    // workspace-root `node_modules` is searched before nested stores.
+    node_module_roots.sort_by_key(|path| path.components().count());
+    node_module_roots.reverse();
+    count_workspace_hardlink_names(&node_module_roots, &mut accounts)?;
+    if source_hardlink_accounts_unproven(&accounts) {
+        count_workspace_hardlink_names(&target_roots, &mut accounts)?;
+    }
+    remember_proven_hardlinks(&accounts);
+    for account in accounts.into_values() {
+        if account.names_found < account.nlink {
+            scan.source_hardlinks.extend(account.source_paths);
         }
     }
     Ok(scan)
+}
+
+fn source_hardlink_accounts_unproven(accounts: &HashMap<FileIdentity, HardlinkAccount>) -> bool {
+    accounts
+        .values()
+        .any(|account| account.names_found < account.nlink)
+}
+
+/// Count directory entries under `roots` for inodes already recorded in
+/// `accounts`. Returns when every recorded link count is accounted for.
+/// A walk that hits its entry or depth limit fails closed.
+fn count_workspace_hardlink_names(
+    roots: &[PathBuf],
+    accounts: &mut HashMap<FileIdentity, HardlinkAccount>,
+) -> Result<()> {
+    if roots.is_empty() || !source_hardlink_accounts_unproven(accounts) {
+        return Ok(());
+    }
+    let mut pending: Vec<(PathBuf, usize)> =
+        roots.iter().map(|root| (root.clone(), 0usize)).collect();
+    let mut scanned = 0usize;
+    while let Some((directory, depth)) = pending.pop() {
+        if !source_hardlink_accounts_unproven(accounts) {
+            return Ok(());
+        }
+        let Some(entries) = workspace_scan_result(std::fs::read_dir(&directory), || {
+            format!(
+                "failed to count hard-link names under {}",
+                directory.display()
+            )
+        })?
+        else {
+            continue;
+        };
+        for entry in entries {
+            let Some(entry) = workspace_scan_result(entry, || {
+                format!(
+                    "failed to enumerate hard-link names under {}",
+                    directory.display()
+                )
+            })?
+            else {
+                continue;
+            };
+            scanned = next_workspace_scan_entry(scanned, MAX_CREDENTIAL_ALIAS_SCAN_ENTRIES)?;
+            let path = entry.path();
+            let Some(file_type) = workspace_scan_result(entry.file_type(), || {
+                format!("failed to inspect hard-link name {}", path.display())
+            })?
+            else {
+                continue;
+            };
+            if file_type.is_symlink() {
+                continue;
+            }
+            if file_type.is_dir() {
+                ensure_workspace_scan_depth(depth, &path)?;
+                pending.push((path, depth + 1));
+                continue;
+            }
+            if !file_type.is_file() {
+                continue;
+            }
+            let Some(metadata) = workspace_scan_result(std::fs::symlink_metadata(&path), || {
+                format!("failed to inspect hard-link name {}", path.display())
+            })?
+            else {
+                continue;
+            };
+            if metadata.file_type().is_symlink() || !metadata.is_file() {
+                continue;
+            }
+            let nlink = hard_link_count(&path, &metadata);
+            if nlink <= 1 {
+                continue;
+            }
+            let Some(identity) = FileIdentity::from_path(&path, &metadata) else {
+                continue;
+            };
+            if let Some(account) = accounts.get_mut(&identity) {
+                if account.remembered {
+                    continue;
+                }
+                account.names_found = account.names_found.saturating_add(1);
+                account.nlink = account.nlink.max(nlink);
+                account.names.push(path);
+            }
+        }
+    }
+    Ok(())
+}
+
+fn hardlink_name_cache() -> &'static std::sync::Mutex<HashMap<FileIdentity, Vec<PathBuf>>> {
+    static CACHE: std::sync::OnceLock<std::sync::Mutex<HashMap<FileIdentity, Vec<PathBuf>>>> =
+        std::sync::OnceLock::new();
+    CACHE.get_or_init(|| std::sync::Mutex::new(HashMap::new()))
+}
+
+fn lock_hardlink_name_cache() -> std::sync::MutexGuard<'static, HashMap<FileIdentity, Vec<PathBuf>>>
+{
+    match hardlink_name_cache().lock() {
+        Ok(guard) => guard,
+        Err(poisoned) => poisoned.into_inner(),
+    }
+}
+
+fn apply_remembered_hardlinks(accounts: &mut HashMap<FileIdentity, HardlinkAccount>) {
+    if accounts.is_empty() {
+        return;
+    }
+    let snapshots: Vec<(FileIdentity, Vec<PathBuf>)> = {
+        let cache = lock_hardlink_name_cache();
+        accounts
+            .keys()
+            .filter_map(|identity| cache.get(identity).map(|names| (*identity, names.clone())))
+            .collect()
+    };
+    let mut stale = Vec::new();
+    for (identity, names) in snapshots {
+        let Some(account) = accounts.get(&identity) else {
+            continue;
+        };
+        if remembered_hardlink_names_match(identity, account.nlink, &names) {
+            if let Some(account) = accounts.get_mut(&identity) {
+                account.names_found = account.nlink;
+                account.remembered = true;
+            }
+        } else {
+            stale.push(identity);
+        }
+    }
+    if stale.is_empty() {
+        return;
+    }
+    let mut cache = lock_hardlink_name_cache();
+    for identity in stale {
+        cache.remove(&identity);
+    }
+}
+
+fn remembered_hardlink_names_match(identity: FileIdentity, nlink: u64, names: &[PathBuf]) -> bool {
+    if nlink == 0 || names.len() as u64 != nlink {
+        return false;
+    }
+    for path in names {
+        let Ok(metadata) = std::fs::symlink_metadata(path) else {
+            return false;
+        };
+        if metadata.file_type().is_symlink() || !metadata.is_file() {
+            return false;
+        }
+        if hard_link_count(path, &metadata) != nlink {
+            return false;
+        }
+        if FileIdentity::from_path(path, &metadata) != Some(identity) {
+            return false;
+        }
+    }
+    true
+}
+
+fn remember_proven_hardlinks(accounts: &HashMap<FileIdentity, HardlinkAccount>) {
+    let mut cache = lock_hardlink_name_cache();
+    for (identity, account) in accounts {
+        if account.names_found < account.nlink {
+            cache.remove(identity);
+            continue;
+        }
+        if account.remembered {
+            continue;
+        }
+        if account.names.len() as u64 == account.nlink {
+            cache.insert(*identity, account.names.clone());
+        }
+    }
 }
 
 /// Find workspace paths that hard-link to already-discovered credential files.
@@ -1651,6 +1916,87 @@ mod tests {
         assert!(!policy
             .deny_write
             .contains(&workspace.join("node_modules/ordinary")));
+    }
+
+    #[cfg(any(unix, windows))]
+    #[test]
+    fn in_workspace_hardlinks_are_not_outside_aliases() {
+        let workspace = tempfile::tempdir().unwrap();
+        let scratch = tempfile::tempdir().unwrap();
+        std::fs::create_dir_all(workspace.path().join("src")).unwrap();
+        std::fs::create_dir_all(workspace.path().join("node_modules")).unwrap();
+        std::fs::create_dir_all(workspace.path().join("target")).unwrap();
+
+        let pair = workspace.path().join("src/pair");
+        std::fs::write(&pair, "pair").unwrap();
+        std::fs::hard_link(&pair, workspace.path().join("src/pair-alias")).unwrap();
+
+        let bundled = workspace.path().join("src/bundled");
+        std::fs::write(&bundled, "bundled").unwrap();
+        std::fs::hard_link(&bundled, workspace.path().join("node_modules/bundled")).unwrap();
+
+        let built = workspace.path().join("src/built");
+        std::fs::write(&built, "built").unwrap();
+        std::fs::hard_link(&built, workspace.path().join("target/built")).unwrap();
+
+        let outside = scratch.path().join("outside");
+        std::fs::write(&outside, "outside").unwrap();
+        std::fs::hard_link(&outside, workspace.path().join("src/outside-alias")).unwrap();
+
+        // Two in-workspace names plus one outside name. The source path stays
+        // denied because the link count is still greater than the names found.
+        let mixed = workspace.path().join("src/mixed");
+        std::fs::write(&mixed, "mixed").unwrap();
+        std::fs::hard_link(&mixed, workspace.path().join("node_modules/mixed")).unwrap();
+        std::fs::hard_link(&mixed, scratch.path().join("mixed-outside")).unwrap();
+
+        let hardlinks = workspace_hardlink_paths(workspace.path()).unwrap();
+        let names: Vec<_> = hardlinks
+            .iter()
+            .filter_map(|path| path.file_name().and_then(|name| name.to_str()))
+            .collect();
+        assert!(names.contains(&"outside-alias"), "{names:?}");
+        assert!(names.contains(&"mixed"), "{names:?}");
+        assert!(!names.contains(&"pair"), "{names:?}");
+        assert!(!names.contains(&"pair-alias"), "{names:?}");
+        assert!(!names.contains(&"bundled"), "{names:?}");
+        assert!(!names.contains(&"built"), "{names:?}");
+
+        let policy = EnforcedPolicy::for_execution(workspace.path(), scratch.path()).unwrap();
+        let root = workspace.path().canonicalize().unwrap();
+        assert!(policy.deny_read.contains(&root.join("src/outside-alias")));
+        assert!(policy.deny_read.contains(&root.join("src/mixed")));
+        assert!(policy.deny_write.contains(&root.join("node_modules/mixed")));
+        assert!(!policy.deny_read.contains(&root.join("src/pair")));
+        assert!(!policy.deny_read.contains(&root.join("src/pair-alias")));
+        assert!(!policy.deny_read.contains(&root.join("src/bundled")));
+        assert!(!policy.deny_read.contains(&root.join("src/built")));
+        assert!(!policy
+            .deny_write
+            .contains(&root.join("node_modules/bundled")));
+        assert!(!policy.deny_write.contains(&root.join("target/built")));
+    }
+
+    #[cfg(any(unix, windows))]
+    #[test]
+    fn cached_internal_hardlink_is_rechecked_when_the_twin_moves_outside() {
+        let workspace = tempfile::tempdir().unwrap();
+        let outside = tempfile::tempdir().unwrap();
+        std::fs::create_dir_all(workspace.path().join("node_modules")).unwrap();
+        let source = workspace.path().join("src-file");
+        std::fs::write(&source, "data").unwrap();
+        let twin = workspace.path().join("node_modules/src-file");
+        std::fs::hard_link(&source, &twin).unwrap();
+
+        let first = workspace_hardlink_paths(workspace.path()).unwrap();
+        assert!(first.is_empty(), "{first:?}");
+
+        std::fs::remove_file(&twin).unwrap();
+        std::fs::hard_link(&source, outside.path().join("src-file")).unwrap();
+
+        let second = workspace_hardlink_paths(workspace.path()).unwrap();
+        assert_eq!(second.len(), 1, "{second:?}");
+        assert!(second[0].ends_with("src-file"));
     }
 
     #[test]

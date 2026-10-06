@@ -1,3 +1,15 @@
+## [0.2.2] - 2026-10-06
+
+### Fixed
+
+- Seatbelt profiles no longer deny a source file whose every hard-link name
+  is inside the workspace, including names under `node_modules` and `target`.
+  macOS `sandbox-exec` rejects a compiled profile larger than 65535 bytes.
+  Treating package-store duplicates as outside aliases overflowed that limit.
+  A path stays denied when its link count is greater than the number of names
+  found in the workspace, or when that count cannot be proven. Credential
+  aliases inside package stores stay denied.
+
 ## [0.2.0] - 2026-09-25
 
 ### Added
