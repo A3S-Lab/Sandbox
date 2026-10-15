@@ -1,3 +1,12 @@
+## [0.2.3] - 2026-10-15
+
+### Added
+
+- Linux finds bubblewrap through `A3S_SANDBOX_BWRAP_PATH`, then
+  `/usr/bin/bwrap`, then `bwrap` on `PATH` (NixOS, Homebrew on Linux, custom
+  prefixes). A set override is authoritative: it does not fall back to
+  `PATH`.
+
 ## [0.2.2] - 2026-10-06
 
 ### Fixed

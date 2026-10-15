@@ -27,8 +27,14 @@ pub(crate) struct PlatformSandbox {
 
 impl PlatformSandbox {
     pub(crate) fn new(workspace: &Path) -> Result<Self> {
-        let bwrap = resolve_executable("/usr/bin/bwrap", workspace)
-            .context("Linux native sandbox requires bubblewrap at /usr/bin/bwrap")?;
+        let bwrap = crate::platform::bwrap_candidates()
+            .into_iter()
+            .find_map(|candidate| resolve_executable(&candidate, workspace).ok())
+            .context(
+                "Linux native sandbox requires bubblewrap: set \
+                 A3S_SANDBOX_BWRAP_PATH, install bwrap at /usr/bin/bwrap, or \
+                 have bwrap on PATH",
+            )?;
         let shell = resolve_executable("/bin/bash", workspace)
             .context("trusted Linux bash executable is unavailable")?;
         Ok(Self { bwrap, shell })
