@@ -1,0 +1,1177 @@
+check (ubuntu-latest)	Set up job	﻿2026-10-18T04:39:05.5696519Z Current runner version: '2.337.0'
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5722590Z ##[group]Runner Image Provisioner
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5723580Z Hosted Compute Agent
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5724214Z Version: 20261012.601
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5724902Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5725895Z Build Date: 2026-10-12T17:48:21Z
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5726617Z Worker ID: {aedb2c14-80d6-4e9b-a719-36cf5d32db6f}
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5727430Z Region: westus3
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5728032Z Cloud: Azure
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5728573Z ##[endgroup]
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5730176Z ##[group]Operating System
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5730843Z Ubuntu
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5731446Z 24.04.5
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5732001Z LTS
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5732519Z ##[endgroup]
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5733132Z ##[group]Runner Image
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5733721Z Image: ubuntu-24.04
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5734325Z Version: 20261012.334.1
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5735769Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5737643Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5738632Z ##[endgroup]
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5739976Z ##[group]GITHUB_TOKEN Permissions
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5741908Z Attestations: write
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5742638Z Contents: read
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5743284Z Metadata: read
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5743828Z ##[endgroup]
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5746667Z Secret source: Actions
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5747803Z Cache mode: write
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.5748621Z Prepare workflow directory
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.6102916Z Prepare all required actions
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.6151922Z Getting action download info
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:05.9518517Z Download action repository 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:06.0436229Z Download action repository 'dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8' (SHA:683b588c487a69d01f6c6ddf40f036ff682cc2c8)
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:06.2977363Z Download action repository 'actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e' (SHA:b7ad1dad31e06c5925ef5d2fc7ad053ef454303e)
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:07.1111800Z Download action repository 'actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6' (SHA:1e69f48acb82d1966a394da916b4c1698aa569d6)
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:07.9480569Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+check (ubuntu-latest)	Set up job	2026-10-18T04:39:08.2071375Z Complete job name: check (ubuntu-latest)
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	﻿2026-10-18T04:39:08.3088338Z ##[group]Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.3089451Z with:
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.3089977Z   repository: A3S-Lab/Sandbox
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.3093168Z   token: ***
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.3093664Z   ssh-strict: true
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.3094142Z   ssh-user: git
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.3094649Z   persist-credentials: true
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.3095163Z   clean: true
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.3095925Z   sparse-checkout-cone-mode: true
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.3096488Z   fetch-depth: 1
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.3096968Z   fetch-tags: false
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.3097458Z   show-progress: true
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.3097958Z   lfs: false
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.3098411Z   submodules: false
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.3098914Z   set-safe-directory: true
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.3099590Z   allow-unsafe-pr-checkout: false
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.3100886Z ##[endgroup]
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4163276Z Syncing repository: A3S-Lab/Sandbox
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4167203Z ##[group]Getting Git version info
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4168485Z Working directory is '/home/runner/work/Sandbox/Sandbox'
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4170446Z [command]/usr/bin/git version
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4245301Z git version 2.55.0
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4269972Z ##[endgroup]
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4287760Z Temporarily overriding HOME='/home/runner/work/_temp/c2934216-f7f1-4606-8237-62ae1ec19145' before making global git config changes
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4289996Z Adding repository directory to the temporary git global config as a safe directory
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4293577Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Sandbox/Sandbox
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4357125Z Deleting the contents of '/home/runner/work/Sandbox/Sandbox'
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4361807Z ##[group]Initializing the repository
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4367764Z [command]/usr/bin/git init /home/runner/work/Sandbox/Sandbox
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4474672Z hint: Using 'master' as the name for the initial branch. This default branch name
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4476894Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4478862Z hint: to use in all of your new repositories, which will suppress this warning,
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4480315Z hint: call:
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4481302Z hint:
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4482625Z hint: 	git config --global init.defaultBranch <name>
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4483833Z hint:
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4484927Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4486949Z hint: 'development'. The just-created branch can be renamed via this command:
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4488242Z hint:
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4489034Z hint: 	git branch -m <name>
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4489962Z hint:
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4491134Z hint: Disable this message with "git config set advice.defaultBranchName false"
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4492799Z Initialized empty Git repository in /home/runner/work/Sandbox/Sandbox/.git/
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4496228Z [command]/usr/bin/git remote add origin https://github.com/A3S-Lab/Sandbox
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4551886Z ##[endgroup]
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4554078Z ##[group]Disabling automatic garbage collection
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4555964Z [command]/usr/bin/git config --local gc.auto 0
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4599821Z ##[endgroup]
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4601369Z ##[group]Setting up auth
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4608583Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.4644640Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.5053408Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.5097060Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.5343114Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.5392259Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.5635355Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.5679790Z ##[endgroup]
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.5680766Z ##[group]Fetching the repository
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:08.5690438Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +fa883b32ad78811b91ec490c5931424289c9e007:refs/remotes/origin/codex/sandbox-s4-20261018
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:09.2716282Z From https://github.com/A3S-Lab/Sandbox
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:09.2717782Z  * [new ref]         fa883b32ad78811b91ec490c5931424289c9e007 -> origin/codex/sandbox-s4-20261018
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:09.2720084Z ##[endgroup]
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:09.2720948Z ##[group]Determining the checkout info
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:09.2721847Z ##[endgroup]
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:09.2726044Z [command]/usr/bin/git sparse-checkout disable
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:09.2795246Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:09.2846262Z ##[group]Checking out the ref
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:09.2852131Z [command]/usr/bin/git checkout --progress --force -B codex/sandbox-s4-20261018 refs/remotes/origin/codex/sandbox-s4-20261018
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:09.3010719Z Switched to a new branch 'codex/sandbox-s4-20261018'
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:09.3017110Z branch 'codex/sandbox-s4-20261018' set up to track 'origin/codex/sandbox-s4-20261018'.
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:09.3027120Z ##[endgroup]
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:09.3081589Z [command]/usr/bin/git log -1 --format=%H
+check (ubuntu-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:09.3113275Z fa883b32ad78811b91ec490c5931424289c9e007
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	﻿2026-10-18T04:39:09.3483769Z ##[group]Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3484258Z with:
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3484468Z   toolchain: 1.97.1
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3484704Z   components: rustfmt, clippy
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3484951Z ##[endgroup]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3555277Z ##[start-action display=Parse toolchain version;id=__dtolnay_rust-toolchain.parse]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3614095Z ##[group]Run if [[ -z $toolchain ]]; then
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3614566Z ^[[36;1mif [[ -z $toolchain ]]; then^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3615131Z ^[[36;1m  # GitHub does not enforce `required: true` inputs itself. https://github.com/actions/runner/issues/1070^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3616100Z ^[[36;1m  echo "'toolchain' is a required input" >&2^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3616419Z ^[[36;1m  exit 1^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3616758Z ^[[36;1melif [[ $toolchain =~ ^stable' '[0-9]+' '(year|month|week|day)s?' 'ago$ ]]; then^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3617175Z ^[[36;1m  if [[ Linux == macOS ]]; then^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3617706Z ^[[36;1m    echo "toolchain=1.$((($(date -v-$(sed 's/stable \([0-9]*\) \(.\).*/\1\2/' <<< $toolchain) +%s)/60/60/24-16569)/7/6))" >> $GITHUB_OUTPUT^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3618271Z ^[[36;1m  else^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3618673Z ^[[36;1m    echo "toolchain=1.$((($(date --date "${toolchain#stable }" +%s)/60/60/24-16569)/7/6))" >> $GITHUB_OUTPUT^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3619131Z ^[[36;1m  fi^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3619430Z ^[[36;1melif [[ $toolchain =~ ^stable' 'minus' '[0-9]+' 'releases?$ ]]; then^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3619972Z ^[[36;1m  echo "toolchain=1.$((($(date +%s)/60/60/24-16569)/7/6-${toolchain//[^0-9]/}))" >> $GITHUB_OUTPUT^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3620501Z ^[[36;1melif [[ $toolchain =~ ^1\.[0-9]+$ ]]; then^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3621038Z ^[[36;1m  echo "toolchain=1.$((i=${toolchain#1.}, c=($(date +%s)/60/60/24-16569)/7/6, i+9*i*(10*i<=c)+90*i*(100*i<=c)))" >> $GITHUB_OUTPUT^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3621572Z ^[[36;1melse^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3621784Z ^[[36;1m  delimiter=EOF^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3622099Z ^[[36;1m  while [[ $toolchain == *$delimiter* ]]; do delimiter+=_; done^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3622622Z ^[[36;1m  printf 'toolchain<<%s\n%s\n%s\n' "$delimiter" "$toolchain" "$delimiter" >> $GITHUB_OUTPUT^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3623048Z ^[[36;1mfi^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3907211Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3907736Z env:
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3907982Z   toolchain: 1.97.1
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.3908236Z ##[endgroup]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4053288Z ##[end-action id=__dtolnay_rust-toolchain.parse;outcome=success;conclusion=success;duration_ms=49]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4058410Z ##[start-action display=Set $CARGO_HOME;id=__dtolnay_rust-toolchain.__run]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4093108Z ##[group]Run echo CARGO_HOME=${CARGO_HOME:-"$HOME/.cargo"} >> $GITHUB_ENV
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4093654Z ^[[36;1mecho CARGO_HOME=${CARGO_HOME:-"$HOME/.cargo"} >> $GITHUB_ENV^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4157214Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4157605Z ##[endgroup]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4256237Z ##[end-action id=__dtolnay_rust-toolchain.__run;outcome=success;conclusion=success;duration_ms=19]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4258894Z ##[start-action display=Install rustup if needed;id=__dtolnay_rust-toolchain.__run_2]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4287535Z ##[group]Run if ! command -v rustup &>/dev/null; then
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4287945Z ^[[36;1mif ! command -v rustup &>/dev/null; then^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4288738Z ^[[36;1m  curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused --location --silent --show-error --fail https://sh.rustup.rs | sh -s -- --default-toolchain none -y^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4289492Z ^[[36;1m  echo "$CARGO_HOME/bin" >> $GITHUB_PATH^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4289946Z ^[[36;1mfi^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4351478Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4351857Z env:
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4352062Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4352319Z ##[endgroup]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4442547Z ##[end-action id=__dtolnay_rust-toolchain.__run_2;outcome=success;conclusion=success;duration_ms=18]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4445202Z ##[start-action display=Install rustup if needed on windows;id=__dtolnay_rust-toolchain.__run_3]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4453009Z ##[end-action id=__dtolnay_rust-toolchain.__run_3;outcome=skipped;conclusion=skipped;duration_ms=0]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4469742Z ##[start-action display=rustup toolchain install 1.97.1;id=__dtolnay_rust-toolchain.__run_4]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4520938Z ##[group]Run set -f  # split targets and components on commas and whitespace, without glob expansion
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4521655Z ^[[36;1mset -f  # split targets and components on commas and whitespace, without glob expansion^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4522120Z ^[[36;1mflags=()^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4522404Z ^[[36;1mfor t in ${targets//,/ }; do flags+=(--target "$t"); done^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4522818Z ^[[36;1mfor c in ${components//,/ }; do flags+=(--component "$c"); done^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4523338Z ^[[36;1mif [[ $toolchain == nightly && -n $components ]]; then flags+=(--allow-downgrade); fi^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4523784Z ^[[36;1mlog=$(mktemp)^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4524028Z ^[[36;1mtrap 'rm -f "$log"' EXIT^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4524289Z ^[[36;1mfor attempt in 1 2 3 4 5; do^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4524865Z ^[[36;1m  if rustup toolchain install "$toolchain" "${flags[@]}" --profile minimal --no-self-update --force-non-host 2>&1 | tee "$log"; then^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4525771Z ^[[36;1m    break^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4526034Z ^[[36;1m  else^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4526245Z ^[[36;1m    status=$?^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4526464Z ^[[36;1m  fi^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4526764Z ^[[36;1m  if [[ $attempt == 5 ]] || ! grep -Fq 'checksum failed for ' "$log" \^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4527350Z ^[[36;1m      || ! grep -Fq 'this is likely due to an ongoing update of the official release server' "$log"; then^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4527833Z ^[[36;1m    exit "$status"^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4528060Z ^[[36;1m  fi^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4528416Z ^[[36;1m  echo "Retrying rustup toolchain install in 30 seconds (retry $attempt of 4)" >&2^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4528848Z ^[[36;1m  sleep 30^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4529054Z ^[[36;1mdone^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4591664Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4592041Z env:
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4592252Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4592516Z   toolchain: 1.97.1
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4592727Z   targets:
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4592933Z   components: rustfmt, clippy
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4593190Z   RUSTUP_PERMIT_COPY_RENAME: 1
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.4593441Z ##[endgroup]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.5219105Z info: syncing channel updates for 1.97.1-x86_64-unknown-linux-gnu
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.7310539Z info: latest update on 2026-07-16 for version 1.97.1 (8bab26f4f 2026-07-14)
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:09.7311855Z info: downloading 5 components
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:17.9743065Z
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:17.9814969Z   1.97.1-x86_64-unknown-linux-gnu installed - rustc 1.97.1 (8bab26f4f 2026-07-14)
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:17.9815748Z
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:17.9880618Z ##[end-action id=__dtolnay_rust-toolchain.__run_4;outcome=success;conclusion=success;duration_ms=8540]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:17.9890980Z ##[start-action display=rustup default 1.97.1;id=__dtolnay_rust-toolchain.__run_5]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:17.9914009Z ##[group]Run rustup default "$toolchain" --force-non-host
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:17.9914446Z ^[[36;1mrustup default "$toolchain" --force-non-host^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:17.9976303Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:17.9976672Z env:
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:17.9976878Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:17.9977139Z   toolchain: 1.97.1
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:17.9977533Z ##[endgroup]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0103795Z info: using existing install for 1.97.1-x86_64-unknown-linux-gnu
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0110910Z info: default toolchain set to 1.97.1-x86_64-unknown-linux-gnu
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0111235Z
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0180148Z   1.97.1-x86_64-unknown-linux-gnu unchanged - rustc 1.97.1 (8bab26f4f 2026-07-14)
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0181187Z
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0182278Z info: note that the toolchain '1.97.1-x86_64-unknown-linux-gnu' is currently in use (overridden by '/home/runner/work/Sandbox/Sandbox/rust-toolchain.toml')
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0199415Z ##[end-action id=__dtolnay_rust-toolchain.__run_5;outcome=success;conclusion=success;duration_ms=30]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0203960Z ##[start-action display=Create cachekey;id=__dtolnay_rust-toolchain.rustc-version]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0226415Z ##[group]Run DATE=$(rustc +"$toolchain" --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0227357Z ^[[36;1mDATE=$(rustc +"$toolchain" --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0228073Z ^[[36;1mHASH=$(rustc +"$toolchain" --version --verbose | sed -ne 's/^commit-hash: //p')^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0228613Z ^[[36;1mecho "cachekey=$(echo $DATE$HASH | head -c12)" >> $GITHUB_OUTPUT^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0290876Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0291258Z env:
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0291465Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0291734Z   toolchain: 1.97.1
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0291949Z ##[endgroup]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0651392Z ##[end-action id=__dtolnay_rust-toolchain.rustc-version;outcome=success;conclusion=success;duration_ms=44]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0654567Z ##[start-action display=Disable incremental compilation;id=__dtolnay_rust-toolchain.__run_6]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0677188Z ##[group]Run if [ -z "${CARGO_INCREMENTAL+set}" ]; then
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0677626Z ^[[36;1mif [ -z "${CARGO_INCREMENTAL+set}" ]; then^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0677971Z ^[[36;1m  echo CARGO_INCREMENTAL=0 >> $GITHUB_ENV^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0678305Z ^[[36;1mfi^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0740101Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0740489Z env:
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0740711Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0740997Z ##[endgroup]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0829507Z ##[end-action id=__dtolnay_rust-toolchain.__run_6;outcome=success;conclusion=success;duration_ms=17]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0832102Z ##[start-action display=Enable colors in Cargo output;id=__dtolnay_rust-toolchain.__run_7]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0853406Z ##[group]Run if [ -z "${CARGO_TERM_COLOR+set}" ]; then
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0853804Z ^[[36;1mif [ -z "${CARGO_TERM_COLOR+set}" ]; then^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0854147Z ^[[36;1m  echo CARGO_TERM_COLOR=always >> $GITHUB_ENV^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0854446Z ^[[36;1mfi^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0912747Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0913133Z env:
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0913344Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0913608Z   CARGO_INCREMENTAL: 0
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.0913830Z ##[endgroup]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1001883Z ##[end-action id=__dtolnay_rust-toolchain.__run_7;outcome=success;conclusion=success;duration_ms=16]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1006419Z ##[start-action display=Enable Cargo sparse registry;id=__dtolnay_rust-toolchain.__run_8]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1029206Z ##[group]Run # implemented in 1.66, stabilized in 1.68, made default in 1.70
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1029770Z ^[[36;1m# implemented in 1.66, stabilized in 1.68, made default in 1.70^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1030494Z ^[[36;1mif [ -z "${CARGO_REGISTRIES_CRATES_IO_PROTOCOL+set}" -o -f "/home/runner/work/_temp"/.implicit_cargo_registries_crates_io_protocol ]; then^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1031248Z ^[[36;1m  if rustc +"$toolchain" --version --verbose | grep -q '^release: 1\.6[89]\.'; then^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1031850Z ^[[36;1m    touch "/home/runner/work/_temp"/.implicit_cargo_registries_crates_io_protocol || true^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1032566Z ^[[36;1m    echo CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse >> $GITHUB_ENV^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1033092Z ^[[36;1m  elif rustc +"$toolchain" --version --verbose | grep -q '^release: 1\.6[67]\.'; then^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1033684Z ^[[36;1m    touch "/home/runner/work/_temp"/.implicit_cargo_registries_crates_io_protocol || true^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1034384Z ^[[36;1m    echo CARGO_REGISTRIES_CRATES_IO_PROTOCOL=git >> $GITHUB_ENV^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1034743Z ^[[36;1m  fi^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1034937Z ^[[36;1mfi^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1093704Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1094078Z env:
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1094286Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1094545Z   CARGO_INCREMENTAL: 0
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1094780Z   CARGO_TERM_COLOR: always
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1095009Z   toolchain: 1.97.1
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1095326Z ##[endgroup]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1426973Z ##[end-action id=__dtolnay_rust-toolchain.__run_8;outcome=success;conclusion=success;duration_ms=41]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1431532Z ##[start-action display=Work around spurious network errors in curl 8.0;id=__dtolnay_rust-toolchain.__run_9]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1453179Z ##[group]Run # https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/timeout.20investigation
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1454031Z ^[[36;1m# https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/timeout.20investigation^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1454714Z ^[[36;1mif rustc +"$toolchain" --version --verbose | grep -q '^release: 1\.7[01]\.'; then^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1455210Z ^[[36;1m  echo CARGO_HTTP_MULTIPLEXING=false >> $GITHUB_ENV^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1455868Z ^[[36;1mfi^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1518510Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1518899Z env:
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1519136Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1519429Z   CARGO_INCREMENTAL: 0
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1519677Z   CARGO_TERM_COLOR: always
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1519907Z   toolchain: 1.97.1
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1520114Z ##[endgroup]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1735063Z ##[end-action id=__dtolnay_rust-toolchain.__run_9;outcome=success;conclusion=success;duration_ms=30]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1741629Z ##[start-action display=rustc +1.97.1 --version --verbose;id=__dtolnay_rust-toolchain.__run_10]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1763594Z ##[group]Run rustc +"$toolchain" --version --verbose
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1764010Z ^[[36;1mrustc +"$toolchain" --version --verbose^[[0m
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1826971Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1827358Z env:
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1827570Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1827838Z   CARGO_INCREMENTAL: 0
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1828094Z   CARGO_TERM_COLOR: always
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1828331Z   toolchain: 1.97.1
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.1828540Z ##[endgroup]
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.2042848Z rustc 1.97.1 (8bab26f4f 2026-07-14)
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.2043510Z binary: rustc
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.2043993Z commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.2044563Z commit-date: 2026-07-14
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.2044978Z host: x86_64-unknown-linux-gnu
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.2045633Z release: 1.97.1
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.2046043Z LLVM version: 22.1.6
+check (ubuntu-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:18.2061198Z ##[end-action id=__dtolnay_rust-toolchain.__run_10;outcome=success;conclusion=success;duration_ms=31]
+check (ubuntu-latest)	Record source and toolchain	﻿2026-10-18T04:39:18.2122049Z ##[group]Run git rev-parse HEAD
+check (ubuntu-latest)	Record source and toolchain	2026-10-18T04:39:18.2122398Z ^[[36;1mgit rev-parse HEAD^[[0m
+check (ubuntu-latest)	Record source and toolchain	2026-10-18T04:39:18.2122671Z ^[[36;1mrustc --version --verbose^[[0m
+check (ubuntu-latest)	Record source and toolchain	2026-10-18T04:39:18.2185963Z shell: /usr/bin/bash -e {0}
+check (ubuntu-latest)	Record source and toolchain	2026-10-18T04:39:18.2186253Z env:
+check (ubuntu-latest)	Record source and toolchain	2026-10-18T04:39:18.2186462Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Record source and toolchain	2026-10-18T04:39:18.2186728Z   CARGO_INCREMENTAL: 0
+check (ubuntu-latest)	Record source and toolchain	2026-10-18T04:39:18.2186959Z   CARGO_TERM_COLOR: always
+check (ubuntu-latest)	Record source and toolchain	2026-10-18T04:39:18.2187195Z ##[endgroup]
+check (ubuntu-latest)	Record source and toolchain	2026-10-18T04:39:18.2288761Z fa883b32ad78811b91ec490c5931424289c9e007
+check (ubuntu-latest)	Record source and toolchain	2026-10-18T04:39:18.2574800Z rustc 1.97.1 (8bab26f4f 2026-07-14)
+check (ubuntu-latest)	Record source and toolchain	2026-10-18T04:39:18.2576408Z binary: rustc
+check (ubuntu-latest)	Record source and toolchain	2026-10-18T04:39:18.2577118Z commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+check (ubuntu-latest)	Record source and toolchain	2026-10-18T04:39:18.2578119Z commit-date: 2026-07-14
+check (ubuntu-latest)	Record source and toolchain	2026-10-18T04:39:18.2578746Z host: x86_64-unknown-linux-gnu
+check (ubuntu-latest)	Record source and toolchain	2026-10-18T04:39:18.2579349Z release: 1.97.1
+check (ubuntu-latest)	Record source and toolchain	2026-10-18T04:39:18.2579979Z LLVM version: 22.1.6
+check (ubuntu-latest)	Prepare Linux sandbox host	﻿2026-10-18T04:39:18.2638191Z ##[group]Run sudo apt-get update
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.2638558Z ^[[36;1msudo apt-get update^[[0m
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.2638852Z ^[[36;1msudo apt-get install --yes bubblewrap^[[0m
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.2639329Z ^[[36;1mif sysctl -N kernel.apparmor_restrict_unprivileged_userns >/dev/null 2>&1; then^[[0m
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.2639873Z ^[[36;1m  sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0^[[0m
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.2640238Z ^[[36;1mfi^[[0m
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.2640553Z ^[[36;1mif sysctl -N kernel.unprivileged_userns_clone >/dev/null 2>&1; then^[[0m
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.2641007Z ^[[36;1m  sudo sysctl -w kernel.unprivileged_userns_clone=1^[[0m
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.2641337Z ^[[36;1mfi^[[0m
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.2702906Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.2703272Z env:
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.2703484Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.2703747Z   CARGO_INCREMENTAL: 0
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.2703970Z   CARGO_TERM_COLOR: always
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.2704198Z ##[endgroup]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.3516977Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.3811385Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.3819584Z Get:6 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.3829990Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.3869213Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.3905266Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.5249961Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble/main armhf Packages [12.4 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.5356382Z Get:8 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [557 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.5451529Z Get:9 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [618 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.5729270Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1397 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.5800328Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [308 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.5842131Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1704 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.5927724Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [342 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.5953457Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1805 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.6068072Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [411 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.6928468Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1144 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.6992303Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [231 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.7013395Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1222 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.7079713Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [246 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.7514715Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1713 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:18.7619951Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted Translation-en [392 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:22.1840781Z Fetched 12.5 MB in 1s (9606 kB/s)
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.1411075Z Reading package lists...
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.1719702Z Reading package lists...
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.3767480Z Building dependency tree...
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.3774782Z Reading state information...
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.5435101Z The following NEW packages will be installed:
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.5443298Z   bubblewrap
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.5620561Z 0 upgraded, 1 newly installed, 0 to remove and 44 not upgraded.
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.5621268Z Need to get 50.4 kB of archives.
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.5621653Z After this operation, 133 kB of additional disk space will be used.
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.5622423Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.6413713Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 bubblewrap amd64 0.9.0-1ubuntu0.3 [50.4 kB]
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.8962696Z Fetched 50.4 kB in 0s (552 kB/s)
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.9189334Z Selecting previously unselected package bubblewrap.
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.9506391Z (Reading database ...
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.9507040Z (Reading database ... 5%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.9507540Z (Reading database ... 10%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.9508015Z (Reading database ... 15%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.9508549Z (Reading database ... 20%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.9509112Z (Reading database ... 25%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.9509686Z (Reading database ... 30%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.9510161Z (Reading database ... 35%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.9510594Z (Reading database ... 40%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.9510867Z (Reading database ... 45%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.9511111Z (Reading database ... 50%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:23.9566575Z (Reading database ... 55%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:24.0692490Z (Reading database ... 60%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:24.2777082Z (Reading database ... 65%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:24.4630330Z (Reading database ... 70%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:24.6294552Z (Reading database ... 75%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:24.8151941Z (Reading database ... 80%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:24.9828848Z (Reading database ... 85%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:25.1422405Z (Reading database ... 90%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:25.3308388Z (Reading database ... 95%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:25.3308933Z (Reading database ... 100%
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:25.3309530Z (Reading database ... 203540 files and directories currently installed.)
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:25.3352952Z Preparing to unpack .../bubblewrap_0.9.0-1ubuntu0.3_amd64.deb ...
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:25.3381165Z Unpacking bubblewrap (0.9.0-1ubuntu0.3) ...
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:25.3830033Z Setting up bubblewrap (0.9.0-1ubuntu0.3) ...
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:25.3891581Z Processing triggers for man-db (2.12.0-4build2) ...
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:25.3915307Z Not building database; man-db/auto-update is not 'true'.
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:26.2419216Z
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:26.2419823Z Running kernel seems to be up-to-date.
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:26.2420319Z
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:26.2420526Z No services need to be restarted.
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:26.2420912Z
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:26.2421098Z No containers need to be restarted.
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:26.2421329Z
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:26.2421493Z No user sessions are running outdated binaries.
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:26.2421761Z
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:26.2422041Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:27.2168014Z kernel.apparmor_restrict_unprivileged_userns = 0
+check (ubuntu-latest)	Prepare Linux sandbox host	2026-10-18T04:39:27.2245992Z kernel.unprivileged_userns_clone = 1
+check (ubuntu-latest)	Run cargo fmt --all -- --check	﻿2026-10-18T04:39:27.2288042Z ##[group]Run cargo fmt --all -- --check
+check (ubuntu-latest)	Run cargo fmt --all -- --check	2026-10-18T04:39:27.2288436Z ^[[36;1mcargo fmt --all -- --check^[[0m
+check (ubuntu-latest)	Run cargo fmt --all -- --check	2026-10-18T04:39:27.2349762Z shell: /usr/bin/bash -e {0}
+check (ubuntu-latest)	Run cargo fmt --all -- --check	2026-10-18T04:39:27.2350018Z env:
+check (ubuntu-latest)	Run cargo fmt --all -- --check	2026-10-18T04:39:27.2350222Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Run cargo fmt --all -- --check	2026-10-18T04:39:27.2350494Z   CARGO_INCREMENTAL: 0
+check (ubuntu-latest)	Run cargo fmt --all -- --check	2026-10-18T04:39:27.2350714Z   CARGO_TERM_COLOR: always
+check (ubuntu-latest)	Run cargo fmt --all -- --check	2026-10-18T04:39:27.2350936Z ##[endgroup]
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	﻿2026-10-18T04:39:27.4851003Z ##[group]Run cargo clippy --all-targets --locked -- -D warnings
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.4851872Z ^[[36;1mcargo clippy --all-targets --locked -- -D warnings^[[0m
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.4916341Z shell: /usr/bin/bash -e {0}
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.4916600Z env:
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.4916801Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.4917070Z   CARGO_INCREMENTAL: 0
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.4917294Z   CARGO_TERM_COLOR: always
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.4917525Z ##[endgroup]
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.5706167Z ^[[1m^[[92m    Updating^[[0m crates.io index
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.8282757Z ^[[1m^[[92m Downloading^[[0m crates ...
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9085677Z ^[[1m^[[92m  Downloaded^[[0m block-buffer v0.10.4
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9158903Z ^[[1m^[[92m  Downloaded^[[0m bitflags v2.13.2
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9208824Z ^[[1m^[[92m  Downloaded^[[0m cfg-if v1.0.5
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9222973Z ^[[1m^[[92m  Downloaded^[[0m dirs-sys v0.4.1
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9235731Z ^[[1m^[[92m  Downloaded^[[0m cpufeatures v0.2.17
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9250582Z ^[[1m^[[92m  Downloaded^[[0m crypto-common v0.1.7
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9262784Z ^[[1m^[[92m  Downloaded^[[0m errno v0.3.14
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9279548Z ^[[1m^[[92m  Downloaded^[[0m tokio-macros v2.7.2
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9290475Z ^[[1m^[[92m  Downloaded^[[0m version_check v0.9.5
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9304575Z ^[[1m^[[92m  Downloaded^[[0m async-trait v0.1.92
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9344442Z ^[[1m^[[92m  Downloaded^[[0m itoa v1.0.18
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9362755Z ^[[1m^[[92m  Downloaded^[[0m generic-array v0.14.7
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9377820Z ^[[1m^[[92m  Downloaded^[[0m option-ext v0.2.0
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9386644Z ^[[1m^[[92m  Downloaded^[[0m sha2 v0.10.9
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9416470Z ^[[1m^[[92m  Downloaded^[[0m dirs v5.0.1
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9433651Z ^[[1m^[[92m  Downloaded^[[0m zmij v1.0.23
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9454755Z ^[[1m^[[92m  Downloaded^[[0m anyhow v1.0.104
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9503889Z ^[[1m^[[92m  Downloaded^[[0m pin-project-lite v0.2.17
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9578383Z ^[[1m^[[92m  Downloaded^[[0m signal-hook-registry v1.4.8
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9606253Z ^[[1m^[[92m  Downloaded^[[0m bytes v1.12.1
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9640391Z ^[[1m^[[92m  Downloaded^[[0m digest v0.10.7
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9661950Z ^[[1m^[[92m  Downloaded^[[0m fastrand v2.5.0
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9677524Z ^[[1m^[[92m  Downloaded^[[0m tempfile v3.27.0
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9713188Z ^[[1m^[[92m  Downloaded^[[0m proc-macro2 v1.0.107
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9755686Z ^[[1m^[[92m  Downloaded^[[0m getrandom v0.4.3
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9807929Z ^[[1m^[[92m  Downloaded^[[0m quote v1.0.47
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9847441Z ^[[1m^[[92m  Downloaded^[[0m socket2 v0.6.5
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9871283Z ^[[1m^[[92m  Downloaded^[[0m serde_core v1.0.229
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9910063Z ^[[1m^[[92m  Downloaded^[[0m unicode-ident v1.0.27
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9938796Z ^[[1m^[[92m  Downloaded^[[0m once_cell v1.21.4
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.9964583Z ^[[1m^[[92m  Downloaded^[[0m memchr v2.8.3
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.0022179Z ^[[1m^[[92m  Downloaded^[[0m mio v1.2.4
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.0090937Z ^[[1m^[[92m  Downloaded^[[0m typenum v1.20.1
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.0126037Z ^[[1m^[[92m  Downloaded^[[0m serde_json v1.0.154
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.0201248Z ^[[1m^[[92m  Downloaded^[[0m syn v3.0.9
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.0309875Z ^[[1m^[[92m  Downloaded^[[0m rustix v1.1.5
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.0589243Z ^[[1m^[[92m  Downloaded^[[0m libc v0.2.191
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.1078705Z ^[[1m^[[92m  Downloaded^[[0m tokio v1.53.3
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.1555674Z ^[[1m^[[92m  Downloaded^[[0m linux-raw-sys v0.12.1
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.2470600Z ^[[1m^[[92m   Compiling^[[0m libc v0.2.191
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.2483281Z ^[[1m^[[92m   Compiling^[[0m proc-macro2 v1.0.107
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.2488468Z ^[[1m^[[92m   Compiling^[[0m version_check v0.9.5
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.2489465Z ^[[1m^[[92m   Compiling^[[0m unicode-ident v1.0.27
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.3053428Z ^[[1m^[[92m   Compiling^[[0m quote v1.0.47
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.4771379Z ^[[1m^[[92m    Checking^[[0m typenum v1.20.1
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.4916935Z ^[[1m^[[92m   Compiling^[[0m generic-array v0.14.7
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.5941857Z ^[[1m^[[92m   Compiling^[[0m zmij v1.0.23
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.7386723Z ^[[1m^[[92m    Checking^[[0m cfg-if v1.0.5
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.7637120Z ^[[1m^[[92m   Compiling^[[0m rustix v1.1.5
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.1097851Z ^[[1m^[[92m   Compiling^[[0m syn v3.0.9
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.1575856Z ^[[1m^[[92m   Compiling^[[0m serde_core v1.0.229
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.3276981Z ^[[1m^[[92m   Compiling^[[0m getrandom v0.4.3
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.5146842Z ^[[1m^[[92m    Checking^[[0m errno v0.3.14
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.5206961Z ^[[1m^[[92m    Checking^[[0m bitflags v2.13.2
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.5631714Z ^[[1m^[[92m    Checking^[[0m linux-raw-sys v0.12.1
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.6176829Z ^[[1m^[[92m   Compiling^[[0m anyhow v1.0.104
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.6726892Z ^[[1m^[[92m    Checking^[[0m block-buffer v0.10.4
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.7346978Z ^[[1m^[[92m    Checking^[[0m crypto-common v0.1.7
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.7744045Z ^[[1m^[[92m   Compiling^[[0m serde_json v1.0.154
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.7846854Z ^[[1m^[[92m    Checking^[[0m option-ext v0.2.0
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.8126896Z ^[[1m^[[92m    Checking^[[0m dirs-sys v0.4.1
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.8716789Z ^[[1m^[[92m    Checking^[[0m digest v0.10.7
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.9063242Z ^[[1m^[[92m    Checking^[[0m signal-hook-registry v1.4.8
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:30.0036991Z ^[[1m^[[92m    Checking^[[0m socket2 v0.6.5
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:30.2286725Z ^[[1m^[[92m    Checking^[[0m mio v1.2.4
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:30.4786982Z ^[[1m^[[92m    Checking^[[0m itoa v1.0.18
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:30.5597150Z ^[[1m^[[92m    Checking^[[0m pin-project-lite v0.2.17
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:30.5926681Z ^[[1m^[[92m    Checking^[[0m bytes v1.12.1
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:31.0167448Z ^[[1m^[[92m    Checking^[[0m once_cell v1.21.4
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:31.1286649Z ^[[1m^[[92m    Checking^[[0m memchr v2.8.3
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:31.2927449Z ^[[1m^[[92m    Checking^[[0m fastrand v2.5.0
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:31.4027422Z ^[[1m^[[92m    Checking^[[0m cpufeatures v0.2.17
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:31.4366714Z ^[[1m^[[92m    Checking^[[0m sha2 v0.10.9
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:31.4846944Z ^[[1m^[[92m    Checking^[[0m tempfile v3.27.0
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:31.6396917Z ^[[1m^[[92m    Checking^[[0m dirs v5.0.1
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:32.1850116Z ^[[1m^[[92m   Compiling^[[0m tokio-macros v2.7.2
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:32.1864849Z ^[[1m^[[92m   Compiling^[[0m async-trait v0.1.92
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:32.6678328Z ^[[1m^[[92m    Checking^[[0m tokio v1.53.3
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:34.8106850Z ^[[1m^[[92m    Checking^[[0m a3s-sandbox v0.3.0 (/home/runner/work/Sandbox/Sandbox)
+check (ubuntu-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:37.1972772Z ^[[1m^[[92m    Finished^[[0m `dev` profile [unoptimized + debuginfo] target(s) in 9.65s
+check (ubuntu-latest)	Build bins for mediation relay tests	﻿2026-10-18T04:39:37.2264801Z ##[group]Run cargo build --bins --locked
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:37.2265681Z ^[[36;1mcargo build --bins --locked^[[0m
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:37.2327700Z shell: /usr/bin/bash -e {0}
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:37.2327968Z env:
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:37.2328173Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:37.2328435Z   CARGO_INCREMENTAL: 0
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:37.2328658Z   CARGO_TERM_COLOR: always
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:37.2328882Z ##[endgroup]
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:37.3284375Z ^[[1m^[[92m   Compiling^[[0m libc v0.2.191
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:37.3285864Z ^[[1m^[[92m   Compiling^[[0m typenum v1.20.1
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:37.3293118Z ^[[1m^[[92m   Compiling^[[0m cfg-if v1.0.5
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:37.3324487Z ^[[1m^[[92m   Compiling^[[0m linux-raw-sys v0.12.1
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:37.3578744Z ^[[1m^[[92m   Compiling^[[0m option-ext v0.2.0
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:37.3928775Z ^[[1m^[[92m   Compiling^[[0m bitflags v2.13.2
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:37.5676806Z ^[[1m^[[92m   Compiling^[[0m zmij v1.0.23
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:37.6676485Z ^[[1m^[[92m   Compiling^[[0m rustix v1.1.5
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:37.8786729Z ^[[1m^[[92m   Compiling^[[0m serde_core v1.0.229
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:38.0596681Z ^[[1m^[[92m   Compiling^[[0m generic-array v0.14.7
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:38.4197122Z ^[[1m^[[92m   Compiling^[[0m errno v0.3.14
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:38.4976423Z ^[[1m^[[92m   Compiling^[[0m signal-hook-registry v1.4.8
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:38.6227676Z ^[[1m^[[92m   Compiling^[[0m crypto-common v0.1.7
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:38.6856975Z ^[[1m^[[92m   Compiling^[[0m block-buffer v0.10.4
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:38.7356742Z ^[[1m^[[92m   Compiling^[[0m mio v1.2.4
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:38.7506733Z ^[[1m^[[92m   Compiling^[[0m digest v0.10.7
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:38.8756713Z ^[[1m^[[92m   Compiling^[[0m socket2 v0.6.5
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:39.2176716Z ^[[1m^[[92m   Compiling^[[0m getrandom v0.4.3
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:39.3299275Z ^[[1m^[[92m   Compiling^[[0m dirs-sys v0.4.1
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:39.3777317Z ^[[1m^[[92m   Compiling^[[0m cpufeatures v0.2.17
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:39.4022087Z ^[[1m^[[92m   Compiling^[[0m pin-project-lite v0.2.17
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:39.4426872Z ^[[1m^[[92m   Compiling^[[0m once_cell v1.21.4
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:39.5791822Z ^[[1m^[[92m   Compiling^[[0m itoa v1.0.18
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:39.5906927Z ^[[1m^[[92m   Compiling^[[0m bytes v1.12.1
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:39.7076897Z ^[[1m^[[92m   Compiling^[[0m fastrand v2.5.0
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:39.8074571Z ^[[1m^[[92m   Compiling^[[0m memchr v2.8.3
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:39.8846817Z ^[[1m^[[92m   Compiling^[[0m tempfile v3.27.0
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:40.2297192Z ^[[1m^[[92m   Compiling^[[0m serde_json v1.0.154
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:40.2326436Z ^[[1m^[[92m   Compiling^[[0m tokio v1.53.3
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:40.2936836Z ^[[1m^[[92m   Compiling^[[0m dirs v5.0.1
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:40.3411223Z ^[[1m^[[92m   Compiling^[[0m sha2 v0.10.9
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:40.5406763Z ^[[1m^[[92m   Compiling^[[0m anyhow v1.0.104
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:43.1901952Z ^[[1m^[[92m   Compiling^[[0m a3s-sandbox v0.3.0 (/home/runner/work/Sandbox/Sandbox)
+check (ubuntu-latest)	Build bins for mediation relay tests	2026-10-18T04:39:46.4067273Z ^[[1m^[[92m    Finished^[[0m `dev` profile [unoptimized + debuginfo] target(s) in 9.14s
+check (ubuntu-latest)	Run tests	﻿2026-10-18T04:39:46.4184517Z ##[group]Run set -o pipefail
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:46.4185070Z ^[[36;1mset -o pipefail^[[0m
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:46.4185902Z ^[[36;1mcargo test --all-targets --locked 2>&1 | tee suite.log^[[0m
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:46.4248770Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:46.4249153Z env:
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:46.4249356Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:46.4249621Z   CARGO_INCREMENTAL: 0
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:46.4249845Z   CARGO_TERM_COLOR: always
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:46.4250074Z ##[endgroup]
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:46.4984001Z ^[[1m^[[92m   Compiling^[[0m a3s-sandbox v0.3.0 (/home/runner/work/Sandbox/Sandbox)
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.4082655Z ^[[1m^[[92m    Finished^[[0m `test` profile [unoptimized + debuginfo] target(s) in 5.95s
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.4118674Z ^[[1m^[[92m     Running^[[0m unittests src/lib.rs (target/debug/deps/a3s_sandbox-d5bb9c0f88492e5f)
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.4132262Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.4132512Z running 225 tests
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.4162922Z test network::connect::tests::absolute_form_without_matching_injection_forwards_no_authorization ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.4163937Z test network::connect::tests::absolute_form_http_injects_secret_header_upstream ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.4164505Z test network::connect::tests::connect_allow_tunnels_bytes_to_upstream ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.4165108Z test network::connect::tests::client_supplied_authorization_is_replaced_by_injection ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.4169175Z test network::connect::tests::path_prefixed_rule_does_not_authorize_connect ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.4178858Z test network::connect::tests::unix_connect_allow_tunnels_bytes_to_upstream ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.6179862Z test network::connect::tests::connect_deny_never_reaches_upstream ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.6181740Z test network::relay::tests::default_guest_relay_port_is_stable ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.6182900Z test network::relay::tests::posix_shell_single_quote_escapes_apostrophes ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.6189319Z test network::relay::tests::stage_relay_into_scratch_copies_executable ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.6199681Z test network::connect::tests::unix_connect_deny_never_reaches_upstream ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.6216213Z test network::relay::tests::tcp_unix_relay_forwards_connect_to_unix_mediator ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.6222686Z test network::relay::tests::tcp_unix_relay_forwards_socks5_to_unix_mediator ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.6223935Z test network::relay::tests::wrap_command_with_guest_relay_embeds_relay_and_socket ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.6225092Z test network::socks::tests::path_prefixed_rule_does_not_authorize_socks ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.6229402Z test network::socks::tests::socks_allow_tunnels_bytes_to_upstream ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.6237830Z test network::socks::tests::unix_socks_allow_tunnels_bytes_to_upstream ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.7152902Z test network::connect::tests::absolute_form_https_target_refused_fail_closed ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.7156232Z test network::connect::tests::absolute_form_denied_origin_never_reaches_upstream ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.7526876Z test observability::gate2_integration::gate2_execute_records_attributable_audit_events ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.7527584Z test observability::gate2_resources::gate2_memory_ceiling_stops_overallocation ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.7874534Z test observability::gate2_resources::gate2_policy_output_ceiling_truncates_capture ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.7878992Z test observability::gate2_resources::gate2_unix_process_limit_fails_closed_at_policy ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.7880105Z test observability::tests::audit_event_replay_key_stable_for_same_decision ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.7881096Z test observability::tests::buffer_drops_oldest_under_backpressure ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.7882092Z test observability::tests::monitoring_failure_does_not_grant_access_semantics ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.7882974Z test platform::bwrap_candidate_tests::defaults_then_an_authoritative_override ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.7885274Z test platform::cgroup::tests::cgroup_mount_point_is_cgroup_v2_or_honest_failure ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.7888975Z test platform::cgroup::tests::cpu_cap_roundtrips_when_delegated ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.7896653Z test platform::cgroup::tests::delegated_base_probe_roundtrips_or_fails_closed_with_reason ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.7902368Z test platform::cgroup::tests::memory_cap_roundtrips_when_delegated ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.7928709Z test platform::linux::tests::ephemeral_scratch_is_mounted_as_tmpfs_not_host_bind ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.7963484Z test platform::linux::tests::ephemeral_scratch_with_mediation_keeps_host_bind_for_socket ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.8244135Z test network::socks::tests::socks_deny_never_reaches_upstream ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.8614894Z test platform::linux::tests::linux_bridge_wire_denies_forbidden_connect_and_raw_egress ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.8879678Z test platform::linux::tests::linux_bridge_wire_tunnels_allowed_connect_via_unix_mediator ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9267861Z test network::socks::tests::unix_socks_deny_never_reaches_upstream ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9307158Z test platform::linux::tests::mediation_wire_adds_unshare_net_when_unix_mediator_set ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9311953Z test platform::linux::tests::seccomp_filter_blocks_sockets_and_namespace_reentry ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9314414Z test platform::linux::tests::seccomp_filter_file_is_rewound_for_bubblewrap ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9319883Z test platform::linux::tests::seccomp_mediation_mode_allows_sockets_but_blocks_namespace_escape ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9323275Z test platform::linux::tests::linux_socks_bridge_wire_allows_allowed_connect ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9324829Z test policy::capabilities::tests::gate13_matrix_rows_match_this_platforms_capabilities ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9333563Z test policy::capabilities::tests::gate13_threat_model_embeds_the_generated_capability_matrix ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9335038Z test policy::capabilities::tests::gate2_backend_enforces_optional_memory_and_process_limits ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9336758Z test policy::capabilities::tests::gate4_mediated_http_capability_matches_platform_fence ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9338335Z test policy::capabilities::tests::gate5_mediated_socks_capability_matches_platform_fence ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9340142Z test policy::capabilities::tests::memory_limit_without_backend_support_fails_closed ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9341555Z test policy::capabilities::tests::policy_exceeding_backend_capabilities_fails_closed ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9342775Z test policy::decide::tests::deny_read_wins_over_allow_read ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9344085Z test policy::decide::tests::fixture_decisions_are_separator_agnostic ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9345242Z test policy::decide::tests::glob_rules_match_single_segment_wildcards ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9346761Z test policy::decide::tests::network_default_is_deny_all ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9348088Z test policy::decide::tests::unmatched_paths_fail_closed ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9349221Z test policy::decide::tests::write_exception_carves_out_denied_ancestor ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9350393Z test policy::digest::tests::baseline_digest_is_hex_sha256_length ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9351675Z test policy::digest::tests::digest_changes_when_rules_change ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9352766Z test policy::digest::tests::digest_is_stable_under_rule_reordering ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9354747Z test policy::enforced::tests::cached_internal_hardlink_is_rechecked_when_the_twin_moves_outside ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9356727Z test policy::enforced::tests::child_environment_mediator_overwrites_explicit_proxy_bypass ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9358206Z test policy::enforced::tests::child_environment_mediator_pipe_sets_named_pipe_not_http_proxy ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9359857Z test policy::enforced::tests::child_environment_removes_runtime_injection_and_rehomes_state ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9361164Z test policy::enforced::tests::child_environment_socks_mediator_sets_all_proxy_only ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9362581Z test policy::enforced::tests::child_environment_removes_case_insensitive_bootstrap_variables ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9380311Z test policy::enforced::tests::executable_resolution_rejects_workspace_tools ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9406635Z test policy::enforced::tests::credential_hardlink_aliases_inside_package_stores_enter_the_deny_set ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9419378Z test policy::enforced::tests::hardlink_scan_skips_build_and_package_stores ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9430420Z test policy::enforced::tests::git_worktree_pointer_is_resolved_for_case_variant_gitfiles ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9466436Z test policy::enforced::tests::in_workspace_hardlinks_are_not_outside_aliases ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9507633Z test policy::enforced::tests::nested_environment_files_and_hardlinks_enter_the_deny_set ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9526622Z test policy::enforced::tests::monorepo_workspace_scan_stays_under_entry_limit ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9528147Z test policy::enforced::tests::nested_secret_scan_matches_case_variant_environment_files ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9536690Z test policy::enforced::tests::nested_secret_scan_skips_control_and_build_stores ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9538394Z test policy::enforced::tests::only_protected_workspace_roots_require_directory_placeholders ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9566365Z test policy::enforced::tests::path_ancestors_exclude_the_filesystem_root ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9567429Z test policy::enforced::tests::nested_secret_scan_fails_closed_at_depth_limit ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9568546Z test policy::enforced::tests::protected_path_matching_is_case_insensitive_and_traversal_safe ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9578671Z test policy::enforced::tests::protected_workspace_symlinks_fail_closed ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9596816Z test policy::enforced::tests::scan_directory_filter_handles_case_variants ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9597762Z test policy::enforced::tests::policy_discovers_case_variant_control_metadata ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9608663Z test platform::linux::tests::linux_socks_bridge_wire_denies_forbidden_connect ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9646814Z test observability::gate2_resources::gate2_policy_timeout_ceiling_caps_request ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9681236Z test policy::gate1_integration::gate1_fixture_decisions_match_expected_table ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9704298Z test policy::gate1_integration::gate1_fixture_digest_is_replay_stable ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9706037Z test policy::gate1_integration::gate1_compile_refuses_allow_overlays_outside_workspace_or_scratch ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9707544Z test policy::gate1_integration::gate1_native_sandbox_rejects_unenforcible_policy ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9709116Z test policy::gate3_integration::gate3_document_decisions_treat_readonly_mount_as_readable ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9710580Z test policy::gate3_integration::gate3_ephemeral_session_fails_closed_without_overlay_capability ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9712098Z test policy::gate1_integration::gate1_compile_applies_exact_deny_overlays_without_globs ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9713386Z test policy::gate3_integration::gate3_linux_ephemeral_is_accepted_by_policy ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9714715Z test policy::gate1_integration::gate1_compile_requires_sandbox_policy_and_rejects_broadening ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9716265Z test policy::gate3_integration::gate3_linux_ephemeral_compiles_session_write_mode ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9728016Z test policy::gate3_integration::gate3_readonly_mount_outside_workspace_compiles_for_read_not_write ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9744871Z test policy::gate3_integration::gate3_readonly_mount_under_workspace_denies_writes ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9746338Z test policy::gate4_integration::gate4_claiming_platforms_accept_mediated_network_capability ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9766525Z test policy::gate4_integration::gate4_connect_mediator_allow_and_deny_integration ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9767978Z test policy::gate4_integration::gate4_does_not_weaken_default_deny_all ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9772671Z test policy::gate3_integration::gate3_readwrite_mount_outside_workspace_fails_closed ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9774777Z test policy::gate4_integration::gate4_mediated_http_capability_is_platform_scoped ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9778418Z test policy::gate4_integration::gate4_rejects_path_prefix_with_dotdot ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9779812Z test policy::gate5_integration::gate5_mediated_socks_capability_is_platform_scoped ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9804375Z test policy::gate5_integration::gate5_non_macos_refuses_mediated_socks ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9818435Z test policy::gate5_integration::gate5_non_macos_refuses_unix_socket_allow_rules ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9836863Z test policy::gate5_integration::gate5_socks_mediator_allow_and_deny_integration ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9842219Z test policy::gate5_integration::gate5_unix_socket_allowlist_capability_is_platform_scoped ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9843898Z test policy::gate5_linux_bridge::gate5_linux_bridge_foundation_apis_are_present ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9856144Z test policy::gate5_linux_bridge::gate5_linux_bridge_residual_checklist_is_documented ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9861528Z test policy::gate5_linux_bridge::gate5_linux_mediated_http_and_socks_are_claimed_unix_allowlists_are_not ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9863128Z test policy::gate5_linux_bridge::gate5_linux_mediated_http_policy_compiles_on_linux_capabilities ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9872128Z test policy::gate5_windows_bridge::gate5_windows_bridge_acceptance_checklist_is_documented ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9873619Z test policy::gate5_windows_bridge::gate5_windows_guest_contract_rejects_http_proxy_as_bridge ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9879036Z test policy::gate5_windows_bridge::gate5_windows_mediated_http_is_claimed_socks_remain_unclaimed ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9884333Z test policy::gate5_windows_bridge::gate5_windows_mediated_http_policy_compiles_on_windows_capabilities ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9886150Z test policy::gate6_integration::gate6_capability_report_lists_unavailable_surfaces ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9891396Z test policy::gate6_integration::gate6_replace_policy_allows_narrowing_without_opt_in ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9892943Z test policy::gate6_integration::gate6_replace_policy_refuses_silent_broadening ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9902202Z test policy::gate7_fuzz::gate7_fuzz_ipv6_literal_parses_but_requires_exact_allowlist ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:52.9903663Z test policy::gate7_fuzz::gate7_fuzz_mediator_still_allows_well_formed_connect_after_garbage ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.0389303Z test policy::gate1_integration::gate1_native_sandbox_integration_still_executes ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.0401655Z test policy::gate7_fuzz::gate7_fuzz_parse_connect_target_accepts_canonical_shapes ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.0402931Z test policy::gate7_fuzz::gate7_fuzz_parse_connect_target_rejects_malformed_corpus ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.0416780Z test policy::gate3_integration::gate3_native_sandbox_reads_readonly_mount_and_blocks_writes ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.0517187Z test policy::gate7_integration::gate7_benchmark_connect_mediator_allow_p50_under_budget ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.0520461Z test policy::gate7_integration::gate7_capability_report_never_hides_unavailable_mediation ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.0522191Z test policy::gate7_integration::gate7_connect_does_not_alias_localhost_to_loopback_ip ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.0529152Z test policy::gate7_integration::gate7_connect_mediator_rejects_non_connect_method ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.0590354Z test policy::gate4_integration::gate4_linux_sandbox_mediator_tunnels_allowed_connect ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.0933485Z test policy::gate7_integration::gate7_direct_symlink_to_outside_file_does_not_leak_on_read ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.0934909Z test policy::gate7_integration::gate7_narrowing_then_rebroadening_requires_opt_in_each_time ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.0936908Z test policy::gate7_integration::gate7_path_prefix_never_authorizes_opaque_tunnels ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.0940181Z test policy::gate7_integration::gate7_policy_validate_rejects_malformed_network_hosts ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.0941678Z test policy::gate7_integration::gate7_policy_validate_rejects_zero_resource_ceilings ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.0943580Z test policy::gate7_integration::gate7_replace_policy_still_refuses_mediation_enablement ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.3544489Z test policy::gate7_integration::gate7_benchmark_baseline_exec_p50_under_budget ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.3886755Z test policy::gate7_fuzz::gate7_fuzz_mediator_survives_malformed_tcp_payloads_without_upstream ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.4228290Z test policy::gate7_integration::gate7_same_workspace_overlapping_executes_stay_isolated ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.4229974Z test policy::gate7_integration::gate7_socks_does_not_authorize_literal_ip_when_hostname_allowlisted ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.4233893Z test policy::gate7_integration::gate7_socks_mediator_rejects_bind_command ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.4480309Z test policy::gate7_integration::gate7_soak_same_workspace_concurrent_sessions_keep_outputs_distinct ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.4482702Z test policy::gate7_release_invariants::gate7_release_capability_probe_lists_unavailable_surfaces ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.4485197Z test policy::gate7_release_invariants::gate7_release_claims_match_capability_matrix ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.4486888Z test policy::gate7_release_invariants::gate7_release_default_profile_keeps_mediation_off ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.4979167Z test policy::gate7_integration::gate7_in_command_symlink_swap_during_sleep_does_not_leak ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.4987485Z test policy::gate8_integration::gate8_invalid_secret_entries_refuse ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5011689Z test policy::gate8_integration::gate8_reserved_secret_names_refuse ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5057425Z test policy::gate7_integration::gate7_tocu_symlink_planted_between_executes_does_not_leak_outside_secret ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5401408Z test policy::gate8_integration::gate8_egress_reinjection_delivers_secret_without_landing_it ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5406525Z test policy::gate8_integration::gate8_secret_colliding_with_explicit_env_refuses ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5606281Z test policy::gate8_integration::gate8_secret_bytes_absent_from_audit_and_digest_stable ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5612587Z test policy::gate8_integration::gate8_secret_env_without_mediation_fails_closed ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5632218Z test policy::grant::tests::apply_appends_to_existing_mediated_policy_without_clobbering ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5632899Z test policy::grant::tests::apply_is_idempotent_for_identical_subject ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5633409Z test policy::grant::tests::apply_refuses_invalid_or_wildcard_hosts ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5633996Z test policy::grant::tests::apply_to_deny_all_baseline_activates_mediation_for_exactly_that_origin ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5641862Z test policy::grant::tests::grant_cannot_alias_localhost_to_loopback_ip ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5642952Z test policy::grant::tests::port_pinned_grant_widens_only_that_port ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5644273Z test policy::grant_integration::applied_grant_is_auditable_with_new_digest_and_updates_the_session ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5645377Z test policy::grant_integration::baseline_policy_fixture_matches_default ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5651965Z test policy::grant_integration::granted_policy_authorizes_only_the_granted_subject ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5660123Z test policy::grant_integration::hand_built_broadening_still_refuses_without_the_explicit_opt_in ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5664120Z test policy::grant_integration::idempotent_regrant_changes_nothing_and_records_no_new_allow_rule ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5668548Z test policy::grant_integration::stale_base_digest_refuses_and_leaves_policy_unchanged ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5680297Z test policy::mediate::tests::allow_exact_origin_and_path_prefix ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5681417Z test policy::mediate::tests::connect_requires_pathless_allow_rule ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5682474Z test policy::mediate::tests::deny_when_mediation_flag_off ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5683734Z test policy::mediate::tests::injection_host_match_is_case_insensitive_without_aliasing ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5685142Z test policy::mediate::tests::injections_apply_only_on_matching_origin_and_path ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5686585Z test policy::mediate::tests::injections_without_allow_rule_authorize_nothing ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5687626Z test policy::mediate::tests::missing_path_prefix_allows_any_path_on_origin ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5688662Z test policy::mediate::tests::socks_requires_mediated_socks_flag_and_pathless_rule ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5689661Z test policy::model::tests::baseline_policy_validates ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5690678Z test policy::model::tests::mediated_network_document_validates_shape_but_backend_fails_closed ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5691704Z test policy::model::tests::rejects_dotdot_in_path_rules ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5692584Z test policy::model::tests::rejects_mediated_network_flag_without_allowlist ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5693608Z test policy::model::tests::rejects_network_allow_without_mediation_flag ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5694501Z test policy::model::tests::rejects_recursive_glob ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5695214Z test policy::model::tests::rejects_wrong_version ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5696388Z test policy::model::tests::rejects_zero_timeout ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5697311Z test policy::normalize::tests::absolute_unix_style_paths_keep_root ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5698364Z test policy::normalize::tests::collapses_dot_and_rejects_escape ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5699502Z test policy::normalize::tests::identical_relative_shapes_compare_equal ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5700550Z test policy::normalize::tests::normalizes_separators ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5715974Z test policy::resource_quota_integration::cgroup_memory_quota_kills_the_tree_when_exceeded ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5717215Z test policy::resource_quota_integration::cgroup_process_quota_bounds_the_process_tree ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5718942Z test policy::resource_quota_integration::quota_policy_refuses_at_construction_without_delegation ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5720091Z test policy::resource_quota_integration::zero_cpu_quota_refuses_at_resolve ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5721152Z test policy::resources::tests::gate2_capabilities_can_enforce_optional_process_and_memory ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5722183Z test policy::resources::tests::resolve_caps_request_timeout_by_policy ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5723112Z test policy::resources::tests::resolve_rejects_call_depth_as_unenforcible ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5724054Z test policy::resources::tests::resolve_rejects_zero_process_or_memory_limits ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5724963Z test policy::resources::tests::resolve_uses_policy_output_ceiling ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5727074Z test policy::update::tests::adding_unix_socket_allow_is_broadening ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5728340Z test policy::gate8_integration::gate8_secret_bytes_never_appear_in_child_environment_dump ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5729286Z test policy::update::tests::enabling_socks_is_broadening ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5730034Z test policy::update::tests::raising_timeout_is_broadening ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5730782Z test policy::update::tests::narrowing_mediation_is_allowed ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5731548Z test policy::update::tests::removing_process_quota_is_broadening ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.5915244Z test policy::gate8_integration::gate8_secret_env_delivers_sentinel_not_secret_to_child ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.6043290Z test process::lifecycle_tests::root_exit_stops_background_work_before_waiting_for_pipe_eof ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.6249652Z test process::tests::bounded_capture_at_exact_limit_is_not_marked_truncated ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.6445180Z test process::tests::bounded_capture_keeps_head_and_tail_with_exact_accounting ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.6581608Z test process::tests::bounded_capture_preserves_stream_identity_under_one_global_limit ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:53.6582764Z test process::tests::bounded_capture_replaces_invalid_utf8_per_stream ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:54.0758684Z test process::lifecycle_tests::completion_observer_cannot_hold_a_finished_command_forever ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:54.5295771Z test process::tests::process_deadline_includes_wait_after_both_streams_close ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:54.5774073Z test process::lifecycle_tests::cancellation_before_the_owner_is_polled_stops_the_process_group ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:54.6095327Z test tests::linux_backend_drops_all_process_capabilities_before_bash ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:54.6673783Z test tests::native_backend_blocks_credential_hardlinks_inside_writable_dependency_trees ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:54.7946067Z test policy::gate7_integration::gate7_soak_repeated_baseline_executes_stay_stable ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:54.9211612Z test tests::native_backend_blocks_symlink_hardlink_and_credential_escape ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:54.9620247Z test tests::native_backend_blocks_ip_and_host_unix_socket_communication ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:54.9986628Z test tests::native_backend_cannot_remove_or_rename_protected_workspace_entries ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:55.0025673Z test tests::native_backend_enforces_the_global_output_limit ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:55.0302201Z test tests::native_backend_handles_workspace_paths_with_spaces ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:55.0429369Z test tests::native_backend_keeps_concurrent_workspaces_isolated ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:55.0558736Z test tests::native_backend_notifies_observer_and_accounts_each_stream ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:55.0680099Z test tests::native_backend_preserves_exit_code_and_stream_identity ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:55.0806893Z test tests::native_backend_rejects_invalid_explicit_environment_entries ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:55.1167988Z test tests::native_backend_protects_case_variant_control_metadata ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:55.2465182Z test tests::native_backend_starts_and_writes_only_ordinary_workspace_content ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:55.2468020Z test tests::native_sandbox_canonicalizes_workspace_and_reports_backend ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:55.2472248Z test tests::native_sandbox_rejects_invalid_workspaces_and_requests ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:55.5321723Z test process::tests::successful_root_exit_does_not_leave_detached_descendants ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:55.6183797Z test tests::native_backend_sanitizes_environment_and_kills_timed_out_descendants ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7045253Z test process::tests::dropping_capture_kills_descendants_in_the_process_group ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7046448Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7047008Z test result: ok. 225 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.29s
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7047855Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7053988Z ^[[1m^[[92m     Running^[[0m unittests src/bin/a3s_sandbox.rs (target/debug/deps/a3s_sandbox-4397b95852c5f6de)
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7064222Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7064550Z running 0 tests
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7065047Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7065694Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7066288Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7067705Z ^[[1m^[[92m     Running^[[0m unittests src/bin/a3s_sandbox_bridge.rs (target/debug/deps/a3s_sandbox_bridge-476b4a5841fd4f38)
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7076723Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7076900Z running 0 tests
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7077219Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7077734Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7078792Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7079941Z ^[[1m^[[92m     Running^[[0m unittests src/bin/a3s_sandbox_relay.rs (target/debug/deps/a3s_sandbox_relay-c724c6150a132a61)
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7089080Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7089292Z running 0 tests
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7089552Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7089866Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7090216Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7092043Z ^[[1m^[[92m     Running^[[0m tests/availability.rs (target/debug/deps/availability-883645690611f94b)
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7102677Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7102831Z running 2 tests
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7106452Z test unavailability_reasons_are_stable_and_unknown_values_refuse ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7384124Z test launch_probe_does_not_grant_missing_lifetime_guarantees ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7384684Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7384942Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7385345Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7387463Z ^[[1m^[[92m     Running^[[0m tests/bridge_protocol.rs (target/debug/deps/bridge_protocol-5b18e82993b71a91)
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7396702Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7396865Z running 2 tests
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.7990460Z test unknown_method_fails_without_killing_the_bridge ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.8418244Z test handshake_probe_exec_and_shutdown ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.8418767Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.8419139Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.8419576Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.8420896Z ^[[1m^[[92m     Running^[[0m tests/cli_gate6.rs (target/debug/deps/cli_gate6-1d3ff3295669aa02)
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.8432417Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.8432587Z running 4 tests
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.8526477Z test cli_digest_prints_stable_hex ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.8527448Z test cli_capabilities_emits_backend_and_unavailable ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.8734431Z test cli_exec_does_not_report_a_signaled_command_as_success ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.8734921Z test cli_exec_runs_command_in_sandbox ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.8735205Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.8736198Z test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.8736760Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.8738056Z ^[[1m^[[92m     Running^[[0m tests/lifecycle.rs (target/debug/deps/lifecycle-a0edb6ad981600c4)
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.8750463Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.8750670Z running 4 tests
+check (ubuntu-latest)	Run tests	2026-10-18T04:39:59.8757113Z test execution_failure_codes_are_closed_and_stable ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:00.3908540Z test command_deadline_bounds_a_delta_observer_that_never_returns ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:00.4199047Z test completed_command_preserves_observer_failure_as_a_typed_non_replayable_error ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:00.9187670Z test dropping_the_caller_still_stops_a_command_blocked_in_its_observer ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:00.9188269Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:00.9188653Z test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.04s
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:00.9189226Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:00.9193443Z ^[[1m^[[92m     Running^[[0m tests/linux_lifetime.rs (target/debug/deps/linux_lifetime-7e3a9e17aa6f5abc)
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:00.9205967Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:00.9206129Z running 2 tests
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:00.9629619Z test killing_the_host_stops_the_detached_pid_namespace_without_rust_cleanup ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.5108634Z test detached_namespace_descendants_stop_on_return_timeout_and_cancellation ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.5109519Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.5110042Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.59s
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.5110649Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.5112926Z ^[[1m^[[92m     Running^[[0m tests/sbom_gate7.rs (target/debug/deps/sbom_gate7-ab18e8a8301c6c43)
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.5123325Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.5123788Z running 1 test
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.5471011Z ^[[1m^[[92m Downloading^[[0m crates ...
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.6004476Z ^[[1m^[[92m  Downloaded^[[0m r-efi v6.0.0
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.6057995Z ^[[1m^[[92m  Downloaded^[[0m redox_users v0.4.6
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.6071545Z ^[[1m^[[92m  Downloaded^[[0m libredox v0.1.25
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.6080497Z ^[[1m^[[92m  Downloaded^[[0m getrandom v0.2.17
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.6161588Z ^[[1m^[[92m  Downloaded^[[0m windows-link v0.2.1
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.6232942Z ^[[1m^[[92m  Downloaded^[[0m windows-targets v0.48.5
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.6368571Z ^[[1m^[[92m  Downloaded^[[0m tracing-core v0.1.36
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.6399594Z ^[[1m^[[92m  Downloaded^[[0m thiserror v1.0.69
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.6456283Z ^[[1m^[[92m  Downloaded^[[0m thiserror-impl v1.0.69
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.6470325Z ^[[1m^[[92m  Downloaded^[[0m wasi v0.11.1+wasi-snapshot-preview1
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.6487018Z ^[[1m^[[92m  Downloaded^[[0m tracing-attributes v0.1.31
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.6513710Z ^[[1m^[[92m  Downloaded^[[0m base64 v0.21.7
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.6551873Z ^[[1m^[[92m  Downloaded^[[0m serde_derive v1.0.229
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.6589728Z ^[[1m^[[92m  Downloaded^[[0m serde v1.0.229
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.6855236Z ^[[1m^[[92m  Downloaded^[[0m syn v2.0.119
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.6963474Z ^[[1m^[[92m  Downloaded^[[0m windows_aarch64_gnullvm v0.48.5
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.7038841Z ^[[1m^[[92m  Downloaded^[[0m windows_x86_64_gnullvm v0.48.5
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.7114264Z ^[[1m^[[92m  Downloaded^[[0m tracing v0.1.44
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.7273103Z ^[[1m^[[92m  Downloaded^[[0m windows_aarch64_msvc v0.48.5
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.7385521Z ^[[1m^[[92m  Downloaded^[[0m windows_x86_64_msvc v0.48.5
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.7496593Z ^[[1m^[[92m  Downloaded^[[0m windows_x86_64_gnu v0.48.5
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.7669502Z ^[[1m^[[92m  Downloaded^[[0m windows_i686_gnu v0.48.5
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.7851757Z ^[[1m^[[92m  Downloaded^[[0m windows_i686_msvc v0.48.5
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.7968250Z ^[[1m^[[92m  Downloaded^[[0m windows-sys v0.61.2
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.8594685Z ^[[1m^[[92m  Downloaded^[[0m windows-sys v0.48.0
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.9786620Z wrote /tmp/.tmpV0BVz1 components=65 sha256=a0a0e83d86d7c525c01baf45722192522e022fa971c1f649888c3a5600bbde6c
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.9858340Z test gate7_sbom_script_emits_cyclonedx_with_a3s_sandbox ... ok
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.9858934Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.9859555Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.47s
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.9860198Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.9861990Z ^[[1m^[[92m     Running^[[0m tests/windows_lifetime.rs (target/debug/deps/windows_lifetime-2c699f06f2e79b04)
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.9871960Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.9872319Z running 0 tests
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.9873680Z
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.9874182Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+check (ubuntu-latest)	Run tests	2026-10-18T04:40:03.9874795Z
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	﻿2026-10-18T04:40:03.9996425Z ##[group]Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:03.9996858Z with:
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:03.9997060Z   go-version: stable
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:03.9997275Z   cache: false
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:03.9997477Z   check-latest: false
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:03.9999847Z   token: ***
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:04.0000047Z env:
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:04.0000242Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:04.0000500Z   CARGO_INCREMENTAL: 0
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:04.0000719Z   CARGO_TERM_COLOR: always
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:04.0000958Z ##[endgroup]
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:04.1149067Z Setup go version spec stable
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:05.0526725Z stable version resolved as 1.27.2
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:05.0538630Z Attempting to download 1.27.2...
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:05.0538941Z matching 1.27.2...
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:05.0551928Z Acquiring 1.27.2 from https://github.com/actions/go-versions/releases/download/1.27.2-37875086547/go-1.27.2-linux-x64.tar.gz
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:05.6833553Z Extracting Go...
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:05.6951410Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/cbd90cde-d4d7-493c-aed8-a1a19f5bb976 -f /home/runner/work/_temp/efb2629d-8203-49e6-807d-5e3666db6267
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:07.4231711Z Successfully extracted go to /home/runner/work/_temp/cbd90cde-d4d7-493c-aed8-a1a19f5bb976
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:07.4232625Z Adding to the cache ...
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.1242310Z Successfully cached go to /opt/hostedtoolcache/go/1.27.2/x64
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.1246301Z Added go to the path
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.1247118Z Successfully set up Go version stable
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.1452354Z go version go1.27.2 linux/amd64
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.1452584Z
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.1452890Z ##[group]go env
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2776749Z AR='ar'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2777173Z CC='gcc'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2777556Z CGO_CFLAGS='-O2 -g'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2777956Z CGO_CPPFLAGS=''
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2778349Z CGO_CXXFLAGS='-O2 -g'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2778739Z CGO_ENABLED='1'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2779091Z CGO_FFLAGS='-O2 -g'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2779487Z CGO_LDFLAGS='-O2 -g'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2779849Z CXX='g++'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2780165Z GCCGO='gccgo'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2780492Z GO111MODULE=''
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2780908Z GOAMD64='v1'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2781236Z GOARCH='amd64'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2781566Z GOAUTH='netrc'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2781985Z GOBIN='/home/runner/go/bin'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2782437Z GOCACHE='/home/runner/.cache/go-build'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2782902Z GOCACHEPROG=''
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2783286Z GODEBUG=''
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2783560Z GOENV='/home/runner/.config/go/env'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2783831Z GOEXE=''
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2784026Z GOEXPERIMENT=''
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2784254Z GOFIPS140='off'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2784458Z GOFLAGS=''
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2785174Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build2549666339=/tmp/go-build -gno-record-gcc-switches'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2786179Z GOHOSTARCH='amd64'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2786400Z GOHOSTOS='linux'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2786614Z GOINSECURE=''
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2786813Z GOMOD='/dev/null'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2787051Z GOMODCACHE='/home/runner/go/pkg/mod'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2787321Z GONOPROXY=''
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2787515Z GONOSUMDB=''
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2787701Z GOOS='linux'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2787900Z GOPACKAGESDRIVER=''
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2788123Z GOPATH='/home/runner/go'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2804503Z GOPRIVATE=''
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2804830Z GOPROXY='https://proxy.golang.org,direct'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2805214Z GOROOT='/opt/hostedtoolcache/go/1.27.2/x64'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2805848Z GOSUMDB='sum.golang.org'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2806107Z GOTELEMETRY='local'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2806382Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2806691Z GOTMPDIR=''
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2806893Z GOTOOLCHAIN='local'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2807215Z GOTOOLDIR='/opt/hostedtoolcache/go/1.27.2/x64/pkg/tool/linux_amd64'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2807576Z GOVCS=''
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2807769Z GOVERSION='go1.27.2'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2808287Z GOWORK=''
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2808508Z PKG_CONFIG='pkg-config'
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2808651Z
+check (ubuntu-latest)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.2809027Z ##[endgroup]
+check (ubuntu-latest)	Test Go SDK protocol	﻿2026-10-18T04:40:13.2974982Z ##[group]Run go test ./...
+check (ubuntu-latest)	Test Go SDK protocol	2026-10-18T04:40:13.2975275Z ^[[36;1mgo test ./...^[[0m
+check (ubuntu-latest)	Test Go SDK protocol	2026-10-18T04:40:13.3039528Z shell: /usr/bin/bash -e {0}
+check (ubuntu-latest)	Test Go SDK protocol	2026-10-18T04:40:13.3039792Z env:
+check (ubuntu-latest)	Test Go SDK protocol	2026-10-18T04:40:13.3039997Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Test Go SDK protocol	2026-10-18T04:40:13.3040268Z   CARGO_INCREMENTAL: 0
+check (ubuntu-latest)	Test Go SDK protocol	2026-10-18T04:40:13.3040508Z   CARGO_TERM_COLOR: always
+check (ubuntu-latest)	Test Go SDK protocol	2026-10-18T04:40:13.3040741Z   GOTOOLCHAIN: local
+check (ubuntu-latest)	Test Go SDK protocol	2026-10-18T04:40:13.3040949Z ##[endgroup]
+check (ubuntu-latest)	Test Go SDK protocol	2026-10-18T04:40:22.2968013Z ok  	github.com/A3S-Lab/Sandbox/sdk/go	1.017s
+check (ubuntu-latest)	Test Go SDK with the real bridge	﻿2026-10-18T04:40:22.3381228Z ##[group]Run A3S_SANDBOX_BRIDGE="$GITHUB_WORKSPACE/target/debug/a3s-sandbox-bridge" go test -race -run Integration -v ./...
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:22.3382899Z ^[[36;1mA3S_SANDBOX_BRIDGE="$GITHUB_WORKSPACE/target/debug/a3s-sandbox-bridge" go test -race -run Integration -v ./...^[[0m
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:22.3466989Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:22.3467344Z env:
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:22.3467554Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:22.3467834Z   CARGO_INCREMENTAL: 0
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:22.3468056Z   CARGO_TERM_COLOR: always
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:22.3468283Z   GOTOOLCHAIN: local
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:22.3468490Z ##[endgroup]
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:33.2081423Z === RUN   TestIntegrationProbeAndCapabilities
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:33.2919076Z --- PASS: TestIntegrationProbeAndCapabilities (0.08s)
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:33.2921798Z === RUN   TestIntegrationExecEcho
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:33.3742313Z --- PASS: TestIntegrationExecEcho (0.08s)
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:33.3743263Z === RUN   TestIntegrationExitCodePropagates
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:33.4590736Z --- PASS: TestIntegrationExitCodePropagates (0.08s)
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:33.4591559Z === RUN   TestIntegrationTimeoutKillsTree
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:33.8269430Z --- PASS: TestIntegrationTimeoutKillsTree (0.37s)
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:33.8270160Z === RUN   TestIntegrationStreamDeltas
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:33.9087629Z --- PASS: TestIntegrationStreamDeltas (0.08s)
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:33.9088219Z PASS
+check (ubuntu-latest)	Test Go SDK with the real bridge	2026-10-18T04:40:34.9106733Z ok  	github.com/A3S-Lab/Sandbox/sdk/go	1.710s
+check (ubuntu-latest)	Build release binaries	﻿2026-10-18T04:40:34.9488050Z ##[group]Run cargo build --release --bins --locked
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:34.9488467Z ^[[36;1mcargo build --release --bins --locked^[[0m
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:34.9551653Z shell: /usr/bin/bash -e {0}
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:34.9551914Z env:
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:34.9552116Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:34.9552398Z   CARGO_INCREMENTAL: 0
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:34.9552619Z   CARGO_TERM_COLOR: always
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:34.9552849Z   GOTOOLCHAIN: local
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:34.9553061Z ##[endgroup]
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:35.0299521Z ^[[1m^[[92m   Compiling^[[0m libc v0.2.191
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:35.0300581Z ^[[1m^[[92m   Compiling^[[0m proc-macro2 v1.0.107
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:35.0301484Z ^[[1m^[[92m   Compiling^[[0m version_check v0.9.5
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:35.0302241Z ^[[1m^[[92m   Compiling^[[0m quote v1.0.47
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:35.1667028Z ^[[1m^[[92m   Compiling^[[0m unicode-ident v1.0.27
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:35.2344523Z ^[[1m^[[92m   Compiling^[[0m typenum v1.20.1
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:35.2537317Z ^[[1m^[[92m   Compiling^[[0m generic-array v0.14.7
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:35.3426985Z ^[[1m^[[92m   Compiling^[[0m cfg-if v1.0.5
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:35.3686919Z ^[[1m^[[92m   Compiling^[[0m rustix v1.1.5
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:35.5638159Z ^[[1m^[[92m   Compiling^[[0m zmij v1.0.23
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:35.8457195Z ^[[1m^[[92m   Compiling^[[0m syn v3.0.9
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:35.8935792Z ^[[1m^[[92m   Compiling^[[0m serde_core v1.0.229
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:36.0547002Z ^[[1m^[[92m   Compiling^[[0m getrandom v0.4.3
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:36.2297162Z ^[[1m^[[92m   Compiling^[[0m linux-raw-sys v0.12.1
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:36.4067062Z ^[[1m^[[92m   Compiling^[[0m errno v0.3.14
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:36.4932250Z ^[[1m^[[92m   Compiling^[[0m option-ext v0.2.0
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:36.5347354Z ^[[1m^[[92m   Compiling^[[0m bitflags v2.13.2
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:36.5612067Z ^[[1m^[[92m   Compiling^[[0m serde_json v1.0.154
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:36.6429033Z ^[[1m^[[92m   Compiling^[[0m crypto-common v0.1.7
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:36.6457231Z ^[[1m^[[92m   Compiling^[[0m block-buffer v0.10.4
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:36.7108096Z ^[[1m^[[92m   Compiling^[[0m anyhow v1.0.104
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:36.7242444Z ^[[1m^[[92m   Compiling^[[0m digest v0.10.7
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:36.9307193Z ^[[1m^[[92m   Compiling^[[0m dirs-sys v0.4.1
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:36.9397140Z ^[[1m^[[92m   Compiling^[[0m signal-hook-registry v1.4.8
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:37.3143695Z ^[[1m^[[92m   Compiling^[[0m mio v1.2.4
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:37.5166985Z ^[[1m^[[92m   Compiling^[[0m socket2 v0.6.5
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:38.5007751Z ^[[1m^[[92m   Compiling^[[0m bytes v1.12.1
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:39.4657146Z ^[[1m^[[92m   Compiling^[[0m pin-project-lite v0.2.17
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:39.4976064Z ^[[1m^[[92m   Compiling^[[0m fastrand v2.5.0
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:39.7537489Z ^[[1m^[[92m   Compiling^[[0m itoa v1.0.18
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:39.9437045Z ^[[1m^[[92m   Compiling^[[0m cpufeatures v0.2.17
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:39.9706846Z ^[[1m^[[92m   Compiling^[[0m memchr v2.8.3
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:39.9856936Z ^[[1m^[[92m   Compiling^[[0m tokio-macros v2.7.2
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:40.3517122Z ^[[1m^[[92m   Compiling^[[0m once_cell v1.21.4
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:40.4976926Z ^[[1m^[[92m   Compiling^[[0m tokio v1.53.3
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:40.5387307Z ^[[1m^[[92m   Compiling^[[0m tempfile v3.27.0
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:41.2829480Z ^[[1m^[[92m   Compiling^[[0m async-trait v0.1.92
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:41.4277434Z ^[[1m^[[92m   Compiling^[[0m sha2 v0.10.9
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:42.0246277Z ^[[1m^[[92m   Compiling^[[0m dirs v5.0.1
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:44.7710547Z ^[[1m^[[92m   Compiling^[[0m a3s-sandbox v0.3.0 (/home/runner/work/Sandbox/Sandbox)
+check (ubuntu-latest)	Build release binaries	2026-10-18T04:40:56.5286064Z ^[[1m^[[92m    Finished^[[0m `release` profile [optimized] target(s) in 21.53s
+check (ubuntu-latest)	Package native binaries	﻿2026-10-18T04:40:56.5380460Z ##[group]Run set -euo pipefail
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5381031Z ^[[36;1mset -euo pipefail^[[0m
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5381590Z ^[[36;1mversion=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)^[[0m
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5382031Z ^[[36;1mhost=$(rustc -vV | sed -n 's/^host: //p')^[[0m
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5382387Z ^[[36;1mpackage="a3s-sandbox-v${version}-${host}"^[[0m
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5382717Z ^[[36;1mmkdir -p "$RUNNER_TEMP/$package" dist^[[0m
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5383009Z ^[[36;1msuffix=''^[[0m
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5383276Z ^[[36;1mif [[ "$RUNNER_OS" == Windows ]]; then suffix='.exe'; fi^[[0m
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5383730Z ^[[36;1mfor binary in a3s-sandbox a3s-sandbox-relay a3s-sandbox-bridge; do^[[0m
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5384217Z ^[[36;1m  cp "target/release/${binary}${suffix}" "$RUNNER_TEMP/$package/"^[[0m
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5384572Z ^[[36;1mdone^[[0m
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5384989Z ^[[36;1mcp LICENSE README.md README.zh-CN.md docs/RELEASE_NOTES_0.3.0.md "$RUNNER_TEMP/$package/"^[[0m
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5385787Z ^[[36;1mgit rev-parse HEAD > "$RUNNER_TEMP/$package/SOURCE_COMMIT"^[[0m
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5386284Z ^[[36;1mtar -czf "dist/$package.tar.gz" -C "$RUNNER_TEMP" "$package"^[[0m
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5449322Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5449918Z env:
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5450257Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5450713Z   CARGO_INCREMENTAL: 0
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5451107Z   CARGO_TERM_COLOR: always
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5451515Z   GOTOOLCHAIN: local
+check (ubuntu-latest)	Package native binaries	2026-10-18T04:40:56.5451887Z ##[endgroup]
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	﻿2026-10-18T04:40:56.8754110Z ##[group]Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:40:56.8754511Z with:
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:40:56.8754717Z   subject-path: dist/*.tar.gz
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:40:56.8754972Z   push-to-registry: false
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:40:56.8755214Z   create-storage-record: true
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:40:56.8755708Z   show-summary: true
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:40:56.8758092Z   github-token: ***
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:40:56.8758305Z env:
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:40:56.8758499Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:40:56.8758756Z   CARGO_INCREMENTAL: 0
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:40:56.8758977Z   CARGO_TERM_COLOR: always
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:40:56.8759206Z   GOTOOLCHAIN: local
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:40:56.8759436Z ##[endgroup]
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:40:57.0428990Z Attestation type: Build Provenance
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1957366Z Attestation created for a3s-sandbox-v0.3.0-x86_64-unknown-linux-gnu.tar.gz@sha256:1d3f7210ca6d28fd3982ea2cfa4428ef7c1fa331de88220c8d7f030c81e6a29b
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1959842Z ##[group]^[[36mAttestation signed using certificate from Public Good Sigstore instance^[[39m
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1963186Z -----BEGIN CERTIFICATE-----
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1963935Z MIIHTjCCBtOgAwIBAgIUXxpwBvan9UUmPLlGnGh5l3JQeYkwCgYIKoZIzj0EAwMw
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1964972Z NzEVMBMGA1UEChMMc2lnc3RvcmUuZGV2MR4wHAYDVQQDExVzaWdzdG9yZS1pbnRl
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1966224Z cm1lZGlhdGUwHhcNMjYxMDE4MDQ0MDU3WhcNMjYxMDE4MDQ1MDU3WjAAMFkwEwYH
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1967219Z KoZIzj0CAQYIKoZIzj0DAQcDQgAEicCf4BUcNU7Ck6BySRPwWag9/Za7aGl3x779
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1968162Z 3UAhuym6b0+fVoQKdOc65MBF6a7z0frrEzCT/jYBlJ33qydCwKOCBfIwggXuMA4G
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1969103Z A1UdDwEB/wQEAwIHgDATBgNVHSUEDDAKBggrBgEFBQcDAzAfBgNVHSMEGDAWgBTf
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1970078Z 0+nPViQRlvmo2OkoVaLGLhhkPzBuBgNVHREBAf8EZDBihmBodHRwczovL2dpdGh1
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1971073Z Yi5jb20vQTNTLUxhYi9TYW5kYm94Ly5naXRodWIvd29ya2Zsb3dzL2NpLnltbEBy
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1972028Z ZWZzL2hlYWRzL2NvZGV4L3NhbmRib3gtczQtMjAyNjEwMTgwOQYKKwYBBAGDvzAB
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1973029Z AQQraHR0cHM6Ly90b2tlbi5hY3Rpb25zLmdpdGh1YnVzZXJjb250ZW50LmNvbTAf
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1973889Z BgorBgEEAYO/MAECBBF3b3JrZmxvd19kaXNwYXRjaDA2BgorBgEEAYO/MAEDBChm
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1974839Z YTg4M2IzMmFkNzg4MTFiOTFlYzQ5MGM1OTMxNDI0Mjg5YzllMDA3MBAGCisGAQQB
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1976052Z g78wAQQEAkNJMB0GCisGAQQBg78wAQUED0EzUy1MYWIvU2FuZGJveDAyBgorBgEE
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1977317Z AYO/MAEGBCRyZWZzL2hlYWRzL2NvZGV4L3NhbmRib3gtczQtMjAyNjEwMTgwOwYK
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1978321Z KwYBBAGDvzABCAQtDCtodHRwczovL3Rva2VuLmFjdGlvbnMuZ2l0aHVidXNlcmNv
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1979332Z bnRlbnQuY29tMHAGCisGAQQBg78wAQkEYgxgaHR0cHM6Ly9naXRodWIuY29tL0Ez
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1980294Z Uy1MYWIvU2FuZGJveC8uZ2l0aHViL3dvcmtmbG93cy9jaS55bWxAcmVmcy9oZWFk
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1981246Z cy9jb2RleC9zYW5kYm94LXM0LTIwMjYxMDE4MDgGCisGAQQBg78wAQoEKgwoZmE4
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1982241Z ODNiMzJhZDc4ODExYjkxZWM0OTBjNTkzMTQyNDI4OWM5ZTAwNzAdBgorBgEEAYO/
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1983214Z MAELBA8MDWdpdGh1Yi1ob3N0ZWQwMgYKKwYBBAGDvzABDAQkDCJodHRwczovL2dp
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1984181Z dGh1Yi5jb20vQTNTLUxhYi9TYW5kYm94MDgGCisGAQQBg78wAQ0EKgwoZmE4ODNi
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1985146Z MzJhZDc4ODExYjkxZWM0OTBjNTkzMTQyNDI4OWM5ZTAwNzA0BgorBgEEAYO/MAEO
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1986375Z BCYMJHJlZnMvaGVhZHMvY29kZXgvc2FuZGJveC1zNC0yMDI2MTAxODAaBgorBgEE
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1987350Z AYO/MAEPBAwMCjEzNTM2Mzc3ODMwKgYKKwYBBAGDvzABEAQcDBpodHRwczovL2dp
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1988278Z dGh1Yi5jb20vQTNTLUxhYjAZBgorBgEEAYO/MAERBAsMCTI1NTAzMTIzNzBwBgor
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1989174Z BgEEAYO/MAESBGIMYGh0dHBzOi8vZ2l0aHViLmNvbS9BM1MtTGFiL1NhbmRib3gv
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1990111Z LmdpdGh1Yi93b3JrZmxvd3MvY2kueW1sQHJlZnMvaGVhZHMvY29kZXgvc2FuZGJv
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1991078Z eC1zNC0yMDI2MTAxODA4BgorBgEEAYO/MAETBCoMKGZhODgzYjMyYWQ3ODgxMWI5
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1992023Z MWVjNDkwYzU5MzE0MjQyODljOWUwMDcwIQYKKwYBBAGDvzABFAQTDBF3b3JrZmxv
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1992947Z d19kaXNwYXRjaDBWBgorBgEEAYO/MAEVBEgMRmh0dHBzOi8vZ2l0aHViLmNvbS9B
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1993893Z M1MtTGFiL1NhbmRib3gvYWN0aW9ucy9ydW5zLzM5MDk3ODIxNTE5L2F0dGVtcHRz
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1994949Z LzEwFgYKKwYBBAGDvzABFgQIDAZwdWJsaWMwYgYKKwYBBAGDvzABGARUDFJyZXBv
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1996507Z OkEzUy1MYWJAMjU1MDMxMjM3L1NhbmRib3hAMTM1MzYzNzc4MzpyZWY6cmVmcy9o
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1997546Z ZWFkcy9jb2RleC9zYW5kYm94LXM0LTIwMjYxMDE4MIGKBgorBgEEAdZ5AgQCBHwE
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1998596Z egB4AHYA3T0wasbHETJjGR4cmWc3AqJKXrjePK3/h4pygC8p7o4AAAGhTVAbdAAA
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1999645Z BAMARzBFAiEAp1lyZ607szHI2c3vcmIh6GeKi3maXEgES+yWoATFucICIEkkINJq
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.2000643Z L2W/0hVQN/rIYshe7JuUMZhHgtNQUcDhnqdNMAoGCCqGSM49BAMDA2kAMGYCMQC/
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.2001672Z BgHzyOYCJVzjkgCG+TE4q53VlPG9ssayK+eXXle8jcMDlluxuTfKzVHzYjklmMUC
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.2002620Z MQDmyZ/9S+ecCQ2stPENVojHOTOkti/QG2MZ03oXyIlJ4BlCqFqIH7RHo+6DsLEG
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.2003286Z K8Y=
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.2003627Z -----END CERTIFICATE-----
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.2003833Z
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.2004406Z ##[endgroup]
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.2028015Z ^[[36mAttestation signature uploaded to Rekor transparency log^[[39m
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.2029026Z https://search.sigstore.dev?logIndex=3306301849
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.2029931Z ^[[36mAttestation uploaded to repository^[[39m
+check (ubuntu-latest)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.2030642Z https://github.com/A3S-Lab/Sandbox/attestations/57072351
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	﻿2026-10-18T04:41:10.2396768Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.2397280Z with:
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.2397659Z   name: sandbox-Linux-fa883b32ad78811b91ec490c5931424289c9e007
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.2398190Z   path: *.log
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	dist/*.tar.gz
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	/home/runner/work/_temp/0qaujP/attestation.json
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.2398655Z   if-no-files-found: error
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.2398981Z   compression-level: 6
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.2399271Z   overwrite: false
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.2399572Z   include-hidden-files: false
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.2399873Z env:
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.2400141Z   CARGO_HOME: /home/runner/.cargo
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.2400470Z   CARGO_INCREMENTAL: 0
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.2400764Z   CARGO_TERM_COLOR: always
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.2401059Z   GOTOOLCHAIN: local
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.2401356Z ##[endgroup]
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.4086436Z (node:9720) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.4087727Z (Use `node --trace-deprecation ...` to show where the warning was created)
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.4174949Z Multiple search paths detected. Calculating the least common ancestor of all paths
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.4176875Z The least common ancestor is /home/runner/work. This will be the root directory of the artifact
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.4177784Z With the provided path, there will be 3 files uploaded
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.4178699Z Artifact name is valid!
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.4179126Z Root directory input is valid!
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.7769753Z Beginning upload of artifact content to blob storage
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:10.8690214Z (node:9720) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.4741430Z Uploaded bytes 2146211
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.5382816Z Finished uploading artifact content to blob storage!
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.5384121Z SHA256 digest of uploaded artifact zip is 6a649d11772c5c869e565c8abf1c74fb119730bc62c78f73c4f20d77f1280395
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.5386069Z Finalizing artifact upload
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.7818909Z Artifact sandbox-Linux-fa883b32ad78811b91ec490c5931424289c9e007.zip successfully finalized. Artifact ID 12125202001
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.7820278Z Artifact sandbox-Linux-fa883b32ad78811b91ec490c5931424289c9e007 has been successfully uploaded! Final size is 2146211 bytes. Artifact ID is 12125202001
+check (ubuntu-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.7826300Z Artifact download URL: https://github.com/A3S-Lab/Sandbox/actions/runs/39097821519/artifacts/12125202001
+check (ubuntu-latest)	Post Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	﻿2026-10-18T04:41:11.7999342Z Post job cleanup.
+check (ubuntu-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	﻿2026-10-18T04:41:11.9308917Z Post job cleanup.
+check (ubuntu-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.0315247Z [command]/usr/bin/git version
+check (ubuntu-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.0371821Z git version 2.55.0
+check (ubuntu-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.0429482Z Temporarily overriding HOME='/home/runner/work/_temp/d6f268cc-56d1-46ea-b536-6478c08b8632' before making global git config changes
+check (ubuntu-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.0431031Z Adding repository directory to the temporary git global config as a safe directory
+check (ubuntu-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.0435239Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Sandbox/Sandbox
+check (ubuntu-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.0476937Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+check (ubuntu-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.0516326Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+check (ubuntu-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.0768006Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+check (ubuntu-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.0807372Z http.https://github.com/.extraheader
+check (ubuntu-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.0819526Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+check (ubuntu-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.0859741Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+check (ubuntu-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.1153815Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+check (ubuntu-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.1198730Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+check (ubuntu-latest)	Complete job	﻿2026-10-18T04:41:12.1620711Z Cleaning up orphan processes
+check (ubuntu-latest)	Complete job	2026-10-18T04:41:12.1913073Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11d5960a326750d5838078e36cf38b85af677262, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

@@ -1,0 +1,1093 @@
+check (macos-14)	Set up job	﻿2026-10-18T04:39:08.9076570Z Current runner version: '2.337.0'
+check (macos-14)	Set up job	2026-10-18T04:39:08.9091510Z ##[group]Runner Image Provisioner
+check (macos-14)	Set up job	2026-10-18T04:39:08.9092040Z Hosted Compute Agent
+check (macos-14)	Set up job	2026-10-18T04:39:08.9092410Z Version: 20260828.587
+check (macos-14)	Set up job	2026-10-18T04:39:08.9092820Z Commit: abac92662cab4cc7352de4f9f9d2e2419aad9c29
+check (macos-14)	Set up job	2026-10-18T04:39:08.9093320Z Build Date: 2026-08-28T16:44:25Z
+check (macos-14)	Set up job	2026-10-18T04:39:08.9093810Z Worker ID: {6b0b5116-14b8-4360-a6e8-3499597f1fa8}
+check (macos-14)	Set up job	2026-10-18T04:39:08.9094270Z Azure Region: westus
+check (macos-14)	Set up job	2026-10-18T04:39:08.9094630Z ##[endgroup]
+check (macos-14)	Set up job	2026-10-18T04:39:08.9095460Z ##[group]Operating System
+check (macos-14)	Set up job	2026-10-18T04:39:08.9095850Z macOS
+check (macos-14)	Set up job	2026-10-18T04:39:08.9096250Z 14.8.9
+check (macos-14)	Set up job	2026-10-18T04:39:08.9096620Z 23J631
+check (macos-14)	Set up job	2026-10-18T04:39:08.9096960Z ##[endgroup]
+check (macos-14)	Set up job	2026-10-18T04:39:08.9097310Z ##[group]Runner Image
+check (macos-14)	Set up job	2026-10-18T04:39:08.9097690Z Image: macos-14-arm64
+check (macos-14)	Set up job	2026-10-18T04:39:08.9098060Z Version: 20260831.0302.1
+check (macos-14)	Set up job	2026-10-18T04:39:08.9098800Z Included Software: https://github.com/actions/runner-images/blob/macos-14-arm64/20260831.0302/images/macos/macos-14-arm64-Readme.md
+check (macos-14)	Set up job	2026-10-18T04:39:08.9100010Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-14-arm64%2F20260831.0302
+check (macos-14)	Set up job	2026-10-18T04:39:08.9100770Z ##[endgroup]
+check (macos-14)	Set up job	2026-10-18T04:39:08.9101710Z ##[group]GITHUB_TOKEN Permissions
+check (macos-14)	Set up job	2026-10-18T04:39:08.9103180Z Attestations: write
+check (macos-14)	Set up job	2026-10-18T04:39:08.9103740Z Contents: read
+check (macos-14)	Set up job	2026-10-18T04:39:08.9104160Z Metadata: read
+check (macos-14)	Set up job	2026-10-18T04:39:08.9104580Z ##[endgroup]
+check (macos-14)	Set up job	2026-10-18T04:39:08.9106110Z Secret source: Actions
+check (macos-14)	Set up job	2026-10-18T04:39:08.9106700Z Cache mode: write
+check (macos-14)	Set up job	2026-10-18T04:39:08.9107180Z Prepare workflow directory
+check (macos-14)	Set up job	2026-10-18T04:39:08.9333600Z Prepare all required actions
+check (macos-14)	Set up job	2026-10-18T04:39:08.9374650Z Getting action download info
+check (macos-14)	Set up job	2026-10-18T04:39:09.0909330Z Download action repository 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+check (macos-14)	Set up job	2026-10-18T04:39:09.4272120Z Download action repository 'dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8' (SHA:683b588c487a69d01f6c6ddf40f036ff682cc2c8)
+check (macos-14)	Set up job	2026-10-18T04:39:09.8072750Z Download action repository 'actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e' (SHA:b7ad1dad31e06c5925ef5d2fc7ad053ef454303e)
+check (macos-14)	Set up job	2026-10-18T04:39:10.5412840Z Download action repository 'actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6' (SHA:1e69f48acb82d1966a394da916b4c1698aa569d6)
+check (macos-14)	Set up job	2026-10-18T04:39:11.3082190Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+check (macos-14)	Set up job	2026-10-18T04:39:11.6310250Z Complete job name: check (macos-14)
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	﻿2026-10-18T04:39:11.7434950Z ##[group]Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:11.7436170Z with:
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:11.7436700Z   repository: A3S-Lab/Sandbox
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:11.7442670Z   token: ***
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:11.7443190Z   ssh-strict: true
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:11.7443700Z   ssh-user: git
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:11.7444210Z   persist-credentials: true
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:11.7444770Z   clean: true
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:11.7445310Z   sparse-checkout-cone-mode: true
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:11.7445980Z   fetch-depth: 1
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:11.7446490Z   fetch-tags: false
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:11.7447040Z   show-progress: true
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:11.7447570Z   lfs: false
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:11.7448050Z   submodules: false
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:11.7448570Z   set-safe-directory: true
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:11.7449170Z   allow-unsafe-pr-checkout: false
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:11.7450040Z ##[endgroup]
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.2744520Z Syncing repository: A3S-Lab/Sandbox
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.2746300Z ##[group]Getting Git version info
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.2747120Z Working directory is '/Users/runner/work/Sandbox/Sandbox'
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.2748870Z [command]/opt/homebrew/bin/git version
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.2992570Z git version 2.55.0
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3009810Z ##[endgroup]
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3021060Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/f710c189-7ace-4833-8cc5-28cbf1b560e0/.gitconfig'
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3025840Z Temporarily overriding HOME='/Users/runner/work/_temp/f710c189-7ace-4833-8cc5-28cbf1b560e0' before making global git config changes
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3031210Z Adding repository directory to the temporary git global config as a safe directory
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3034930Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/Sandbox/Sandbox
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3134190Z Deleting the contents of '/Users/runner/work/Sandbox/Sandbox'
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3141910Z ##[group]Initializing the repository
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3145200Z [command]/opt/homebrew/bin/git init /Users/runner/work/Sandbox/Sandbox
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3377750Z hint: Using 'master' as the name for the initial branch. This default branch name
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3381140Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3384210Z hint: to use in all of your new repositories, which will suppress this warning,
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3386530Z hint: call:
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3387780Z hint:
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3389520Z hint: 	git config --global init.defaultBranch <name>
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3390580Z hint:
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3391320Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3392430Z hint: 'development'. The just-created branch can be renamed via this command:
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3393380Z hint:
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3393900Z hint: 	git branch -m <name>
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3394490Z hint:
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3395250Z hint: Disable this message with "git config set advice.defaultBranchName false"
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3396480Z Initialized empty Git repository in /Users/runner/work/Sandbox/Sandbox/.git/
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3398810Z [command]/opt/homebrew/bin/git remote add origin https://github.com/A3S-Lab/Sandbox
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3480220Z ##[endgroup]
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3481440Z ##[group]Disabling automatic garbage collection
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3486640Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3543390Z ##[endgroup]
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3545730Z ##[group]Setting up auth
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3548750Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.3774610Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.4747290Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.4788180Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.5472330Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.5528590Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.6745910Z [command]/opt/homebrew/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.6760630Z ##[endgroup]
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.6761650Z ##[group]Fetching the repository
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:12.6763580Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +fa883b32ad78811b91ec490c5931424289c9e007:refs/remotes/origin/codex/sandbox-s4-20261018
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:13.4090820Z From https://github.com/A3S-Lab/Sandbox
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:13.4123970Z  * [new ref]         fa883b32ad78811b91ec490c5931424289c9e007 -> origin/codex/sandbox-s4-20261018
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:13.4129370Z ##[endgroup]
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:13.4130460Z ##[group]Determining the checkout info
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:13.4131490Z ##[endgroup]
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:13.4132140Z [command]/opt/homebrew/bin/git sparse-checkout disable
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:13.4192930Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:13.4250830Z ##[group]Checking out the ref
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:13.4254820Z [command]/opt/homebrew/bin/git checkout --progress --force -B codex/sandbox-s4-20261018 refs/remotes/origin/codex/sandbox-s4-20261018
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:13.4502410Z Switched to a new branch 'codex/sandbox-s4-20261018'
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:13.4507590Z branch 'codex/sandbox-s4-20261018' set up to track 'origin/codex/sandbox-s4-20261018'.
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:13.4513300Z ##[endgroup]
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:13.4584530Z [command]/opt/homebrew/bin/git log -1 --format=%H
+check (macos-14)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:39:13.4641190Z fa883b32ad78811b91ec490c5931424289c9e007
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	﻿2026-10-18T04:39:13.5144270Z ##[group]Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5145310Z with:
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5145880Z   toolchain: 1.97.1
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5146520Z   components: rustfmt, clippy
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5147200Z ##[endgroup]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5220210Z ##[start-action display=Parse toolchain version;id=__dtolnay_rust-toolchain.parse]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5286380Z ##[group]Run if [[ -z $toolchain ]]; then
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5287310Z ^[[36;1mif [[ -z $toolchain ]]; then^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5288490Z ^[[36;1m  # GitHub does not enforce `required: true` inputs itself. https://github.com/actions/runner/issues/1070^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5289800Z ^[[36;1m  echo "'toolchain' is a required input" >&2^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5290560Z ^[[36;1m  exit 1^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5291550Z ^[[36;1melif [[ $toolchain =~ ^stable' '[0-9]+' '(year|month|week|day)s?' 'ago$ ]]; then^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5293830Z ^[[36;1m  if [[ macOS == macOS ]]; then^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5297430Z ^[[36;1m    echo "toolchain=1.$((($(date -v-$(sed 's/stable \([0-9]*\) \(.\).*/\1\2/' <<< $toolchain) +%s)/60/60/24-16569)/7/6))" >> $GITHUB_OUTPUT^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5300940Z ^[[36;1m  else^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5303280Z ^[[36;1m    echo "toolchain=1.$((($(date --date "${toolchain#stable }" +%s)/60/60/24-16569)/7/6))" >> $GITHUB_OUTPUT^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5304540Z ^[[36;1m  fi^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5305320Z ^[[36;1melif [[ $toolchain =~ ^stable' 'minus' '[0-9]+' 'releases?$ ]]; then^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5306780Z ^[[36;1m  echo "toolchain=1.$((($(date +%s)/60/60/24-16569)/7/6-${toolchain//[^0-9]/}))" >> $GITHUB_OUTPUT^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5307910Z ^[[36;1melif [[ $toolchain =~ ^1\.[0-9]+$ ]]; then^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5309150Z ^[[36;1m  echo "toolchain=1.$((i=${toolchain#1.}, c=($(date +%s)/60/60/24-16569)/7/6, i+9*i*(10*i<=c)+90*i*(100*i<=c)))" >> $GITHUB_OUTPUT^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5310380Z ^[[36;1melse^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5310970Z ^[[36;1m  delimiter=EOF^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5311780Z ^[[36;1m  while [[ $toolchain == *$delimiter* ]]; do delimiter+=_; done^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5313040Z ^[[36;1m  printf 'toolchain<<%s\n%s\n%s\n' "$delimiter" "$toolchain" "$delimiter" >> $GITHUB_OUTPUT^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5314120Z ^[[36;1mfi^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5386940Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5387830Z env:
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5388430Z   toolchain: 1.97.1
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5388990Z ##[endgroup]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5814030Z ##[end-action id=__dtolnay_rust-toolchain.parse;outcome=success;conclusion=success;duration_ms=59]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5823070Z ##[start-action display=Set $CARGO_HOME;id=__dtolnay_rust-toolchain.__run]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5875350Z ##[group]Run echo CARGO_HOME=${CARGO_HOME:-"$HOME/.cargo"} >> $GITHUB_ENV
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5876630Z ^[[36;1mecho CARGO_HOME=${CARGO_HOME:-"$HOME/.cargo"} >> $GITHUB_ENV^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5986450Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.5989070Z ##[endgroup]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.6441350Z ##[end-action id=__dtolnay_rust-toolchain.__run;outcome=success;conclusion=success;duration_ms=61]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.6446410Z ##[start-action display=Install rustup if needed;id=__dtolnay_rust-toolchain.__run_2]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.6495420Z ##[group]Run if ! command -v rustup &>/dev/null; then
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.6496340Z ^[[36;1mif ! command -v rustup &>/dev/null; then^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.6498280Z ^[[36;1m  curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused --location --silent --show-error --fail https://sh.rustup.rs | sh -s -- --default-toolchain none -y^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.6499940Z ^[[36;1m  echo "$CARGO_HOME/bin" >> $GITHUB_PATH^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.6500710Z ^[[36;1mfi^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.6578060Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.6580170Z env:
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.6581610Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.6583260Z ##[endgroup]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.6982120Z ##[end-action id=__dtolnay_rust-toolchain.__run_2;outcome=success;conclusion=success;duration_ms=53]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.6988180Z ##[start-action display=Install rustup if needed on windows;id=__dtolnay_rust-toolchain.__run_3]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7001200Z ##[end-action id=__dtolnay_rust-toolchain.__run_3;outcome=skipped;conclusion=skipped;duration_ms=0]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7014820Z ##[start-action display=rustup toolchain install 1.97.1;id=__dtolnay_rust-toolchain.__run_4]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7046600Z ##[group]Run set -f  # split targets and components on commas and whitespace, without glob expansion
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7048140Z ^[[36;1mset -f  # split targets and components on commas and whitespace, without glob expansion^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7049190Z ^[[36;1mflags=()^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7049870Z ^[[36;1mfor t in ${targets//,/ }; do flags+=(--target "$t"); done^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7050910Z ^[[36;1mfor c in ${components//,/ }; do flags+=(--component "$c"); done^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7053620Z ^[[36;1mif [[ $toolchain == nightly && -n $components ]]; then flags+=(--allow-downgrade); fi^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7054840Z ^[[36;1mlog=$(mktemp)^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7055460Z ^[[36;1mtrap 'rm -f "$log"' EXIT^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7056940Z ^[[36;1mfor attempt in 1 2 3 4 5; do^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7058560Z ^[[36;1m  if rustup toolchain install "$toolchain" "${flags[@]}" --profile minimal --no-self-update --force-non-host 2>&1 | tee "$log"; then^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7059930Z ^[[36;1m    break^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7060510Z ^[[36;1m  else^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7061070Z ^[[36;1m    status=$?^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7061650Z ^[[36;1m  fi^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7062620Z ^[[36;1m  if [[ $attempt == 5 ]] || ! grep -Fq 'checksum failed for ' "$log" \^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7063890Z ^[[36;1m      || ! grep -Fq 'this is likely due to an ongoing update of the official release server' "$log"; then^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7065030Z ^[[36;1m    exit "$status"^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7065650Z ^[[36;1m  fi^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7066530Z ^[[36;1m  echo "Retrying rustup toolchain install in 30 seconds (retry $attempt of 4)" >&2^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7067580Z ^[[36;1m  sleep 30^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7068150Z ^[[36;1mdone^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7128490Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7129310Z env:
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7129880Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7130530Z   toolchain: 1.97.1
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7131100Z   targets:
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7131650Z   components: rustfmt, clippy
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7132310Z   RUSTUP_PERMIT_COPY_RENAME: 1
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.7132930Z ##[endgroup]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.8067530Z info: syncing channel updates for 1.97.1-aarch64-apple-darwin
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.9308740Z info: latest update on 2026-07-16 for version 1.97.1 (8bab26f4f 2026-07-14)
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:13.9316850Z info: downloading 5 components
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.2772650Z
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.3649770Z   1.97.1-aarch64-apple-darwin installed - rustc 1.97.1 (8bab26f4f 2026-07-14)
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.3650180Z
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.3650530Z info: self-update is disabled for this build of rustup
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.3650940Z info: any updates to rustup will need to be fetched with your system package manager
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.4048290Z ##[end-action id=__dtolnay_rust-toolchain.__run_4;outcome=success;conclusion=success;duration_ms=8698]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.4060240Z ##[start-action display=rustup default 1.97.1;id=__dtolnay_rust-toolchain.__run_5]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.4100760Z ##[group]Run rustup default "$toolchain" --force-non-host
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.4101710Z ^[[36;1mrustup default "$toolchain" --force-non-host^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.4232130Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.4232470Z env:
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.4232670Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.4232880Z   toolchain: 1.97.1
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.4233080Z ##[endgroup]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.4854050Z info: using existing install for 1.97.1-aarch64-apple-darwin
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.4888570Z info: default toolchain set to 1.97.1-aarch64-apple-darwin
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.4893790Z
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.4994760Z   1.97.1-aarch64-apple-darwin unchanged - rustc 1.97.1 (8bab26f4f 2026-07-14)
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.4996090Z info: note that the toolchain '1.97.1-aarch64-apple-darwin' is currently in use (overridden by '/Users/runner/work/Sandbox/Sandbox/rust-toolchain.toml')
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.4998400Z
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.5007240Z ##[end-action id=__dtolnay_rust-toolchain.__run_5;outcome=success;conclusion=success;duration_ms=94]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.5013740Z ##[start-action display=Create cachekey;id=__dtolnay_rust-toolchain.rustc-version]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.5041770Z ##[group]Run DATE=$(rustc +"$toolchain" --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.5042670Z ^[[36;1mDATE=$(rustc +"$toolchain" --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.5043230Z ^[[36;1mHASH=$(rustc +"$toolchain" --version --verbose | sed -ne 's/^commit-hash: //p')^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.5044540Z ^[[36;1mecho "cachekey=$(echo $DATE$HASH | head -c12)" >> $GITHUB_OUTPUT^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.5116710Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.5117810Z env:
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.5118280Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.5118610Z   toolchain: 1.97.1
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.5118800Z ##[endgroup]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.5988100Z ##[end-action id=__dtolnay_rust-toolchain.rustc-version;outcome=success;conclusion=success;duration_ms=97]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.5991140Z ##[start-action display=Disable incremental compilation;id=__dtolnay_rust-toolchain.__run_6]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6039200Z ##[group]Run if [ -z "${CARGO_INCREMENTAL+set}" ]; then
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6040340Z ^[[36;1mif [ -z "${CARGO_INCREMENTAL+set}" ]; then^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6041090Z ^[[36;1m  echo CARGO_INCREMENTAL=0 >> $GITHUB_ENV^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6041720Z ^[[36;1mfi^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6116990Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6117400Z env:
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6117630Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6117890Z ##[endgroup]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6415420Z ##[end-action id=__dtolnay_rust-toolchain.__run_6;outcome=success;conclusion=success;duration_ms=42]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6420930Z ##[start-action display=Enable colors in Cargo output;id=__dtolnay_rust-toolchain.__run_7]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6466920Z ##[group]Run if [ -z "${CARGO_TERM_COLOR+set}" ]; then
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6467340Z ^[[36;1mif [ -z "${CARGO_TERM_COLOR+set}" ]; then^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6467620Z ^[[36;1m  echo CARGO_TERM_COLOR=always >> $GITHUB_ENV^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6468140Z ^[[36;1mfi^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6530150Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6530500Z env:
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6530660Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6530880Z   CARGO_INCREMENTAL: 0
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6531040Z ##[endgroup]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6896850Z ##[end-action id=__dtolnay_rust-toolchain.__run_7;outcome=success;conclusion=success;duration_ms=47]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6901760Z ##[start-action display=Enable Cargo sparse registry;id=__dtolnay_rust-toolchain.__run_8]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6938080Z ##[group]Run # implemented in 1.66, stabilized in 1.68, made default in 1.70
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6938910Z ^[[36;1m# implemented in 1.66, stabilized in 1.68, made default in 1.70^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6939560Z ^[[36;1mif [ -z "${CARGO_REGISTRIES_CRATES_IO_PROTOCOL+set}" -o -f "/Users/runner/work/_temp"/.implicit_cargo_registries_crates_io_protocol ]; then^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6940570Z ^[[36;1m  if rustc +"$toolchain" --version --verbose | grep -q '^release: 1\.6[89]\.'; then^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6941170Z ^[[36;1m    touch "/Users/runner/work/_temp"/.implicit_cargo_registries_crates_io_protocol || true^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6941630Z ^[[36;1m    echo CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse >> $GITHUB_ENV^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6942080Z ^[[36;1m  elif rustc +"$toolchain" --version --verbose | grep -q '^release: 1\.6[67]\.'; then^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6943070Z ^[[36;1m    touch "/Users/runner/work/_temp"/.implicit_cargo_registries_crates_io_protocol || true^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6943520Z ^[[36;1m    echo CARGO_REGISTRIES_CRATES_IO_PROTOCOL=git >> $GITHUB_ENV^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6943820Z ^[[36;1m  fi^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.6943980Z ^[[36;1mfi^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.7015340Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.7015660Z env:
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.7015850Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.7016060Z   CARGO_INCREMENTAL: 0
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.7016230Z   CARGO_TERM_COLOR: always
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.7016420Z   toolchain: 1.97.1
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.7016570Z ##[endgroup]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.7934270Z ##[end-action id=__dtolnay_rust-toolchain.__run_8;outcome=success;conclusion=success;duration_ms=103]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.7939040Z ##[start-action display=Work around spurious network errors in curl 8.0;id=__dtolnay_rust-toolchain.__run_9]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.7962460Z ##[group]Run # https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/timeout.20investigation
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.7963150Z ^[[36;1m# https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/timeout.20investigation^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.7963680Z ^[[36;1mif rustc +"$toolchain" --version --verbose | grep -q '^release: 1\.7[01]\.'; then^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.7964200Z ^[[36;1m  echo CARGO_HTTP_MULTIPLEXING=false >> $GITHUB_ENV^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.7964520Z ^[[36;1mfi^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.8028590Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.8028970Z env:
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.8029170Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.8029380Z   CARGO_INCREMENTAL: 0
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.8029570Z   CARGO_TERM_COLOR: always
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.8030550Z   toolchain: 1.97.1
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.8030780Z ##[endgroup]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.8620050Z ##[end-action id=__dtolnay_rust-toolchain.__run_9;outcome=success;conclusion=success;duration_ms=67]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.8625090Z ##[start-action display=rustc +1.97.1 --version --verbose;id=__dtolnay_rust-toolchain.__run_10]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.8642830Z ##[group]Run rustc +"$toolchain" --version --verbose
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.8643160Z ^[[36;1mrustc +"$toolchain" --version --verbose^[[0m
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.8707360Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.8707760Z env:
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.8708050Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.8708270Z   CARGO_INCREMENTAL: 0
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.8708470Z   CARGO_TERM_COLOR: always
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.8708680Z   toolchain: 1.97.1
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.8720760Z ##[endgroup]
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.9239900Z rustc 1.97.1 (8bab26f4f 2026-07-14)
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.9241490Z binary: rustc
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.9242470Z commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.9243100Z commit-date: 2026-07-14
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.9243380Z host: aarch64-apple-darwin
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.9243700Z release: 1.97.1
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.9247220Z LLVM version: 22.1.6
+check (macos-14)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:39:22.9270720Z ##[end-action id=__dtolnay_rust-toolchain.__run_10;outcome=success;conclusion=success;duration_ms=64]
+check (macos-14)	Record source and toolchain	﻿2026-10-18T04:39:22.9346040Z ##[group]Run git rev-parse HEAD
+check (macos-14)	Record source and toolchain	2026-10-18T04:39:22.9346390Z ^[[36;1mgit rev-parse HEAD^[[0m
+check (macos-14)	Record source and toolchain	2026-10-18T04:39:22.9346870Z ^[[36;1mrustc --version --verbose^[[0m
+check (macos-14)	Record source and toolchain	2026-10-18T04:39:22.9412140Z shell: /bin/bash -e {0}
+check (macos-14)	Record source and toolchain	2026-10-18T04:39:22.9412430Z env:
+check (macos-14)	Record source and toolchain	2026-10-18T04:39:22.9412620Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Record source and toolchain	2026-10-18T04:39:22.9412850Z   CARGO_INCREMENTAL: 0
+check (macos-14)	Record source and toolchain	2026-10-18T04:39:22.9413030Z   CARGO_TERM_COLOR: always
+check (macos-14)	Record source and toolchain	2026-10-18T04:39:22.9413220Z ##[endgroup]
+check (macos-14)	Record source and toolchain	2026-10-18T04:39:22.9730320Z fa883b32ad78811b91ec490c5931424289c9e007
+check (macos-14)	Record source and toolchain	2026-10-18T04:39:23.0026950Z rustc 1.97.1 (8bab26f4f 2026-07-14)
+check (macos-14)	Record source and toolchain	2026-10-18T04:39:23.0027820Z binary: rustc
+check (macos-14)	Record source and toolchain	2026-10-18T04:39:23.0028420Z commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+check (macos-14)	Record source and toolchain	2026-10-18T04:39:23.0029100Z commit-date: 2026-07-14
+check (macos-14)	Record source and toolchain	2026-10-18T04:39:23.0029870Z host: aarch64-apple-darwin
+check (macos-14)	Record source and toolchain	2026-10-18T04:39:23.0030300Z release: 1.97.1
+check (macos-14)	Record source and toolchain	2026-10-18T04:39:23.0031220Z LLVM version: 22.1.6
+check (macos-14)	Run cargo fmt --all -- --check	﻿2026-10-18T04:39:23.0084830Z ##[group]Run cargo fmt --all -- --check
+check (macos-14)	Run cargo fmt --all -- --check	2026-10-18T04:39:23.0085150Z ^[[36;1mcargo fmt --all -- --check^[[0m
+check (macos-14)	Run cargo fmt --all -- --check	2026-10-18T04:39:23.0143710Z shell: /bin/bash -e {0}
+check (macos-14)	Run cargo fmt --all -- --check	2026-10-18T04:39:23.0143950Z env:
+check (macos-14)	Run cargo fmt --all -- --check	2026-10-18T04:39:23.0144180Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Run cargo fmt --all -- --check	2026-10-18T04:39:23.0144390Z   CARGO_INCREMENTAL: 0
+check (macos-14)	Run cargo fmt --all -- --check	2026-10-18T04:39:23.0144580Z   CARGO_TERM_COLOR: always
+check (macos-14)	Run cargo fmt --all -- --check	2026-10-18T04:39:23.0144760Z ##[endgroup]
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	﻿2026-10-18T04:39:23.3037420Z ##[group]Run cargo clippy --all-targets --locked -- -D warnings
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.3037920Z ^[[36;1mcargo clippy --all-targets --locked -- -D warnings^[[0m
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.3095110Z shell: /bin/bash -e {0}
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.3095450Z env:
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.3095670Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.3095880Z   CARGO_INCREMENTAL: 0
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.3096070Z   CARGO_TERM_COLOR: always
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.3096260Z ##[endgroup]
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.4587210Z ^[[1m^[[92m    Updating^[[0m crates.io index
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.6536030Z ^[[1m^[[92m Downloading^[[0m crates ...
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.6852170Z ^[[1m^[[92m  Downloaded^[[0m async-trait v0.1.92
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.7284400Z ^[[1m^[[92m  Downloaded^[[0m socket2 v0.6.5
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.7335120Z ^[[1m^[[92m  Downloaded^[[0m generic-array v0.14.7
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.7363410Z ^[[1m^[[92m  Downloaded^[[0m block-buffer v0.10.4
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.7382850Z ^[[1m^[[92m  Downloaded^[[0m dirs-sys v0.4.1
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.7424390Z ^[[1m^[[92m  Downloaded^[[0m errno v0.3.14
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.7446830Z ^[[1m^[[92m  Downloaded^[[0m itoa v1.0.18
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.7504110Z ^[[1m^[[92m  Downloaded^[[0m option-ext v0.2.0
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.7517800Z ^[[1m^[[92m  Downloaded^[[0m tokio-macros v2.7.2
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.7538590Z ^[[1m^[[92m  Downloaded^[[0m version_check v0.9.5
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.7576020Z ^[[1m^[[92m  Downloaded^[[0m cfg-if v1.0.5
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.7609630Z ^[[1m^[[92m  Downloaded^[[0m cpufeatures v0.2.17
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.7636800Z ^[[1m^[[92m  Downloaded^[[0m crypto-common v0.1.7
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.7652340Z ^[[1m^[[92m  Downloaded^[[0m dirs v5.0.1
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.7669430Z ^[[1m^[[92m  Downloaded^[[0m digest v0.10.7
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.7966440Z ^[[1m^[[92m  Downloaded^[[0m pin-project-lite v0.2.17
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.8127560Z ^[[1m^[[92m  Downloaded^[[0m signal-hook-registry v1.4.8
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.8150710Z ^[[1m^[[92m  Downloaded^[[0m zmij v1.0.23
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.8189620Z ^[[1m^[[92m  Downloaded^[[0m sha2 v0.10.9
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.8242260Z ^[[1m^[[92m  Downloaded^[[0m unicode-ident v1.0.27
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.8294380Z ^[[1m^[[92m  Downloaded^[[0m anyhow v1.0.104
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.8441340Z ^[[1m^[[92m  Downloaded^[[0m fastrand v2.5.0
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.8770460Z ^[[1m^[[92m  Downloaded^[[0m once_cell v1.21.4
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.8840020Z ^[[1m^[[92m  Downloaded^[[0m quote v1.0.47
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.8901590Z ^[[1m^[[92m  Downloaded^[[0m tempfile v3.27.0
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.8977200Z ^[[1m^[[92m  Downloaded^[[0m proc-macro2 v1.0.107
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.9056860Z ^[[1m^[[92m  Downloaded^[[0m serde_core v1.0.229
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.9115720Z ^[[1m^[[92m  Downloaded^[[0m bitflags v2.13.2
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:23.9204540Z ^[[1m^[[92m  Downloaded^[[0m rustix v1.1.5
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:24.0421770Z ^[[1m^[[92m  Downloaded^[[0m bytes v1.12.1
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:24.0482390Z ^[[1m^[[92m  Downloaded^[[0m memchr v2.8.3
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:24.0608370Z ^[[1m^[[92m  Downloaded^[[0m typenum v1.20.1
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:24.0684620Z ^[[1m^[[92m  Downloaded^[[0m getrandom v0.4.3
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:24.0773710Z ^[[1m^[[92m  Downloaded^[[0m mio v1.2.4
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:24.1181600Z ^[[1m^[[92m  Downloaded^[[0m serde_json v1.0.154
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:24.1347530Z ^[[1m^[[92m  Downloaded^[[0m syn v3.0.9
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:24.1569890Z ^[[1m^[[92m  Downloaded^[[0m tokio v1.53.3
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:24.3127720Z ^[[1m^[[92m  Downloaded^[[0m libc v0.2.191
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:24.5918170Z ^[[1m^[[92m   Compiling^[[0m libc v0.2.191
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:24.6020980Z ^[[1m^[[92m   Compiling^[[0m proc-macro2 v1.0.107
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:24.6124290Z ^[[1m^[[92m   Compiling^[[0m version_check v0.9.5
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:24.9476150Z ^[[1m^[[92m   Compiling^[[0m generic-array v0.14.7
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.5904430Z ^[[1m^[[92m   Compiling^[[0m unicode-ident v1.0.27
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.6556790Z ^[[1m^[[92m   Compiling^[[0m quote v1.0.47
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:27.8761210Z ^[[1m^[[92m    Checking^[[0m typenum v1.20.1
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.2366270Z ^[[1m^[[92m    Checking^[[0m errno v0.3.14
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.3486150Z ^[[1m^[[92m   Compiling^[[0m serde_core v1.0.229
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.4702650Z ^[[1m^[[92m   Compiling^[[0m syn v3.0.9
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.5413910Z ^[[1m^[[92m    Checking^[[0m cfg-if v1.0.5
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.5621970Z ^[[1m^[[92m   Compiling^[[0m rustix v1.1.5
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.7965880Z ^[[1m^[[92m   Compiling^[[0m getrandom v0.4.3
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.8845030Z ^[[1m^[[92m   Compiling^[[0m zmij v1.0.23
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:28.9771790Z ^[[1m^[[92m    Checking^[[0m block-buffer v0.10.4
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.0556670Z ^[[1m^[[92m    Checking^[[0m crypto-common v0.1.7
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.1174350Z ^[[1m^[[92m    Checking^[[0m bitflags v2.13.2
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.1281140Z ^[[1m^[[92m    Checking^[[0m option-ext v0.2.0
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.1531800Z ^[[1m^[[92m   Compiling^[[0m serde_json v1.0.154
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.2038140Z ^[[1m^[[92m   Compiling^[[0m anyhow v1.0.104
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:29.5474850Z ^[[1m^[[92m    Checking^[[0m dirs-sys v0.4.1
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:30.1759670Z ^[[1m^[[92m    Checking^[[0m digest v0.10.7
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:30.6277110Z ^[[1m^[[92m    Checking^[[0m signal-hook-registry v1.4.8
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:30.7384810Z ^[[1m^[[92m    Checking^[[0m mio v1.2.4
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:31.0027160Z ^[[1m^[[92m    Checking^[[0m socket2 v0.6.5
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:31.1494130Z ^[[1m^[[92m    Checking^[[0m cpufeatures v0.2.17
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:31.1843880Z ^[[1m^[[92m    Checking^[[0m bytes v1.12.1
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:31.2952300Z ^[[1m^[[92m    Checking^[[0m once_cell v1.21.4
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:31.4060530Z ^[[1m^[[92m    Checking^[[0m fastrand v2.5.0
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:31.5098200Z ^[[1m^[[92m    Checking^[[0m memchr v2.8.3
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:31.6481040Z ^[[1m^[[92m    Checking^[[0m itoa v1.0.18
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:31.7453450Z ^[[1m^[[92m    Checking^[[0m pin-project-lite v0.2.17
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:31.7851460Z ^[[1m^[[92m    Checking^[[0m tempfile v3.27.0
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:31.9189390Z ^[[1m^[[92m    Checking^[[0m sha2 v0.10.9
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:32.0396800Z ^[[1m^[[92m    Checking^[[0m dirs v5.0.1
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:32.1201620Z ^[[1m^[[92m   Compiling^[[0m tokio-macros v2.7.2
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:32.2360690Z ^[[1m^[[92m   Compiling^[[0m async-trait v0.1.92
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:32.7989190Z ^[[1m^[[92m    Checking^[[0m tokio v1.53.3
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:36.8510720Z ^[[1m^[[92m    Checking^[[0m a3s-sandbox v0.3.0 (/Users/runner/work/Sandbox/Sandbox)
+check (macos-14)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:39:39.4993990Z ^[[1m^[[92m    Finished^[[0m `dev` profile [unoptimized + debuginfo] target(s) in 16.09s
+check (macos-14)	Build bins for mediation relay tests	﻿2026-10-18T04:39:39.5829470Z ##[group]Run cargo build --bins --locked
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:39.5830900Z ^[[36;1mcargo build --bins --locked^[[0m
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:39.6018500Z shell: /bin/bash -e {0}
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:39.6019490Z env:
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:39.6019800Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:39.6020170Z   CARGO_INCREMENTAL: 0
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:39.6020410Z   CARGO_TERM_COLOR: always
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:39.6020700Z ##[endgroup]
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:39.8093320Z ^[[1m^[[92m   Compiling^[[0m libc v0.2.191
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:39.8096670Z ^[[1m^[[92m   Compiling^[[0m typenum v1.20.1
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:39.8139790Z ^[[1m^[[92m   Compiling^[[0m cfg-if v1.0.5
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:39.8668270Z ^[[1m^[[92m   Compiling^[[0m option-ext v0.2.0
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:39.9203280Z ^[[1m^[[92m   Compiling^[[0m bitflags v2.13.2
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:40.1951030Z ^[[1m^[[92m   Compiling^[[0m zmij v1.0.23
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:40.4687830Z ^[[1m^[[92m   Compiling^[[0m generic-array v0.14.7
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:40.5120210Z ^[[1m^[[92m   Compiling^[[0m serde_core v1.0.229
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:40.6545800Z ^[[1m^[[92m   Compiling^[[0m errno v0.3.14
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:40.7398820Z ^[[1m^[[92m   Compiling^[[0m signal-hook-registry v1.4.8
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:40.9900590Z ^[[1m^[[92m   Compiling^[[0m crypto-common v0.1.7
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:41.0164450Z ^[[1m^[[92m   Compiling^[[0m block-buffer v0.10.4
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:41.0446310Z ^[[1m^[[92m   Compiling^[[0m rustix v1.1.5
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:41.0912230Z ^[[1m^[[92m   Compiling^[[0m digest v0.10.7
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:41.2356250Z ^[[1m^[[92m   Compiling^[[0m getrandom v0.4.3
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:41.3393780Z ^[[1m^[[92m   Compiling^[[0m cpufeatures v0.2.17
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:41.4006530Z ^[[1m^[[92m   Compiling^[[0m mio v1.2.4
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:42.0404510Z ^[[1m^[[92m   Compiling^[[0m dirs-sys v0.4.1
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:42.1199720Z ^[[1m^[[92m   Compiling^[[0m socket2 v0.6.5
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:42.4841230Z ^[[1m^[[92m   Compiling^[[0m memchr v2.8.3
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:42.5870520Z ^[[1m^[[92m   Compiling^[[0m bytes v1.12.1
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:42.7869280Z ^[[1m^[[92m   Compiling^[[0m pin-project-lite v0.2.17
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:42.8386950Z ^[[1m^[[92m   Compiling^[[0m itoa v1.0.18
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:43.0065590Z ^[[1m^[[92m   Compiling^[[0m fastrand v2.5.0
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:43.0615290Z ^[[1m^[[92m   Compiling^[[0m once_cell v1.21.4
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:43.2006110Z ^[[1m^[[92m   Compiling^[[0m tempfile v3.27.0
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:43.2210650Z ^[[1m^[[92m   Compiling^[[0m tokio v1.53.3
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:43.3669220Z ^[[1m^[[92m   Compiling^[[0m serde_json v1.0.154
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:43.6325320Z ^[[1m^[[92m   Compiling^[[0m dirs v5.0.1
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:43.7056450Z ^[[1m^[[92m   Compiling^[[0m sha2 v0.10.9
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:44.0159950Z ^[[1m^[[92m   Compiling^[[0m anyhow v1.0.104
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:47.4820580Z ^[[1m^[[92m   Compiling^[[0m a3s-sandbox v0.3.0 (/Users/runner/work/Sandbox/Sandbox)
+check (macos-14)	Build bins for mediation relay tests	2026-10-18T04:39:51.8771150Z ^[[1m^[[92m    Finished^[[0m `dev` profile [unoptimized + debuginfo] target(s) in 12.16s
+check (macos-14)	Verify macOS CONNECT in isolation	﻿2026-10-18T04:39:51.9073130Z ##[group]Run cargo test --lib --locked policy::gate4_integration::gate4_macos_sandbox_mediator_tunnels_allowed_connect -- --exact --nocapture
+check (macos-14)	Verify macOS CONNECT in isolation	2026-10-18T04:39:51.9074860Z ^[[36;1mcargo test --lib --locked policy::gate4_integration::gate4_macos_sandbox_mediator_tunnels_allowed_connect -- --exact --nocapture^[[0m
+check (macos-14)	Verify macOS CONNECT in isolation	2026-10-18T04:39:51.9191220Z shell: /bin/bash -e {0}
+check (macos-14)	Verify macOS CONNECT in isolation	2026-10-18T04:39:51.9191590Z env:
+check (macos-14)	Verify macOS CONNECT in isolation	2026-10-18T04:39:51.9191910Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Verify macOS CONNECT in isolation	2026-10-18T04:39:51.9192160Z   CARGO_INCREMENTAL: 0
+check (macos-14)	Verify macOS CONNECT in isolation	2026-10-18T04:39:51.9192400Z   CARGO_TERM_COLOR: always
+check (macos-14)	Verify macOS CONNECT in isolation	2026-10-18T04:39:51.9192620Z ##[endgroup]
+check (macos-14)	Verify macOS CONNECT in isolation	2026-10-18T04:39:52.1391450Z ^[[1m^[[92m   Compiling^[[0m a3s-sandbox v0.3.0 (/Users/runner/work/Sandbox/Sandbox)
+check (macos-14)	Verify macOS CONNECT in isolation	2026-10-18T04:39:58.2617080Z ^[[1m^[[92m    Finished^[[0m `test` profile [unoptimized + debuginfo] target(s) in 6.23s
+check (macos-14)	Verify macOS CONNECT in isolation	2026-10-18T04:39:58.2654160Z ^[[1m^[[92m     Running^[[0m unittests src/lib.rs (target/debug/deps/a3s_sandbox-ff4c3a33f93e9ba3)
+check (macos-14)	Verify macOS CONNECT in isolation	2026-10-18T04:39:58.2685250Z
+check (macos-14)	Verify macOS CONNECT in isolation	2026-10-18T04:39:58.2685720Z running 1 test
+check (macos-14)	Verify macOS CONNECT in isolation	2026-10-18T04:39:58.4760650Z test policy::gate4_integration::gate4_macos_sandbox_mediator_tunnels_allowed_connect ... ok
+check (macos-14)	Verify macOS CONNECT in isolation	2026-10-18T04:39:58.4761250Z
+check (macos-14)	Verify macOS CONNECT in isolation	2026-10-18T04:39:58.4761470Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 214 filtered out; finished in 0.21s
+check (macos-14)	Verify macOS CONNECT in isolation	2026-10-18T04:39:58.4761860Z
+check (macos-14)	Run tests	﻿2026-10-18T04:39:58.4923900Z ##[group]Run set -o pipefail
+check (macos-14)	Run tests	2026-10-18T04:39:58.4924760Z ^[[36;1mset -o pipefail^[[0m
+check (macos-14)	Run tests	2026-10-18T04:39:58.4925060Z ^[[36;1mcargo test --all-targets --locked 2>&1 | tee suite.log^[[0m
+check (macos-14)	Run tests	2026-10-18T04:39:58.5015210Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+check (macos-14)	Run tests	2026-10-18T04:39:58.5016000Z env:
+check (macos-14)	Run tests	2026-10-18T04:39:58.5016240Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Run tests	2026-10-18T04:39:58.5016590Z   CARGO_INCREMENTAL: 0
+check (macos-14)	Run tests	2026-10-18T04:39:58.5017760Z   CARGO_TERM_COLOR: always
+check (macos-14)	Run tests	2026-10-18T04:39:58.5018090Z ##[endgroup]
+check (macos-14)	Run tests	2026-10-18T04:39:58.7147070Z ^[[1m^[[92m   Compiling^[[0m a3s-sandbox v0.3.0 (/Users/runner/work/Sandbox/Sandbox)
+check (macos-14)	Run tests	2026-10-18T04:40:00.8748290Z ^[[1m^[[92m    Finished^[[0m `test` profile [unoptimized + debuginfo] target(s) in 2.27s
+check (macos-14)	Run tests	2026-10-18T04:40:00.8785050Z ^[[1m^[[92m     Running^[[0m unittests src/lib.rs (target/debug/deps/a3s_sandbox-ff4c3a33f93e9ba3)
+check (macos-14)	Run tests	2026-10-18T04:40:00.8807050Z
+check (macos-14)	Run tests	2026-10-18T04:40:00.8807370Z running 215 tests
+check (macos-14)	Run tests	2026-10-18T04:40:00.8821060Z test network::connect::tests::absolute_form_http_injects_secret_header_upstream ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:00.8824960Z test network::connect::tests::absolute_form_without_matching_injection_forwards_no_authorization ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:00.8828980Z test network::connect::tests::client_supplied_authorization_is_replaced_by_injection ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:00.8833790Z test network::connect::tests::connect_allow_tunnels_bytes_to_upstream ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.0882800Z test network::connect::tests::connect_deny_never_reaches_upstream ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.0891830Z test network::connect::tests::path_prefixed_rule_does_not_authorize_connect ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.0910570Z test network::connect::tests::unix_connect_allow_tunnels_bytes_to_upstream ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.1853120Z test network::connect::tests::absolute_form_https_target_refused_fail_closed ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.1937610Z test network::connect::tests::absolute_form_denied_origin_never_reaches_upstream ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.1938870Z test network::relay::tests::posix_shell_single_quote_escapes_apostrophes ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.1939650Z test network::relay::tests::default_guest_relay_port_is_stable ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.1956460Z test network::relay::tests::stage_relay_into_scratch_copies_executable ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.1958480Z test network::relay::tests::tcp_unix_relay_forwards_connect_to_unix_mediator ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.1960210Z test network::relay::tests::tcp_unix_relay_forwards_socks5_to_unix_mediator ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.1961530Z test network::socks::tests::path_prefixed_rule_does_not_authorize_socks ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.1962920Z test network::relay::tests::wrap_command_with_guest_relay_embeds_relay_and_socket ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.1964420Z test network::socks::tests::socks_allow_tunnels_bytes_to_upstream ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.1966200Z test network::socks::tests::unix_socks_allow_tunnels_bytes_to_upstream ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.2998420Z test network::connect::tests::unix_connect_deny_never_reaches_upstream ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.3306310Z test observability::gate2_integration::gate2_execute_records_attributable_audit_events ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.3308400Z test observability::gate2_resources::gate2_macos_memory_limit_fails_closed_at_policy ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.3704230Z test observability::gate2_resources::gate2_policy_output_ceiling_truncates_capture ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.3952110Z test network::socks::tests::socks_deny_never_reaches_upstream ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.3956530Z test observability::gate2_resources::gate2_unix_process_limit_fails_closed_at_policy ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.3957840Z test observability::tests::audit_event_replay_key_stable_for_same_decision ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.3959160Z test observability::tests::buffer_drops_oldest_under_backpressure ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.3960390Z test observability::tests::monitoring_failure_does_not_grant_access_semantics ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.3968770Z test platform::bwrap_candidate_tests::defaults_then_an_authoritative_override ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.3974550Z test platform::macos::tests::escaped_path_quotes_special_characters ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.3975460Z test platform::macos::tests::escaped_path_rejects_non_utf8_values ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.3976210Z test platform::macos::tests::escaped_path_rejects_nul_and_oversized_values ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4318410Z test platform::macos::tests::monorepo_seatbelt_profile_fits_compiled_data_limit ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4416790Z test platform::macos::tests::profile_denies_network_and_reasserts_workspace_secrets ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4418730Z test policy::capabilities::tests::gate13_matrix_rows_match_this_platforms_capabilities ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4428780Z test policy::capabilities::tests::gate13_threat_model_embeds_the_generated_capability_matrix ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4430690Z test policy::capabilities::tests::gate2_backend_enforces_optional_memory_and_process_limits ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4433000Z test policy::capabilities::tests::gate4_mediated_http_capability_matches_platform_fence ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4442210Z test policy::capabilities::tests::gate5_mediated_socks_capability_matches_platform_fence ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4443210Z test policy::capabilities::tests::memory_limit_without_backend_support_fails_closed ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4444600Z test policy::capabilities::tests::policy_exceeding_backend_capabilities_fails_closed ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4446030Z test policy::decide::tests::deny_read_wins_over_allow_read ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4446920Z test policy::decide::tests::fixture_decisions_are_separator_agnostic ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4449140Z test policy::decide::tests::glob_rules_match_single_segment_wildcards ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4449760Z test policy::decide::tests::network_default_is_deny_all ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4450260Z test policy::decide::tests::unmatched_paths_fail_closed ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4450840Z test policy::decide::tests::write_exception_carves_out_denied_ancestor ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4451560Z test policy::digest::tests::baseline_digest_is_hex_sha256_length ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4452090Z test policy::digest::tests::digest_changes_when_rules_change ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4452740Z test policy::digest::tests::digest_is_stable_under_rule_reordering ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4470930Z test policy::enforced::tests::cached_internal_hardlink_is_rechecked_when_the_twin_moves_outside ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4473530Z test policy::enforced::tests::child_environment_mediator_overwrites_explicit_proxy_bypass ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4481580Z test policy::enforced::tests::child_environment_mediator_pipe_sets_named_pipe_not_http_proxy ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4484120Z test policy::enforced::tests::child_environment_removes_case_insensitive_bootstrap_variables ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4486130Z test policy::enforced::tests::child_environment_removes_runtime_injection_and_rehomes_state ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4488760Z test policy::enforced::tests::child_environment_socks_mediator_sets_all_proxy_only ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4530600Z test policy::enforced::tests::credential_hardlink_aliases_inside_package_stores_enter_the_deny_set ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4542070Z test policy::enforced::tests::executable_resolution_rejects_workspace_tools ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4598810Z test policy::enforced::tests::git_worktree_pointer_is_resolved_for_case_variant_gitfiles ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4624500Z test policy::enforced::tests::hardlink_scan_skips_build_and_package_stores ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4720140Z test policy::enforced::tests::in_workspace_hardlinks_are_not_outside_aliases ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4839930Z test policy::enforced::tests::monorepo_workspace_scan_stays_under_entry_limit ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4886340Z test policy::enforced::tests::nested_environment_files_and_hardlinks_enter_the_deny_set ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4955020Z test policy::enforced::tests::nested_secret_scan_fails_closed_at_depth_limit ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4964800Z test policy::enforced::tests::nested_secret_scan_matches_case_variant_environment_files ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4977620Z test network::socks::tests::unix_socks_deny_never_reaches_upstream ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4979760Z test policy::enforced::tests::path_ancestors_exclude_the_filesystem_root ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.4996360Z test policy::enforced::tests::nested_secret_scan_skips_control_and_build_stores ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5001280Z test policy::enforced::tests::protected_path_matching_is_case_insensitive_and_traversal_safe ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5025900Z test policy::enforced::tests::protected_workspace_symlinks_fail_closed ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5026750Z test policy::enforced::tests::scan_directory_filter_handles_case_variants ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5056500Z test policy::enforced::tests::policy_discovers_case_variant_control_metadata ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5085350Z test policy::gate1_integration::gate1_compile_applies_exact_deny_overlays_without_globs ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5098920Z test policy::gate1_integration::gate1_compile_refuses_allow_overlays_outside_workspace_or_scratch ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5099750Z test policy::gate1_integration::gate1_fixture_decisions_match_expected_table ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5100330Z test policy::gate1_integration::gate1_fixture_digest_is_replay_stable ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5157010Z test policy::gate1_integration::gate1_compile_requires_sandbox_policy_and_rejects_broadening ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5163210Z test policy::gate1_integration::gate1_native_sandbox_rejects_unenforcible_policy ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5166730Z test policy::gate3_integration::gate3_document_decisions_treat_readonly_mount_as_readable ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5169400Z test policy::gate3_integration::gate3_ephemeral_rejected_by_native_sandbox_constructor ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5174730Z test policy::gate3_integration::gate3_ephemeral_session_fails_closed_without_overlay_capability ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5625960Z test policy::gate1_integration::gate1_native_sandbox_integration_still_executes ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5665720Z test policy::gate3_integration::gate3_readonly_mount_outside_workspace_compiles_for_read_not_write ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5710020Z test policy::gate3_integration::gate3_readonly_mount_under_workspace_denies_writes ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5741200Z test policy::gate3_integration::gate3_readwrite_mount_outside_workspace_fails_closed ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5741850Z test policy::gate4_integration::gate4_claiming_platforms_accept_mediated_network_capability ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5742500Z test policy::gate4_integration::gate4_connect_mediator_allow_and_deny_integration ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5743190Z test policy::gate4_integration::gate4_does_not_weaken_default_deny_all ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5743820Z test policy::gate3_integration::gate3_native_sandbox_reads_readonly_mount_and_blocks_writes ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5744540Z test policy::gate4_integration::gate4_mediated_http_capability_is_platform_scoped ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5745140Z test policy::gate4_integration::gate4_rejects_path_prefix_with_dotdot ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5745620Z test policy::gate5_integration::gate5_macos_accepts_exact_unix_socket_allow_rules ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5746220Z test policy::gate5_integration::gate5_macos_accepts_mediated_socks_capability ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.5824440Z test observability::gate2_resources::gate2_policy_timeout_ceiling_caps_request ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6417800Z test policy::gate5_integration::gate5_macos_allows_listed_unix_socket_and_denies_others ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6502000Z test policy::gate5_integration::gate5_mediated_socks_capability_is_platform_scoped ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6502670Z test policy::gate5_integration::gate5_socks_mediator_allow_and_deny_integration ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6503870Z test policy::gate5_integration::gate5_unix_socket_allowlist_capability_is_platform_scoped ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6504470Z test policy::gate5_linux_bridge::gate5_linux_bridge_foundation_apis_are_present ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6505630Z test policy::gate5_linux_bridge::gate5_linux_bridge_residual_checklist_is_documented ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6506400Z test policy::gate5_linux_bridge::gate5_linux_mediated_http_and_socks_are_claimed_unix_allowlists_are_not ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6507080Z test policy::gate5_linux_bridge::gate5_linux_mediated_http_policy_compiles_on_linux_capabilities ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6507940Z test policy::gate5_windows_bridge::gate5_windows_bridge_acceptance_checklist_is_documented ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6510020Z test policy::gate5_windows_bridge::gate5_windows_guest_contract_rejects_http_proxy_as_bridge ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6513560Z test policy::gate5_windows_bridge::gate5_windows_mediated_http_is_claimed_socks_remain_unclaimed ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6514210Z test policy::gate5_windows_bridge::gate5_windows_mediated_http_policy_compiles_on_windows_capabilities ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6515100Z test policy::gate6_integration::gate6_capability_report_lists_unavailable_surfaces ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6516100Z test policy::gate6_integration::gate6_replace_policy_allows_narrowing_without_opt_in ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6516620Z test policy::gate6_integration::gate6_replace_policy_refuses_silent_broadening ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6517490Z test policy::gate7_fuzz::gate7_fuzz_ipv6_literal_parses_but_requires_exact_allowlist ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6518700Z test policy::gate7_fuzz::gate7_fuzz_mediator_still_allows_well_formed_connect_after_garbage ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6519280Z test policy::gate5_integration::gate5_macos_sandbox_socks_tunnels_allowed_connect ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6520380Z test policy::gate7_fuzz::gate7_fuzz_parse_connect_target_accepts_canonical_shapes ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6521480Z test policy::gate7_fuzz::gate7_fuzz_parse_connect_target_rejects_malformed_corpus ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6522170Z test policy::gate4_integration::gate4_macos_sandbox_mediator_tunnels_allowed_connect ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6584500Z test policy::gate7_integration::gate7_benchmark_connect_mediator_allow_p50_under_budget ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6596060Z test policy::gate7_integration::gate7_capability_report_never_hides_unavailable_mediation ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6596630Z test policy::gate7_integration::gate7_connect_does_not_alias_localhost_to_loopback_ip ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6597120Z test policy::gate7_integration::gate7_connect_mediator_rejects_non_connect_method ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.6849680Z test policy::gate7_integration::gate7_direct_symlink_to_outside_file_does_not_leak_on_read ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:01.9705410Z test policy::gate7_integration::gate7_benchmark_baseline_exec_p50_under_budget ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.0256850Z test policy::gate7_integration::gate7_macos_explicit_no_proxy_cannot_bypass_mediator_fence ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.0258870Z test policy::gate7_integration::gate7_narrowing_then_rebroadening_requires_opt_in_each_time ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.0259600Z test policy::gate7_integration::gate7_path_prefix_never_authorizes_opaque_tunnels ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.0260340Z test policy::gate7_integration::gate7_policy_validate_rejects_malformed_network_hosts ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.0261130Z test policy::gate7_integration::gate7_policy_validate_rejects_zero_resource_ceilings ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.0262650Z test policy::gate7_integration::gate7_replace_policy_still_refuses_mediation_enablement ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.0486670Z test policy::gate7_fuzz::gate7_fuzz_mediator_survives_malformed_tcp_payloads_without_upstream ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.1809750Z test policy::gate7_integration::gate7_in_command_symlink_swap_during_sleep_does_not_leak ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.2342310Z test policy::gate7_integration::gate7_soak_same_workspace_concurrent_sessions_keep_outputs_distinct ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.2360180Z test policy::gate7_integration::gate7_socks_does_not_authorize_literal_ip_when_hostname_allowlisted ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.2369300Z test policy::gate7_integration::gate7_socks_mediator_rejects_bind_command ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.2806120Z test policy::gate7_integration::gate7_tocu_symlink_planted_between_executes_does_not_leak_outside_secret ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.2808150Z test policy::gate7_release_invariants::gate7_release_capability_probe_lists_unavailable_surfaces ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.2809120Z test policy::gate7_release_invariants::gate7_release_claims_match_capability_matrix ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.2810150Z test policy::gate7_release_invariants::gate7_release_default_profile_keeps_mediation_off ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.3367320Z test policy::gate8_integration::gate8_egress_reinjection_delivers_secret_without_landing_it ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.3375460Z test policy::gate8_integration::gate8_invalid_secret_entries_refuse ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.3378430Z test policy::gate8_integration::gate8_reserved_secret_names_refuse ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.3658710Z test policy::gate8_integration::gate8_secret_bytes_absent_from_audit_and_digest_stable ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.3949330Z test policy::gate8_integration::gate8_secret_bytes_never_appear_in_child_environment_dump ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.3951020Z test policy::gate8_integration::gate8_secret_colliding_with_explicit_env_refuses ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4012910Z test policy::gate7_integration::gate7_same_workspace_overlapping_executes_stay_isolated ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4023560Z test policy::gate8_integration::gate8_secret_env_without_mediation_fails_closed ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4083910Z test policy::grant::tests::apply_appends_to_existing_mediated_policy_without_clobbering ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4088610Z test policy::grant::tests::apply_is_idempotent_for_identical_subject ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4179380Z test policy::grant::tests::apply_refuses_invalid_or_wildcard_hosts ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4196480Z test policy::grant::tests::apply_to_deny_all_baseline_activates_mediation_for_exactly_that_origin ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4199670Z test policy::grant::tests::grant_cannot_alias_localhost_to_loopback_ip ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4213560Z test policy::grant::tests::port_pinned_grant_widens_only_that_port ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4273060Z test policy::grant_integration::applied_grant_is_auditable_with_new_digest_and_updates_the_session ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4276820Z test policy::grant_integration::baseline_policy_fixture_matches_default ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4280840Z test policy::gate8_integration::gate8_secret_env_delivers_sentinel_not_secret_to_child ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4287830Z test policy::grant_integration::granted_policy_authorizes_only_the_granted_subject ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4292050Z test policy::grant_integration::hand_built_broadening_still_refuses_without_the_explicit_opt_in ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4293080Z test policy::grant_integration::idempotent_regrant_changes_nothing_and_records_no_new_allow_rule ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4299880Z test policy::grant_integration::stale_base_digest_refuses_and_leaves_policy_unchanged ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4300540Z test policy::mediate::tests::allow_exact_origin_and_path_prefix ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4301040Z test policy::mediate::tests::connect_requires_pathless_allow_rule ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4301510Z test policy::mediate::tests::deny_when_mediation_flag_off ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4302320Z test policy::mediate::tests::injection_host_match_is_case_insensitive_without_aliasing ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4307780Z test policy::mediate::tests::injections_apply_only_on_matching_origin_and_path ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4311750Z test policy::mediate::tests::injections_without_allow_rule_authorize_nothing ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4319590Z test policy::mediate::tests::missing_path_prefix_allows_any_path_on_origin ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4324210Z test policy::mediate::tests::socks_requires_mediated_socks_flag_and_pathless_rule ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4331430Z test policy::model::tests::baseline_policy_validates ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4337330Z test policy::model::tests::mediated_network_document_validates_shape_but_backend_fails_closed ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4356380Z test policy::model::tests::rejects_dotdot_in_path_rules ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4357090Z test policy::model::tests::rejects_mediated_network_flag_without_allowlist ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4363340Z test policy::model::tests::rejects_network_allow_without_mediation_flag ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4365970Z test policy::model::tests::rejects_recursive_glob ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4368960Z test policy::model::tests::rejects_wrong_version ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4377980Z test policy::model::tests::rejects_zero_timeout ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4378440Z test policy::normalize::tests::absolute_unix_style_paths_keep_root ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4378910Z test policy::normalize::tests::collapses_dot_and_rejects_escape ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4379400Z test policy::normalize::tests::identical_relative_shapes_compare_equal ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4379860Z test policy::normalize::tests::normalizes_separators ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4380410Z test policy::resource_quota_integration::platforms_without_quota_enforcement_refuse_at_construction ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4381010Z test policy::resource_quota_integration::zero_cpu_quota_refuses_at_resolve ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4381580Z test policy::resources::tests::gate2_capabilities_can_enforce_optional_process_and_memory ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4382120Z test policy::resources::tests::resolve_caps_request_timeout_by_policy ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4382640Z test policy::resources::tests::resolve_rejects_call_depth_as_unenforcible ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4383160Z test policy::resources::tests::resolve_rejects_zero_process_or_memory_limits ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4383730Z test policy::resources::tests::resolve_uses_policy_output_ceiling ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4384210Z test policy::update::tests::adding_unix_socket_allow_is_broadening ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4384670Z test policy::update::tests::enabling_socks_is_broadening ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4385210Z test policy::update::tests::narrowing_mediation_is_allowed ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4385670Z test policy::update::tests::raising_timeout_is_broadening ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.4386120Z test policy::update::tests::removing_process_quota_is_broadening ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:02.5549810Z test policy::grant_integration::grant_loop_unblocks_a_denied_command_end_to_end ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:03.0627500Z test process::lifecycle_tests::completion_observer_cannot_hold_a_finished_command_forever ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:03.1288000Z test process::lifecycle_tests::root_exit_stops_background_work_before_waiting_for_pipe_eof ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:03.1393810Z test process::tests::bounded_capture_at_exact_limit_is_not_marked_truncated ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:03.1503940Z test process::tests::bounded_capture_keeps_head_and_tail_with_exact_accounting ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:03.1602950Z test process::tests::bounded_capture_preserves_stream_identity_under_one_global_limit ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:03.1604000Z test process::tests::bounded_capture_replaces_invalid_utf8_per_stream ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:03.4440320Z test process::lifecycle_tests::cancellation_before_the_owner_is_polled_stops_the_process_group ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:03.4665250Z test policy::gate7_integration::gate7_soak_repeated_baseline_executes_stay_stable ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:03.9022610Z test process::tests::process_deadline_includes_wait_after_both_streams_close ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:03.9514740Z test tests::native_backend_blocks_credential_hardlinks_inside_writable_dependency_trees ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:04.0782900Z test tests::native_backend_blocks_ip_and_host_unix_socket_communication ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:04.2043880Z test tests::native_backend_blocks_symlink_hardlink_and_credential_escape ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:04.2718930Z test tests::native_backend_cannot_remove_or_rename_protected_workspace_entries ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:04.3065930Z test tests::native_backend_enforces_the_global_output_limit ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:04.3336580Z test tests::native_backend_handles_workspace_paths_with_spaces ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:04.3655960Z test tests::native_backend_keeps_concurrent_workspaces_isolated ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:04.3852220Z test tests::native_backend_notifies_observer_and_accounts_each_stream ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:04.4036160Z test tests::native_backend_preserves_exit_code_and_stream_identity ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:04.4413670Z test tests::native_backend_protects_case_variant_control_metadata ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:04.4555300Z test tests::native_backend_rejects_invalid_explicit_environment_entries ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:04.4748630Z test process::tests::successful_root_exit_does_not_leave_detached_descendants ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:04.6126200Z test tests::native_backend_starts_and_writes_only_ordinary_workspace_content ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:04.6128890Z test tests::native_sandbox_canonicalizes_workspace_and_reports_backend ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:04.6149010Z test tests::native_sandbox_rejects_invalid_workspaces_and_requests ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:04.9999510Z test tests::native_backend_sanitizes_environment_and_kills_timed_out_descendants ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:09.2302860Z test process::tests::dropping_capture_kills_descendants_in_the_process_group ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:09.2398220Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.2406940Z test result: ok. 215 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 8.34s
+check (macos-14)	Run tests	2026-10-18T04:40:09.2407720Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.2409240Z ^[[1m^[[92m     Running^[[0m unittests src/bin/a3s_sandbox.rs (target/debug/deps/a3s_sandbox-a6e03b9de767e826)
+check (macos-14)	Run tests	2026-10-18T04:40:09.2410610Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.2410930Z running 0 tests
+check (macos-14)	Run tests	2026-10-18T04:40:09.2416050Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.2416390Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+check (macos-14)	Run tests	2026-10-18T04:40:09.2416920Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.2417440Z ^[[1m^[[92m     Running^[[0m unittests src/bin/a3s_sandbox_bridge.rs (target/debug/deps/a3s_sandbox_bridge-163a6a245a6cc819)
+check (macos-14)	Run tests	2026-10-18T04:40:09.2417980Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.2418170Z running 0 tests
+check (macos-14)	Run tests	2026-10-18T04:40:09.2418280Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.2418580Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+check (macos-14)	Run tests	2026-10-18T04:40:09.2418910Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.2419300Z ^[[1m^[[92m     Running^[[0m unittests src/bin/a3s_sandbox_relay.rs (target/debug/deps/a3s_sandbox_relay-fbb06f0201113817)
+check (macos-14)	Run tests	2026-10-18T04:40:09.2419680Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.2419740Z running 0 tests
+check (macos-14)	Run tests	2026-10-18T04:40:09.2419870Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.2420110Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+check (macos-14)	Run tests	2026-10-18T04:40:09.2420650Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.2421050Z ^[[1m^[[92m     Running^[[0m tests/availability.rs (target/debug/deps/availability-c5ab9bf3a7262b86)
+check (macos-14)	Run tests	2026-10-18T04:40:09.2421340Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.2421440Z running 2 tests
+check (macos-14)	Run tests	2026-10-18T04:40:09.2421750Z test unavailability_reasons_are_stable_and_unknown_values_refuse ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:09.2653690Z test launch_probe_does_not_grant_missing_lifetime_guarantees ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:09.2655430Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.2656080Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+check (macos-14)	Run tests	2026-10-18T04:40:09.2658590Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.2660210Z ^[[1m^[[92m     Running^[[0m tests/bridge_protocol.rs (target/debug/deps/bridge_protocol-3d67b6fbee3e5dff)
+check (macos-14)	Run tests	2026-10-18T04:40:09.2711660Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.2715570Z running 2 tests
+check (macos-14)	Run tests	2026-10-18T04:40:09.3591270Z test unknown_method_fails_without_killing_the_bridge ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:09.4069600Z test handshake_probe_exec_and_shutdown ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:09.4070480Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.4071010Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+check (macos-14)	Run tests	2026-10-18T04:40:09.4071840Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.4072830Z ^[[1m^[[92m     Running^[[0m tests/cli_gate6.rs (target/debug/deps/cli_gate6-dde08d81e685f94a)
+check (macos-14)	Run tests	2026-10-18T04:40:09.4095560Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.4098170Z running 4 tests
+check (macos-14)	Run tests	2026-10-18T04:40:09.4328200Z test cli_digest_prints_stable_hex ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:09.4331510Z test cli_capabilities_emits_backend_and_unavailable ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:09.4617150Z test cli_exec_does_not_report_a_signaled_command_as_success ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:09.4624420Z test cli_exec_runs_command_in_sandbox ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:09.4625210Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.4625920Z test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+check (macos-14)	Run tests	2026-10-18T04:40:09.4626710Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.4628270Z ^[[1m^[[92m     Running^[[0m tests/lifecycle.rs (target/debug/deps/lifecycle-3b96c8b8bd310003)
+check (macos-14)	Run tests	2026-10-18T04:40:09.4658150Z
+check (macos-14)	Run tests	2026-10-18T04:40:09.4658480Z running 4 tests
+check (macos-14)	Run tests	2026-10-18T04:40:09.9791860Z test command_deadline_bounds_a_delta_observer_that_never_returns ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:09.9807280Z test execution_failure_codes_are_closed_and_stable ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:09.9966350Z test completed_command_preserves_observer_failure_as_a_typed_non_replayable_error ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:10.4943410Z test dropping_the_caller_still_stops_a_command_blocked_in_its_observer ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:10.4944010Z
+check (macos-14)	Run tests	2026-10-18T04:40:10.4944300Z test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.03s
+check (macos-14)	Run tests	2026-10-18T04:40:10.4944630Z
+check (macos-14)	Run tests	2026-10-18T04:40:10.4945320Z ^[[1m^[[92m     Running^[[0m tests/linux_lifetime.rs (target/debug/deps/linux_lifetime-e1afb52a9364ad59)
+check (macos-14)	Run tests	2026-10-18T04:40:10.5075370Z
+check (macos-14)	Run tests	2026-10-18T04:40:10.5075810Z running 0 tests
+check (macos-14)	Run tests	2026-10-18T04:40:10.5076030Z
+check (macos-14)	Run tests	2026-10-18T04:40:10.5076390Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+check (macos-14)	Run tests	2026-10-18T04:40:10.5076810Z
+check (macos-14)	Run tests	2026-10-18T04:40:10.5077330Z ^[[1m^[[92m     Running^[[0m tests/sbom_gate7.rs (target/debug/deps/sbom_gate7-49682939c7ac3e21)
+check (macos-14)	Run tests	2026-10-18T04:40:10.5103040Z
+check (macos-14)	Run tests	2026-10-18T04:40:10.5103400Z running 1 test
+check (macos-14)	Run tests	2026-10-18T04:40:10.6317970Z ^[[1m^[[92m Downloading^[[0m crates ...
+check (macos-14)	Run tests	2026-10-18T04:40:10.6738730Z ^[[1m^[[92m  Downloaded^[[0m windows-targets v0.48.5
+check (macos-14)	Run tests	2026-10-18T04:40:10.6785160Z ^[[1m^[[92m  Downloaded^[[0m base64 v0.21.7
+check (macos-14)	Run tests	2026-10-18T04:40:10.6916990Z ^[[1m^[[92m  Downloaded^[[0m libredox v0.1.25
+check (macos-14)	Run tests	2026-10-18T04:40:10.6928470Z ^[[1m^[[92m  Downloaded^[[0m windows-link v0.2.1
+check (macos-14)	Run tests	2026-10-18T04:40:10.6942630Z ^[[1m^[[92m  Downloaded^[[0m redox_users v0.4.6
+check (macos-14)	Run tests	2026-10-18T04:40:10.6975290Z ^[[1m^[[92m  Downloaded^[[0m wasi v0.11.1+wasi-snapshot-preview1
+check (macos-14)	Run tests	2026-10-18T04:40:10.7011600Z ^[[1m^[[92m  Downloaded^[[0m thiserror v1.0.69
+check (macos-14)	Run tests	2026-10-18T04:40:10.7280940Z ^[[1m^[[92m  Downloaded^[[0m thiserror-impl v1.0.69
+check (macos-14)	Run tests	2026-10-18T04:40:10.7306650Z ^[[1m^[[92m  Downloaded^[[0m tracing-attributes v0.1.31
+check (macos-14)	Run tests	2026-10-18T04:40:10.7379200Z ^[[1m^[[92m  Downloaded^[[0m getrandom v0.2.17
+check (macos-14)	Run tests	2026-10-18T04:40:10.7438860Z ^[[1m^[[92m  Downloaded^[[0m r-efi v6.0.0
+check (macos-14)	Run tests	2026-10-18T04:40:10.7589050Z ^[[1m^[[92m  Downloaded^[[0m serde v1.0.229
+check (macos-14)	Run tests	2026-10-18T04:40:10.7718960Z ^[[1m^[[92m  Downloaded^[[0m serde_derive v1.0.229
+check (macos-14)	Run tests	2026-10-18T04:40:10.7817600Z ^[[1m^[[92m  Downloaded^[[0m tracing-core v0.1.36
+check (macos-14)	Run tests	2026-10-18T04:40:10.7877290Z ^[[1m^[[92m  Downloaded^[[0m syn v2.0.119
+check (macos-14)	Run tests	2026-10-18T04:40:10.8102460Z ^[[1m^[[92m  Downloaded^[[0m windows_x86_64_gnullvm v0.48.5
+check (macos-14)	Run tests	2026-10-18T04:40:10.8239190Z ^[[1m^[[92m  Downloaded^[[0m windows_aarch64_gnullvm v0.48.5
+check (macos-14)	Run tests	2026-10-18T04:40:10.8437410Z ^[[1m^[[92m  Downloaded^[[0m tracing v0.1.44
+check (macos-14)	Run tests	2026-10-18T04:40:10.8925980Z ^[[1m^[[92m  Downloaded^[[0m windows_aarch64_msvc v0.48.5
+check (macos-14)	Run tests	2026-10-18T04:40:10.9164080Z ^[[1m^[[92m  Downloaded^[[0m windows_x86_64_gnu v0.48.5
+check (macos-14)	Run tests	2026-10-18T04:40:10.9392800Z ^[[1m^[[92m  Downloaded^[[0m windows_x86_64_msvc v0.48.5
+check (macos-14)	Run tests	2026-10-18T04:40:10.9563160Z ^[[1m^[[92m  Downloaded^[[0m windows_i686_gnu v0.48.5
+check (macos-14)	Run tests	2026-10-18T04:40:10.9892360Z ^[[1m^[[92m  Downloaded^[[0m windows_i686_msvc v0.48.5
+check (macos-14)	Run tests	2026-10-18T04:40:11.0053560Z ^[[1m^[[92m  Downloaded^[[0m windows-sys v0.61.2
+check (macos-14)	Run tests	2026-10-18T04:40:11.1096460Z ^[[1m^[[92m  Downloaded^[[0m windows-sys v0.48.0
+check (macos-14)	Run tests	2026-10-18T04:40:11.2388200Z ^[[1m^[[92m  Downloaded^[[0m linux-raw-sys v0.12.1
+check (macos-14)	Run tests	2026-10-18T04:40:11.4699070Z wrote /var/folders/s6/5hzmn6lx4dz5nxs7k_0slzph0000gn/T/.tmppL5KJl components=65 sha256=45c162655c11c5f87aab034ef5a5f7baf934746d588d1ba95f3de708eb3f6979
+check (macos-14)	Run tests	2026-10-18T04:40:11.4787190Z test gate7_sbom_script_emits_cyclonedx_with_a3s_sandbox ... ok
+check (macos-14)	Run tests	2026-10-18T04:40:11.4787730Z
+check (macos-14)	Run tests	2026-10-18T04:40:11.4793170Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.97s
+check (macos-14)	Run tests	2026-10-18T04:40:11.4793550Z
+check (macos-14)	Run tests	2026-10-18T04:40:11.4794410Z ^[[1m^[[92m     Running^[[0m tests/windows_lifetime.rs (target/debug/deps/windows_lifetime-90ec9aadd04d5a12)
+check (macos-14)	Run tests	2026-10-18T04:40:11.4879650Z
+check (macos-14)	Run tests	2026-10-18T04:40:11.4880130Z running 0 tests
+check (macos-14)	Run tests	2026-10-18T04:40:11.4880380Z
+check (macos-14)	Run tests	2026-10-18T04:40:11.4880670Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+check (macos-14)	Run tests	2026-10-18T04:40:11.4881690Z
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	﻿2026-10-18T04:40:11.5484510Z ##[group]Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:11.5484900Z with:
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:11.5485030Z   go-version: stable
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:11.5485190Z   cache: false
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:11.5485350Z   check-latest: false
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:11.5487390Z   token: ***
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:11.5487510Z env:
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:11.5487650Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:11.5487830Z   CARGO_INCREMENTAL: 0
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:11.5488070Z   CARGO_TERM_COLOR: always
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:11.5488310Z ##[endgroup]
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:11.9565220Z Setup go version spec stable
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:12.9295670Z stable version resolved as 1.27.2
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:12.9296940Z Attempting to download 1.27.2...
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:12.9297150Z matching 1.27.2...
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:12.9297930Z Acquiring 1.27.2 from https://github.com/actions/go-versions/releases/download/1.27.2-37875086547/go-1.27.2-darwin-arm64.tar.gz
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.6040520Z Extracting Go...
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:13.6214760Z [command]/usr/bin/tar xz -C /Users/runner/work/_temp/b5a36b26-7c10-46cd-bcd8-3f2fa0202df6 -f /Users/runner/work/_temp/f628894c-e05e-4965-9bce-48afb9eeab7a
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:15.7795330Z Successfully extracted go to /Users/runner/work/_temp/b5a36b26-7c10-46cd-bcd8-3f2fa0202df6
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:15.7795810Z Adding to the cache ...
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:24.1060240Z Successfully cached go to /Users/runner/hostedtoolcache/go/1.27.2/arm64
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:24.1061490Z Added go to the path
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:24.1063090Z Successfully set up Go version stable
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:24.2608590Z go version go1.27.2 darwin/arm64
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:24.2608850Z
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:24.2609190Z ##[group]go env
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4973180Z AR='ar'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4973780Z CC='clang'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4974330Z CGO_CFLAGS='-O2 -g'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4974700Z CGO_CPPFLAGS=''
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4974960Z CGO_CXXFLAGS='-O2 -g'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4975290Z CGO_ENABLED='1'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4975600Z CGO_FFLAGS='-O2 -g'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4975940Z CGO_LDFLAGS='-O2 -g'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4976190Z CXX='clang++'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4976550Z GCCGO='gccgo'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4976890Z GO111MODULE=''
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4977250Z GOARCH='arm64'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4977600Z GOARM64='v8.0'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4977810Z GOAUTH='netrc'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4978200Z GOBIN='/Users/runner/go/bin'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4978540Z GOCACHE='/Users/runner/Library/Caches/go-build'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4978880Z GOCACHEPROG=''
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4979120Z GODEBUG=''
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4979500Z GOENV='/Users/runner/Library/Application Support/go/env'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4979870Z GOEXE=''
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4980120Z GOEXPERIMENT=''
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4980430Z GOFIPS140='off'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4980710Z GOFLAGS=''
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4981820Z GOGCCFLAGS='-fPIC -arch arm64 -pthread -fno-caret-diagnostics -Qunused-arguments -fmessage-length=0 -ffile-prefix-map=/var/folders/s6/5hzmn6lx4dz5nxs7k_0slzph0000gn/T/go-build1154652944=/tmp/go-build -gno-record-gcc-switches -fno-common'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4982750Z GOHOSTARCH='arm64'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4983110Z GOHOSTOS='darwin'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4983330Z GOINSECURE=''
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4983590Z GOMOD='/dev/null'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4983840Z GOMODCACHE='/Users/runner/go/pkg/mod'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4984140Z GONOPROXY=''
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4984370Z GONOSUMDB=''
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4984640Z GOOS='darwin'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4984930Z GOPACKAGESDRIVER=''
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4985540Z GOPATH='/Users/runner/go'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4985950Z GOPRIVATE=''
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4986280Z GOPROXY='https://proxy.golang.org,direct'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4986780Z GOROOT='/Users/runner/hostedtoolcache/go/1.27.2/arm64'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4987120Z GOSUMDB='sum.golang.org'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4987470Z GOTELEMETRY='local'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4987840Z GOTELEMETRYDIR='/Users/runner/Library/Application Support/go/telemetry'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4988340Z GOTMPDIR=''
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4994470Z GOTOOLCHAIN='local'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4995020Z GOTOOLDIR='/Users/runner/hostedtoolcache/go/1.27.2/arm64/pkg/tool/darwin_arm64'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4996180Z GOVCS=''
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4996450Z GOVERSION='go1.27.2'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4996830Z GOWORK=''
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4997090Z PKG_CONFIG='pkg-config'
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4997350Z
+check (macos-14)	Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	2026-10-18T04:40:25.4998040Z ##[endgroup]
+check (macos-14)	Test Go SDK protocol	﻿2026-10-18T04:40:25.5135030Z ##[group]Run go test ./...
+check (macos-14)	Test Go SDK protocol	2026-10-18T04:40:25.5135420Z ^[[36;1mgo test ./...^[[0m
+check (macos-14)	Test Go SDK protocol	2026-10-18T04:40:25.5319060Z shell: /bin/bash -e {0}
+check (macos-14)	Test Go SDK protocol	2026-10-18T04:40:25.5319460Z env:
+check (macos-14)	Test Go SDK protocol	2026-10-18T04:40:25.5319700Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Test Go SDK protocol	2026-10-18T04:40:25.5320090Z   CARGO_INCREMENTAL: 0
+check (macos-14)	Test Go SDK protocol	2026-10-18T04:40:25.5320310Z   CARGO_TERM_COLOR: always
+check (macos-14)	Test Go SDK protocol	2026-10-18T04:40:25.5320590Z   GOTOOLCHAIN: local
+check (macos-14)	Test Go SDK protocol	2026-10-18T04:40:25.5320810Z ##[endgroup]
+check (macos-14)	Test Go SDK protocol	2026-10-18T04:40:32.7260260Z ok  	github.com/A3S-Lab/Sandbox/sdk/go	1.145s
+check (macos-14)	Test Go SDK with the real bridge	﻿2026-10-18T04:40:32.7707880Z ##[group]Run A3S_SANDBOX_BRIDGE="$GITHUB_WORKSPACE/target/debug/a3s-sandbox-bridge" go test -race -run Integration -v ./...
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:32.7708730Z ^[[36;1mA3S_SANDBOX_BRIDGE="$GITHUB_WORKSPACE/target/debug/a3s-sandbox-bridge" go test -race -run Integration -v ./...^[[0m
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:32.7784810Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:32.7785140Z env:
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:32.7785370Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:32.7785680Z   CARGO_INCREMENTAL: 0
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:32.7785930Z   CARGO_TERM_COLOR: always
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:32.7786210Z   GOTOOLCHAIN: local
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:32.7786470Z ##[endgroup]
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:40.0938180Z === RUN   TestIntegrationProbeAndCapabilities
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:40.2055130Z --- PASS: TestIntegrationProbeAndCapabilities (0.11s)
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:40.2076470Z === RUN   TestIntegrationExecEcho
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:40.3058830Z --- PASS: TestIntegrationExecEcho (0.10s)
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:40.3060480Z === RUN   TestIntegrationExitCodePropagates
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:40.4100460Z --- PASS: TestIntegrationExitCodePropagates (0.10s)
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:40.4111860Z === RUN   TestIntegrationTimeoutKillsTree
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:40.7843790Z --- PASS: TestIntegrationTimeoutKillsTree (0.37s)
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:40.7859070Z === RUN   TestIntegrationStreamDeltas
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:40.8763300Z --- PASS: TestIntegrationStreamDeltas (0.09s)
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:40.8840740Z PASS
+check (macos-14)	Test Go SDK with the real bridge	2026-10-18T04:40:41.8998920Z ok  	github.com/A3S-Lab/Sandbox/sdk/go	1.817s
+check (macos-14)	Build release binaries	﻿2026-10-18T04:40:41.9525630Z ##[group]Run cargo build --release --bins --locked
+check (macos-14)	Build release binaries	2026-10-18T04:40:41.9526580Z ^[[36;1mcargo build --release --bins --locked^[[0m
+check (macos-14)	Build release binaries	2026-10-18T04:40:41.9596890Z shell: /bin/bash -e {0}
+check (macos-14)	Build release binaries	2026-10-18T04:40:41.9597110Z env:
+check (macos-14)	Build release binaries	2026-10-18T04:40:41.9597300Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Build release binaries	2026-10-18T04:40:41.9597520Z   CARGO_INCREMENTAL: 0
+check (macos-14)	Build release binaries	2026-10-18T04:40:41.9597730Z   CARGO_TERM_COLOR: always
+check (macos-14)	Build release binaries	2026-10-18T04:40:41.9597930Z   GOTOOLCHAIN: local
+check (macos-14)	Build release binaries	2026-10-18T04:40:41.9598090Z ##[endgroup]
+check (macos-14)	Build release binaries	2026-10-18T04:40:42.1070390Z ^[[1m^[[92m   Compiling^[[0m libc v0.2.191
+check (macos-14)	Build release binaries	2026-10-18T04:40:42.1078150Z ^[[1m^[[92m   Compiling^[[0m proc-macro2 v1.0.107
+check (macos-14)	Build release binaries	2026-10-18T04:40:42.1079480Z ^[[1m^[[92m   Compiling^[[0m version_check v0.9.5
+check (macos-14)	Build release binaries	2026-10-18T04:40:43.1454910Z ^[[1m^[[92m   Compiling^[[0m generic-array v0.14.7
+check (macos-14)	Build release binaries	2026-10-18T04:40:43.3384800Z ^[[1m^[[92m   Compiling^[[0m quote v1.0.47
+check (macos-14)	Build release binaries	2026-10-18T04:40:43.5075580Z ^[[1m^[[92m   Compiling^[[0m unicode-ident v1.0.27
+check (macos-14)	Build release binaries	2026-10-18T04:40:43.6046780Z ^[[1m^[[92m   Compiling^[[0m typenum v1.20.1
+check (macos-14)	Build release binaries	2026-10-18T04:40:44.2640940Z ^[[1m^[[92m   Compiling^[[0m errno v0.3.14
+check (macos-14)	Build release binaries	2026-10-18T04:40:44.3920440Z ^[[1m^[[92m   Compiling^[[0m serde_core v1.0.229
+check (macos-14)	Build release binaries	2026-10-18T04:40:44.5480820Z ^[[1m^[[92m   Compiling^[[0m syn v3.0.9
+check (macos-14)	Build release binaries	2026-10-18T04:40:44.6810720Z ^[[1m^[[92m   Compiling^[[0m rustix v1.1.5
+check (macos-14)	Build release binaries	2026-10-18T04:40:44.9716800Z ^[[1m^[[92m   Compiling^[[0m cfg-if v1.0.5
+check (macos-14)	Build release binaries	2026-10-18T04:40:44.9818330Z ^[[1m^[[92m   Compiling^[[0m zmij v1.0.23
+check (macos-14)	Build release binaries	2026-10-18T04:40:45.0012470Z ^[[1m^[[92m   Compiling^[[0m getrandom v0.4.3
+check (macos-14)	Build release binaries	2026-10-18T04:40:45.2336580Z ^[[1m^[[92m   Compiling^[[0m block-buffer v0.10.4
+check (macos-14)	Build release binaries	2026-10-18T04:40:45.2536120Z ^[[1m^[[92m   Compiling^[[0m crypto-common v0.1.7
+check (macos-14)	Build release binaries	2026-10-18T04:40:45.3117470Z ^[[1m^[[92m   Compiling^[[0m anyhow v1.0.104
+check (macos-14)	Build release binaries	2026-10-18T04:40:45.3185640Z ^[[1m^[[92m   Compiling^[[0m bitflags v2.13.2
+check (macos-14)	Build release binaries	2026-10-18T04:40:45.5651460Z ^[[1m^[[92m   Compiling^[[0m serde_json v1.0.154
+check (macos-14)	Build release binaries	2026-10-18T04:40:45.7473730Z ^[[1m^[[92m   Compiling^[[0m option-ext v0.2.0
+check (macos-14)	Build release binaries	2026-10-18T04:40:45.7880750Z ^[[1m^[[92m   Compiling^[[0m dirs-sys v0.4.1
+check (macos-14)	Build release binaries	2026-10-18T04:40:48.2244550Z ^[[1m^[[92m   Compiling^[[0m digest v0.10.7
+check (macos-14)	Build release binaries	2026-10-18T04:40:48.4700540Z ^[[1m^[[92m   Compiling^[[0m signal-hook-registry v1.4.8
+check (macos-14)	Build release binaries	2026-10-18T04:40:48.5366430Z ^[[1m^[[92m   Compiling^[[0m tokio-macros v2.7.2
+check (macos-14)	Build release binaries	2026-10-18T04:40:48.6634930Z ^[[1m^[[92m   Compiling^[[0m mio v1.2.4
+check (macos-14)	Build release binaries	2026-10-18T04:40:48.7735230Z ^[[1m^[[92m   Compiling^[[0m socket2 v0.6.5
+check (macos-14)	Build release binaries	2026-10-18T04:40:49.0244930Z ^[[1m^[[92m   Compiling^[[0m cpufeatures v0.2.17
+check (macos-14)	Build release binaries	2026-10-18T04:40:49.0879950Z ^[[1m^[[92m   Compiling^[[0m bytes v1.12.1
+check (macos-14)	Build release binaries	2026-10-18T04:40:49.4393390Z ^[[1m^[[92m   Compiling^[[0m itoa v1.0.18
+check (macos-14)	Build release binaries	2026-10-18T04:40:49.5823550Z ^[[1m^[[92m   Compiling^[[0m memchr v2.8.3
+check (macos-14)	Build release binaries	2026-10-18T04:40:49.5960000Z ^[[1m^[[92m   Compiling^[[0m fastrand v2.5.0
+check (macos-14)	Build release binaries	2026-10-18T04:40:49.7774770Z ^[[1m^[[92m   Compiling^[[0m pin-project-lite v0.2.17
+check (macos-14)	Build release binaries	2026-10-18T04:40:49.8191520Z ^[[1m^[[92m   Compiling^[[0m once_cell v1.21.4
+check (macos-14)	Build release binaries	2026-10-18T04:40:50.0665450Z ^[[1m^[[92m   Compiling^[[0m tempfile v3.27.0
+check (macos-14)	Build release binaries	2026-10-18T04:40:50.2977900Z ^[[1m^[[92m   Compiling^[[0m tokio v1.53.3
+check (macos-14)	Build release binaries	2026-10-18T04:40:50.7081460Z ^[[1m^[[92m   Compiling^[[0m sha2 v0.10.9
+check (macos-14)	Build release binaries	2026-10-18T04:40:51.8804880Z ^[[1m^[[92m   Compiling^[[0m async-trait v0.1.92
+check (macos-14)	Build release binaries	2026-10-18T04:40:52.5629920Z ^[[1m^[[92m   Compiling^[[0m dirs v5.0.1
+check (macos-14)	Build release binaries	2026-10-18T04:40:53.8728370Z ^[[1m^[[92m   Compiling^[[0m a3s-sandbox v0.3.0 (/Users/runner/work/Sandbox/Sandbox)
+check (macos-14)	Build release binaries	2026-10-18T04:41:09.5544590Z ^[[1m^[[92m    Finished^[[0m `release` profile [optimized] target(s) in 27.51s
+check (macos-14)	Package native binaries	﻿2026-10-18T04:41:09.5695240Z ##[group]Run set -euo pipefail
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5695960Z ^[[36;1mset -euo pipefail^[[0m
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5696370Z ^[[36;1mversion=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)^[[0m
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5696860Z ^[[36;1mhost=$(rustc -vV | sed -n 's/^host: //p')^[[0m
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5697320Z ^[[36;1mpackage="a3s-sandbox-v${version}-${host}"^[[0m
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5697640Z ^[[36;1mmkdir -p "$RUNNER_TEMP/$package" dist^[[0m
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5697930Z ^[[36;1msuffix=''^[[0m
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5698190Z ^[[36;1mif [[ "$RUNNER_OS" == Windows ]]; then suffix='.exe'; fi^[[0m
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5698720Z ^[[36;1mfor binary in a3s-sandbox a3s-sandbox-relay a3s-sandbox-bridge; do^[[0m
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5699250Z ^[[36;1m  cp "target/release/${binary}${suffix}" "$RUNNER_TEMP/$package/"^[[0m
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5699730Z ^[[36;1mdone^[[0m
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5700250Z ^[[36;1mcp LICENSE README.md README.zh-CN.md docs/RELEASE_NOTES_0.3.0.md "$RUNNER_TEMP/$package/"^[[0m
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5700730Z ^[[36;1mgit rev-parse HEAD > "$RUNNER_TEMP/$package/SOURCE_COMMIT"^[[0m
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5701370Z ^[[36;1mtar -czf "dist/$package.tar.gz" -C "$RUNNER_TEMP" "$package"^[[0m
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5775490Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5775850Z env:
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5776090Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5776490Z   CARGO_INCREMENTAL: 0
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5776810Z   CARGO_TERM_COLOR: always
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5777100Z   GOTOOLCHAIN: local
+check (macos-14)	Package native binaries	2026-10-18T04:41:09.5777400Z ##[endgroup]
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	﻿2026-10-18T04:41:09.9880040Z ##[group]Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:09.9880600Z with:
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:09.9880880Z   subject-path: dist/*.tar.gz
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:09.9881180Z   push-to-registry: false
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:09.9881460Z   create-storage-record: true
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:09.9881790Z   show-summary: true
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:09.9884190Z   github-token: ***
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:09.9884390Z env:
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:09.9884580Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:09.9884820Z   CARGO_INCREMENTAL: 0
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:09.9885120Z   CARGO_TERM_COLOR: always
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:09.9885330Z   GOTOOLCHAIN: local
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:09.9949840Z ##[endgroup]
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:10.1750710Z Attestation type: Build Provenance
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8759870Z Attestation created for a3s-sandbox-v0.3.0-aarch64-apple-darwin.tar.gz@sha256:d9f26c6a9cc904f7d5880e918f67c546090ddc9c4bcc01b149c36065642dcbd1
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8859630Z ##[group]^[[36mAttestation signed using certificate from Public Good Sigstore instance^[[39m
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8860510Z -----BEGIN CERTIFICATE-----
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8861000Z MIIHTjCCBtOgAwIBAgIULU4tZGjqPLAv2qJnjy/Ve8npzvQwCgYIKoZIzj0EAwMw
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8861890Z NzEVMBMGA1UEChMMc2lnc3RvcmUuZGV2MR4wHAYDVQQDExVzaWdzdG9yZS1pbnRl
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8896270Z cm1lZGlhdGUwHhcNMjYxMDE4MDQ0MTEwWhcNMjYxMDE4MDQ1MTEwWjAAMFkwEwYH
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8897160Z KoZIzj0CAQYIKoZIzj0DAQcDQgAE40q6HwZQfi6Eot47sXrcNDeh6XIPSSwFAkte
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8897800Z /+ojuAFpkWCslMulKFJPGR1RdiwDv9c1ZIpzFi5M9qogTwirf6OCBfIwggXuMA4G
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8898320Z A1UdDwEB/wQEAwIHgDATBgNVHSUEDDAKBggrBgEFBQcDAzAfBgNVHSMEGDAWgBTf
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8898910Z 0+nPViQRlvmo2OkoVaLGLhhkPzBuBgNVHREBAf8EZDBihmBodHRwczovL2dpdGh1
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8899480Z Yi5jb20vQTNTLUxhYi9TYW5kYm94Ly5naXRodWIvd29ya2Zsb3dzL2NpLnltbEBy
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8900000Z ZWZzL2hlYWRzL2NvZGV4L3NhbmRib3gtczQtMjAyNjEwMTgwOQYKKwYBBAGDvzAB
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8912630Z AQQraHR0cHM6Ly90b2tlbi5hY3Rpb25zLmdpdGh1YnVzZXJjb250ZW50LmNvbTAf
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8913190Z BgorBgEEAYO/MAECBBF3b3JrZmxvd19kaXNwYXRjaDA2BgorBgEEAYO/MAEDBChm
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8913630Z YTg4M2IzMmFkNzg4MTFiOTFlYzQ5MGM1OTMxNDI0Mjg5YzllMDA3MBAGCisGAQQB
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8914170Z g78wAQQEAkNJMB0GCisGAQQBg78wAQUED0EzUy1MYWIvU2FuZGJveDAyBgorBgEE
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8914670Z AYO/MAEGBCRyZWZzL2hlYWRzL2NvZGV4L3NhbmRib3gtczQtMjAyNjEwMTgwOwYK
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8915180Z KwYBBAGDvzABCAQtDCtodHRwczovL3Rva2VuLmFjdGlvbnMuZ2l0aHVidXNlcmNv
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8915610Z bnRlbnQuY29tMHAGCisGAQQBg78wAQkEYgxgaHR0cHM6Ly9naXRodWIuY29tL0Ez
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8916040Z Uy1MYWIvU2FuZGJveC8uZ2l0aHViL3dvcmtmbG93cy9jaS55bWxAcmVmcy9oZWFk
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8916480Z cy9jb2RleC9zYW5kYm94LXM0LTIwMjYxMDE4MDgGCisGAQQBg78wAQoEKgwoZmE4
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8916910Z ODNiMzJhZDc4ODExYjkxZWM0OTBjNTkzMTQyNDI4OWM5ZTAwNzAdBgorBgEEAYO/
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8917330Z MAELBA8MDWdpdGh1Yi1ob3N0ZWQwMgYKKwYBBAGDvzABDAQkDCJodHRwczovL2dp
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8917750Z dGh1Yi5jb20vQTNTLUxhYi9TYW5kYm94MDgGCisGAQQBg78wAQ0EKgwoZmE4ODNi
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8918180Z MzJhZDc4ODExYjkxZWM0OTBjNTkzMTQyNDI4OWM5ZTAwNzA0BgorBgEEAYO/MAEO
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8918590Z BCYMJHJlZnMvaGVhZHMvY29kZXgvc2FuZGJveC1zNC0yMDI2MTAxODAaBgorBgEE
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8919020Z AYO/MAEPBAwMCjEzNTM2Mzc3ODMwKgYKKwYBBAGDvzABEAQcDBpodHRwczovL2dp
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8919410Z dGh1Yi5jb20vQTNTLUxhYjAZBgorBgEEAYO/MAERBAsMCTI1NTAzMTIzNzBwBgor
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8919810Z BgEEAYO/MAESBGIMYGh0dHBzOi8vZ2l0aHViLmNvbS9BM1MtTGFiL1NhbmRib3gv
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8920300Z LmdpdGh1Yi93b3JrZmxvd3MvY2kueW1sQHJlZnMvaGVhZHMvY29kZXgvc2FuZGJv
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8920720Z eC1zNC0yMDI2MTAxODA4BgorBgEEAYO/MAETBCoMKGZhODgzYjMyYWQ3ODgxMWI5
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8921150Z MWVjNDkwYzU5MzE0MjQyODljOWUwMDcwIQYKKwYBBAGDvzABFAQTDBF3b3JrZmxv
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8921550Z d19kaXNwYXRjaDBWBgorBgEEAYO/MAEVBEgMRmh0dHBzOi8vZ2l0aHViLmNvbS9B
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8921970Z M1MtTGFiL1NhbmRib3gvYWN0aW9ucy9ydW5zLzM5MDk3ODIxNTE5L2F0dGVtcHRz
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8922380Z LzEwFgYKKwYBBAGDvzABFgQIDAZwdWJsaWMwYgYKKwYBBAGDvzABGARUDFJyZXBv
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8923680Z OkEzUy1MYWJAMjU1MDMxMjM3L1NhbmRib3hAMTM1MzYzNzc4MzpyZWY6cmVmcy9o
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8924100Z ZWFkcy9jb2RleC9zYW5kYm94LXM0LTIwMjYxMDE4MIGKBgorBgEEAdZ5AgQCBHwE
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8924500Z egB4AHYA3T0wasbHETJjGR4cmWc3AqJKXrjePK3/h4pygC8p7o4AAAGhTVBN/gAA
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8924870Z BAMARzBFAiEAodRa+sxo2ehhHZFomknq/ET4bsEGHdvROu33je8Utg8CIGHd8eUC
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8925270Z UwT7A34lyvWB1b6FjLveIz1dpHTJPGnj0JFTMAoGCCqGSM49BAMDA2kAMGYCMQD2
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8925680Z ZM8agicR3Y4/LN8Le1+0sN6NDHk7gpw+89UR+NWk0CmEDbls8qfKORcDj5+CFTAC
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8926140Z MQCM4hF/lVBpenbyIHdGRxU9f5pRNsS01i0yB6oNlIacJBqM/1oNoSRlWZinFznu
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8926600Z eiQ=
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8926750Z -----END CERTIFICATE-----
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8926880Z
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8927170Z ##[endgroup]
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8927570Z ^[[36mAttestation signature uploaded to Rekor transparency log^[[39m
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8927950Z https://search.sigstore.dev?logIndex=3306303485
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8928260Z ^[[36mAttestation uploaded to repository^[[39m
+check (macos-14)	Run actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6	2026-10-18T04:41:11.8928560Z https://github.com/A3S-Lab/Sandbox/attestations/57072359
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	﻿2026-10-18T04:41:11.9100040Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.9100350Z with:
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.9100570Z   name: sandbox-macOS-fa883b32ad78811b91ec490c5931424289c9e007
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.9100930Z   path: *.log
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	dist/*.tar.gz
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	/Users/runner/work/_temp/z4D1h0/attestation.json
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.9101310Z   if-no-files-found: error
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.9101500Z   compression-level: 6
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.9101670Z   overwrite: false
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.9101860Z   include-hidden-files: false
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.9102040Z env:
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.9102190Z   CARGO_HOME: /Users/runner/.cargo
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.9102380Z   CARGO_INCREMENTAL: 0
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.9102550Z   CARGO_TERM_COLOR: always
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.9102720Z   GOTOOLCHAIN: local
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:11.9102860Z ##[endgroup]
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:12.0477720Z (node:11698) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:12.0478400Z (Use `node --trace-deprecation ...` to show where the warning was created)
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:12.0519790Z Multiple search paths detected. Calculating the least common ancestor of all paths
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:12.0520840Z The least common ancestor is /Users/runner/work. This will be the root directory of the artifact
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:12.0521330Z With the provided path, there will be 3 files uploaded
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:12.0523490Z Artifact name is valid!
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:12.0523760Z Root directory input is valid!
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:12.2722180Z Beginning upload of artifact content to blob storage
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:12.3165890Z (node:11698) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:12.3829980Z Uploaded bytes 1892141
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:12.3975610Z Finished uploading artifact content to blob storage!
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:12.3976480Z SHA256 digest of uploaded artifact zip is 8e7fc57626a2652304f61f6b5b4e2ec3cd806402212506d5ac5cf6aa73502ec1
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:12.3977080Z Finalizing artifact upload
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:12.6293470Z Artifact sandbox-macOS-fa883b32ad78811b91ec490c5931424289c9e007.zip successfully finalized. Artifact ID 12125257038
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:12.6294500Z Artifact sandbox-macOS-fa883b32ad78811b91ec490c5931424289c9e007 has been successfully uploaded! Final size is 1892141 bytes. Artifact ID is 12125257038
+check (macos-14)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T04:41:12.6324610Z Artifact download URL: https://github.com/A3S-Lab/Sandbox/actions/runs/39097821519/artifacts/12125257038
+check (macos-14)	Post Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e	﻿2026-10-18T04:41:12.6540960Z Post job cleanup.
+check (macos-14)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	﻿2026-10-18T04:41:12.7649750Z Post job cleanup.
+check (macos-14)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.8515290Z [command]/opt/homebrew/bin/git version
+check (macos-14)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.8555850Z git version 2.55.0
+check (macos-14)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.8571670Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/323cc3b3-8dc0-483d-b5c3-f50256989fe1/.gitconfig'
+check (macos-14)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.8577500Z Temporarily overriding HOME='/Users/runner/work/_temp/323cc3b3-8dc0-483d-b5c3-f50256989fe1' before making global git config changes
+check (macos-14)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.8578700Z Adding repository directory to the temporary git global config as a safe directory
+check (macos-14)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.8581320Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/Sandbox/Sandbox
+check (macos-14)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.8654200Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+check (macos-14)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.8693510Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+check (macos-14)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.9322060Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+check (macos-14)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.9375040Z http.https://github.com/.extraheader
+check (macos-14)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.9381900Z [command]/opt/homebrew/bin/git config --local --unset-all http.https://github.com/.extraheader
+check (macos-14)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.9448220Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+check (macos-14)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:12.9923070Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+check (macos-14)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:41:13.0010050Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+check (macos-14)	Complete job	﻿2026-10-18T04:41:13.1167930Z Cleaning up orphan processes
+check (macos-14)	Complete job	2026-10-18T04:41:13.6054730Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11d5960a326750d5838078e36cf38b85af677262, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

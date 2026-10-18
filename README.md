@@ -115,8 +115,9 @@ directory-identity mutex across hosts, including differently cased paths. A
 directory-read handle prevents root replacement during execution while allowing
 ordinary child updates. Each sandbox has an independent AppContainer
 identity, and cleanup removes only that identity’s temporary ACL entries.
-Native lease qualification is pending, and recovery after a host crash remains
-unqualified; complete host-exit admission stays unavailable.
+The [six ownership contracts](docs/evidence/sandbox/2026-10-18-windows-workspace-mutex/OUTCOME.md)
+pass native Windows CI. Recovery after a host crash remains unqualified;
+complete host-exit admission stays unavailable.
 
 ## Execution model
 

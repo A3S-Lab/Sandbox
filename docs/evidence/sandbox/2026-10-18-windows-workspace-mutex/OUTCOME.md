@@ -6,8 +6,10 @@ The first directory share-mode candidate is rejected after native testing caught
 a normal-operation regression. Its replacement separates cross-host ownership
 from the root-name pin: a named Windows mutex coordinates a physical directory,
 and a directory-read handle denies delete sharing while allowing read/write
-sharing. An initial attribute-only root pin was also rejected by native testing;
-the corrected directory-read pin still requires native qualification.
+sharing. Native CI now passes Linux 240 / 0 / 0, macOS 228 / 0 / 0 and Windows
+219 / 0 / 0 on exact source `fa883b32ad78811b91ec490c5931424289c9e007`.
+Both Windows mutation oracles pass. This qualifies the six ownership contracts,
+not complete S4 crash recovery; `host_exit_cleanup` remains false.
 
 Base: `e2bf1fd411532967cb1e9c2732d8a2bcba9da06c`.
 Toolchain: Rust 1.97.1. Local preparation host: macOS ARM64.
@@ -46,6 +48,36 @@ CI now runs the root-pin and ordinary guest contracts individually before the
 long full suite, retaining both smoke logs. The full suite and mutation checks
 remain mandatory.
 
+## Native passing qualification
+
+[CI 39097821519](https://github.com/A3S-Lab/Sandbox/actions/runs/39097821519)
+completed successfully on exact source
+`fa883b32ad78811b91ec490c5931424289c9e007`. All three jobs passed formatting,
+strict all-target Clippy, tests, native release build, packaging, provenance and
+artifact upload. The retained full job logs contain source/toolchain identity:
+
+| Native job | Full suite passed / failed / ignored | Log |
+| --- | --- | --- |
+| Ubuntu | 240 / 0 / 0 | [native-linux.log](native-linux.log) |
+| macOS 14 | 228 / 0 / 0 | [native-macos.log](native-macos.log) |
+| Windows | 219 / 0 / 0 | [native-windows.log](native-windows.log) |
+
+These totals count only each job's full-suite step, excluding separate smoke
+tests and intentional failing mutations. Windows recorded 206 passing library
+tests plus 13 integration tests, including the 64-round soak, ordinary guest
+updates, ownership contracts and real process/host-death cases. Root pin and
+ordinary guest operations also passed individually before that full suite.
+
+The ownership mutation bypassed the real mutex wait: 4 ownership tests passed
+and the original cross-host/case-alias contracts both failed with their expected
+assertions. Removing Job kill-on-close separately failed the host-death test
+because a sandbox process survived termination. Both workflows required those
+specific failure messages and restored an empty source diff afterwards.
+
+Artifact IDs: Windows `12125297677`, macOS `12125257038`, Linux `12125202001`.
+These are development-branch qualification artifacts, not a published release.
+Full crash/restart ACL, device and profile recovery remains the next S4 work.
+
 ## Replacement
 
 - Name the host-global mutex using the volume and 128-bit directory identity,
@@ -64,8 +96,8 @@ remain mandatory.
   Cross-instance/global worker admission and task-wide deadlines remain S5 work.
 - The root pin requests directory-list/attribute access and shares read/write
   access. It denies delete sharing while active. The acquired identity must still
-  match the bound identity before any scratch/policy initialization. No add-file permission is
-  required by this replacement; directory-read permission is required.
+  match the bound identity before any scratch/policy initialization. No add-file
+  permission is required by this replacement; directory-read permission is required.
 - CI bypasses the real mutex wait and requires both original cross-host and
   case-alias assertions to fail. It restores the source in `finally` and checks
   an empty diff. Removing Job kill-on-close remains a separate negative oracle.
@@ -100,7 +132,7 @@ blank lines removed. Original logs remain on the linked native run.
 
 ## Explicitly not claimed
 
-- No passing native replacement/mutation result yet and no performance SLO.
+- No performance SLO or alias/filesystem qualification beyond the named contracts.
 - No durable ACL, DOS-device or profile crash recovery. An abandoned mutex alone
   is not a recovered execution. `host_exit_cleanup` stays false and S4 is open.
 - No global blocking-worker quota, runtime-abort certification, read-only host
