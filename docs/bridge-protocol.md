@@ -17,11 +17,11 @@ diagnostics only and is never part of the protocol.
 | Method | Params | Result | Notes |
 | --- | --- | --- | --- |
 | `initialize` | `{"workspace": "/abs/path"}` (absolute, required) | capability report (below) | Creates the sandbox with the A3S Bash baseline policy. Required before anything except `ping`. |
-| `probe` | — | `{"backend": "..."}` | Fail-closed: an error means the host cannot enforce the boundary. |
+| `probe` | — | capability report with `runtime_probed=true` | Checks launcher availability; lifetime guarantees remain separate. |
 | `capabilities` | — | capability report | Same shape as the `initialize` result. |
-| `exec` | `{"command": "...", "timeout_ms": 120000?, "env": {...}?}` | `{"stdout", "stderr", "exit_code", "timed_out"}` | Streams `output` / `output_complete` events first. `timeout_ms` kills the whole process tree when it elapses. |
+| `exec` | `{"command": "...", "timeout_ms": 120000?, "env": {...}?}` | `{"stdout", "stderr", "exit_code", "timed_out"}` | Streams `output` / `output_complete` events first. The backend terminates its reported process boundary at the deadline. |
 | `ping` | — | `{"alive": true}` | Liveness check. |
-| `shutdown` | — | `{"bye": true}` | Replies, then exits; all sandboxed trees die. |
+| `shutdown` | — | `{"bye": true}` | Replies, cancels active requests and exits. Host-exit guarantees depend on the report. |
 
 Capability report shape:
 
@@ -30,7 +30,8 @@ Capability report shape:
   "backend": "macos-seatbelt",
   "session_id": "…",
   "policy_digest": "…",
-  "unavailable": [],
+  "runtime_probed": false,
+  "unavailable": ["filesystem_ephemeral_writes", "resource_memory_limit", "resource_process_limit", "resource_cpu_limit", "process_tree_cleanup", "host_exit_cleanup"],
   "capabilities": {
     "filesystem_path_policy": true,
     "filesystem_readonly_mounts": true,
@@ -38,12 +39,14 @@ Capability report shape:
     "network_deny_all": true,
     "mediated_http": true,
     "mediated_socks": true,
-    "unix_socket_allowlist": false,
+    "unix_socket_allowlist": true,
     "resource_timeout": true,
     "resource_output_limit": true,
-    "resource_memory_limit": true,
-    "resource_process_limit": true,
-    "resource_cpu_limit": true
+    "resource_memory_limit": false,
+    "resource_process_limit": false,
+    "resource_cpu_limit": false,
+    "process_tree_cleanup": false,
+    "host_exit_cleanup": false
   }
 }
 ```
@@ -73,9 +76,13 @@ execution.
 
 ## Supervision
 
-The bridge is the parent of every sandboxed process tree. Process-group guards
-terminate the trees when the command completes, when its deadline passes, and
-when the bridge exits for any reason. Hosts should hold the bridge's stdin for
-the lifetime of the client: stdin EOF is the bridge's graceful shutdown
-trigger, so a crashed host takes the whole tree down with it. The Go SDK in
-`sdk/go` implements exactly this model.
+Initialize and `capabilities` describe a static snapshot with
+`runtime_probed=false`. Only a successful `probe` returns a runtime-probed
+report. A successful launcher probe does not imply either lifetime guarantee.
+
+The bridge owns sandbox executions. Stdin EOF requests graceful shutdown, and
+retained execution owners perform cancellation cleanup. The backend's reported
+`process_tree_cleanup` and `host_exit_cleanup` determine whether detached
+descendants and bridge death are contained. macOS native lifetime and Windows
+cross-host crash recovery remain unqualified. Hosts that require complete
+lifetime containment must refuse reports missing either guarantee.

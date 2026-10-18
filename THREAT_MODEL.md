@@ -46,7 +46,7 @@ binary are trusted.
 | Credential / control-metadata write deny | Protected paths not writable | Gate 0 / Gate 3 integration |
 | Symlink / hardlink escape resistance | Outside secrets not leaked via planted links | Gate 0 + Gate 7 TOCTOU tests |
 | Env scrub + scratch re-home | Injection vars removed; HOME/TMP redirected | `child_environment_*` |
-| Bounded output + tree kill | Deadline and capture ceilings | Gate 2 resources |
+| Bounded output + deadline | Capture ceilings and original-group/platform-boundary cleanup; macOS detached lifetime unqualified | Gate 2 resources |
 | Process-tree quotas (Linux) | `pids.max`/`memory.max`/`cpu.max` via delegated cgroup v2; probe-gated, fail-closed without delegation | `platform::cgroup` + `policy::resource_quota_integration` |
 | Policy spine | Unsupported features fail closed | Gate 1–6 validate/compile tests |
 
@@ -61,8 +61,11 @@ Default A3S Bash profile never enables mediation.
 | Exact Unix-socket allowlist | Listed path-literal only | Gate 5 live allow/deny |
 | Proxy bypass resistance | Explicit `NO_PROXY=*` cannot skip mediator | Gate 7 live |
 
-Residuals: Seatbelt violation telemetry quality; package-store hardlink bulk scan
-limits (see SECURITY.md).
+Residuals: `setsid`/`setpgid` descendants can escape the original process group.
+Complete descendant cleanup and host-exit cleanup are not qualified. The
+launcher probe checks startup only. Hosts requiring complete lifetime control
+must refuse the native macOS backend. Seatbelt violation telemetry quality and
+package-store hardlink bulk scan limits also remain (see SECURITY.md).
 
 ## Linux (bwrap + seccomp)
 

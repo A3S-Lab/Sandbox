@@ -14,12 +14,20 @@ Every supported backend applies the same baseline policy:
 - deny symbolic-link and hard-link escape paths;
 - expose only a sanitized environment with state and temporary paths redirected
   into a private scratch directory;
-- bound captured output and terminate the command process tree at its deadline;
+- bound captured output and terminate the original process group or platform
+  isolation boundary at its deadline;
 - protect case-variant control metadata on case-sensitive filesystems;
 - deny source-tree multi-link files and any package/build-store hardlink that
   aliases a discovered credential inode, without bulk-enumerating ordinary
   dependency or build hardlinks into the native profile;
-- tear down detached descendants even when the root shell exits successfully.
+- clean up the original process group when the root shell exits successfully.
+
+macOS lifetime containment is unqualified: descendants can use `setsid` or
+`setpgid` to escape process-group cleanup. Seatbelt still enforces the selected
+filesystem and network policy, but it does not establish when all descendants
+have stopped. Host-exit cleanup is not guaranteed either. A launcher probe
+does not qualify either property. A host requiring complete workload cleanup
+must refuse this backend and select a separately qualified boundary.
 
 Hard-link policy detail: `node_modules` and `target` routinely contain tens of
 thousands of legitimate multi-link artifacts. Naming each path in a Seatbelt
@@ -35,7 +43,8 @@ seccomp on Linux, and AppContainer plus a kill-on-close Job Object on Windows.
 Initialization or capability-probe failures are returned to the caller. The
 crate never falls back to executing the command without isolation.
 
-The Windows launcher is PowerShell 7 from the system Program Files directory.
+Windows 10 / Server 2016 or newer is required for atomic Job assignment during
+process creation. The launcher is PowerShell 7 from system Program Files.
 Windows PowerShell 5.1 is not used because its .NET Framework initialization is
 not AppContainer-safe under the baseline policy.
 
@@ -52,22 +61,34 @@ When `mediated_network` is active on Linux, the guest instead runs with
 in-guest TCP→Unix CONNECT relay, and a bind-mounted host Unix mediator. That
 path is claimed only with live guest allow/deny/egress evidence.
 
-On Windows, AppContainer identity is process-scoped. Workspace ACL entries for
-that identity are installed only for the command lifetime and then restored from
-exact snapshots. Protected paths replace the package SID's inherited permission
-mask while their DACL inheritance is disabled; cleanup restores both the ACL and
-its original protected or inheriting state. Workspace and scratch ancestors
-receive only a non-inheriting `FILE_TRAVERSE` entry for that identity; the volume
-root is excluded, directory listing and data access are not granted, and every
-ancestor DACL is restored. A temporary local DOS drive exposes only the selected
-workspace to the child and is removed during child cleanup. Executions against
-the **same workspace** are serialized inside one host process so ACL
-apply/use/restore cannot race; **distinct workspaces may run concurrently**.
-DOS-device letter allocation uses a separate short critical section. The profile
-remains inert after ACL restoration and is reused only by the same sandbox
-process, avoiding unsafe profile deletion while container brokers may still hold
-profile resources. The backend does not modify the system-drive root, PATH,
-Cargo, Rustup, or other user toolchain trees. System tools retain their
+On Windows, each sandbox instance has an independent AppContainer identity.
+Protected paths temporarily stop inheriting permissions and replace this
+identity's grants with the policy's allowed rights; package-SID deny entries
+did not enforce the real filesystem contracts. Declared write exceptions add
+explicit grants below write-denied parents. Cleanup removes the sandbox SID
+from the current DACL and restores the recorded inheritance flag, retaining
+other trustees' current entries. Failed revocations stay in the guard for
+retry. A host-global named mutex covers each read/modify/write operation, including
+Drop. Authenticated hosts receive synchronize/modify rights; AppContainer and
+restricted-AppContainer groups are explicitly denied. Handles are not
+inherited, and the guard remains on the acquiring OS thread.
+
+Writable trees grant inheritable DELETE on ordinary objects, without granting
+FILE_DELETE_CHILD on parents. Parent delete-child authority would bypass a
+protected child's own delete restriction.
+
+Workspace and scratch ancestors receive only a non-inheriting `FILE_TRAVERSE`
+entry; the volume root is excluded. A temporary local DOS drive exposes the
+workspace and is removed during command cleanup. Executions against the same
+workspace are serialized inside one host; distinct workspaces may run
+concurrently. Cross-host mutex exclusion and abandoned ownership have native
+evidence; cross-host ownership of inheritance changes remains unqualified.
+Durable ACL, pin/device and profile recovery after host death
+remain unqualified. DOS-device letter allocation uses a
+separate short critical section. Profiles remain inert after their grants are
+revoked; profile lifecycle reclamation remains part of the pending recovery
+work. System tool trees are left unchanged. User-owned PATH binaries receive
+non-inheritable read/execute entries for this SID, revoked on cleanup. System tools retain their
 host-provided AppContainer grants, workspace-local tools are covered by the
 workspace grant, and inaccessible user-private tools fail closed. Mediated HTTP
 CONNECT is claimed via an AppContainer-ACL'd connected named-pipe pair: the

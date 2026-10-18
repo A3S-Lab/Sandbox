@@ -9,7 +9,7 @@ fn gate6_capability_report_lists_unavailable_surfaces() {
     let sandbox = NativeSandbox::new(workspace.path()).unwrap();
     let report = sandbox.capability_report();
     assert_eq!(report.backend, sandbox.backend());
-    assert_eq!(report.capabilities, BackendCapabilities::native_gate2());
+    assert!(!report.runtime_probed);
     assert!(!report.policy_digest.is_empty());
     assert_eq!(
         report.unavailable.contains(&"mediated_http"),
@@ -22,6 +22,14 @@ fn gate6_capability_report_lists_unavailable_surfaces() {
     assert_eq!(
         report.unavailable.contains(&"unix_socket_allowlist"),
         !report.capabilities.unix_socket_allowlist
+    );
+    assert_eq!(
+        report.unavailable.contains(&"resource_process_limit"),
+        !report.capabilities.resource_process_limit
+    );
+    assert_eq!(
+        report.unavailable.contains(&"resource_cpu_limit"),
+        !report.capabilities.resource_cpu_limit
     );
 }
 

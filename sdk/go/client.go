@@ -56,15 +56,18 @@ type Capabilities struct {
 	ResourceMemoryLimit      bool `json:"resource_memory_limit"`
 	ResourceProcessLimit     bool `json:"resource_process_limit"`
 	ResourceCPULimit         bool `json:"resource_cpu_limit"`
+	ProcessTreeCleanup       bool `json:"process_tree_cleanup"`
+	HostExitCleanup          bool `json:"host_exit_cleanup"`
 }
 
 // CapabilityReport describes the initialized sandbox boundary.
 type CapabilityReport struct {
-	Backend      string       `json:"backend"`
-	SessionID    string       `json:"session_id"`
-	PolicyDigest string       `json:"policy_digest"`
-	Unavailable  []string     `json:"unavailable"`
-	Capabilities Capabilities `json:"capabilities"`
+	Backend       string       `json:"backend"`
+	SessionID     string       `json:"session_id"`
+	PolicyDigest  string       `json:"policy_digest"`
+	Unavailable   []string     `json:"unavailable"`
+	RuntimeProbed bool         `json:"runtime_probed"`
+	Capabilities  Capabilities `json:"capabilities"`
 }
 
 // Options configures New.
@@ -243,8 +246,21 @@ func (c *Client) Report() CapabilityReport { return c.report }
 // Probe verifies the platform boundary is enforceable on this host. A
 // fail-closed operation: an error means the sandbox cannot run here.
 func (c *Client) Probe(ctx context.Context) error {
-	_, err := c.call(ctx, "probe", nil)
+	_, err := c.ProbeReport(ctx)
 	return err
+}
+
+// ProbeReport checks launcher availability and returns the probed lifetime guarantees.
+func (c *Client) ProbeReport(ctx context.Context) (*CapabilityReport, error) {
+	raw, err := c.call(ctx, "probe", nil)
+	if err != nil {
+		return nil, err
+	}
+	var report CapabilityReport
+	if err := json.Unmarshal(raw, &report); err != nil {
+		return nil, fmt.Errorf("sandbox: decode probe result: %w", err)
+	}
+	return &report, nil
 }
 
 // Ping checks bridge liveness with a protocol round-trip.
@@ -289,8 +305,8 @@ func (c *Client) ExecStream(ctx context.Context, onDelta func(delta string), com
 }
 
 // Close terminates the bridge: stdin EOF triggers a graceful shutdown, and
-// after closeGrace the process is killed. Every sandboxed process tree dies
-// with the bridge. Close is idempotent.
+// after closeGrace the process is killed. Descendant and host-exit cleanup
+// depend on the reported backend guarantees. Close is idempotent.
 func (c *Client) Close() error {
 	c.mu.Lock()
 	if c.closed {

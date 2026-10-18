@@ -1,3 +1,5 @@
+#![cfg(test)]
+
 use super::*;
 use async_trait::async_trait;
 use std::collections::HashMap;
@@ -7,6 +9,26 @@ use tokio::sync::Mutex;
 const TEST_COMMAND_TIMEOUT_MS: u64 = 5_000;
 #[cfg(windows)]
 const WINDOWS_PROBE_MARKER: &str = "a3s-sandbox-probe";
+
+#[cfg(target_os = "linux")]
+pub(crate) fn prepare_guest_relay() {
+    static ONCE: std::sync::Once = std::sync::Once::new();
+    ONCE.call_once(|| {
+        let test_exe = std::env::current_exe().unwrap();
+        let relay = test_exe
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap()
+            .join("a3s-sandbox-relay");
+        assert!(
+            relay.is_file(),
+            "build both binaries before tests: {}",
+            relay.display()
+        );
+        std::env::set_var("A3S_SANDBOX_RELAY", relay);
+    });
+}
 
 fn create_test_sandbox(workspace: &std::path::Path) -> NativeSandbox {
     NativeSandbox::new(workspace).unwrap()
@@ -361,18 +383,17 @@ if ([IO.File]::ReadAllText((Join-Path (Get-Location) '.git/config')) -ne 'origin
         );
     }
 
-    #[cfg(not(windows))]
     {
         let loops = workspace.path().join(".a3s/loops/goal-carve");
         std::fs::create_dir_all(&loops).unwrap();
         // Recreate sandbox so policy picks up the loops carve-out directory.
         let sandbox = create_test_sandbox(workspace.path());
-        let loop_write = execute_test_command(
-            &sandbox,
-            "printf carved > .a3s/loops/goal-carve/ACCEPTANCE.md",
-        )
-        .await
-        .unwrap();
+        let command = if cfg!(windows) {
+            "[IO.File]::WriteAllText('.a3s/loops/goal-carve/ACCEPTANCE.md', 'carved')"
+        } else {
+            "printf carved > .a3s/loops/goal-carve/ACCEPTANCE.md"
+        };
+        let loop_write = execute_test_command(&sandbox, command).await.unwrap();
         assert_eq!(
             loop_write.exit_code, 0,
             "goal-loop carve-out must be writable: {}",
@@ -440,6 +461,62 @@ async fn native_backend_blocks_symlink_hardlink_and_credential_escape() {
         .unwrap();
     assert_ne!(output.exit_code, 0, "runtime hard-link creation succeeded");
     assert!(!workspace.path().join("new-hardlink").exists());
+}
+
+#[tokio::test]
+async fn native_backend_cannot_remove_or_rename_protected_workspace_entries() {
+    let workspace = tempfile::tempdir().unwrap();
+    std::fs::create_dir(workspace.path().join(".git")).unwrap();
+    std::fs::write(workspace.path().join(".git/config"), "host-control").unwrap();
+    std::fs::write(workspace.path().join(".env"), "host-secret").unwrap();
+    std::fs::create_dir(workspace.path().join("ordinary")).unwrap();
+    std::fs::write(workspace.path().join("ordinary/content"), "ordinary").unwrap();
+    std::fs::write(workspace.path().join("ordinary.txt"), "ordinary").unwrap();
+    let sandbox = create_test_sandbox(workspace.path());
+    let ordinary_command = if cfg!(windows) {
+        "$ErrorActionPreference = 'Stop'; [IO.Directory]::Move('ordinary', 'moved-ordinary'); [IO.File]::Delete('ordinary.txt')"
+    } else {
+        "mv ordinary moved-ordinary && rm ordinary.txt"
+    };
+    let ordinary = execute_test_command(&sandbox, ordinary_command)
+        .await
+        .unwrap();
+    assert_eq!(ordinary.exit_code, 0, "{ordinary:?}");
+    assert!(!ordinary.timed_out, "{ordinary:?}");
+    assert_eq!(
+        std::fs::read_to_string(workspace.path().join("moved-ordinary/content")).unwrap(),
+        "ordinary"
+    );
+    assert!(!workspace.path().join("ordinary").exists());
+    assert!(!workspace.path().join("ordinary.txt").exists());
+    let commands = if cfg!(windows) {
+        [
+            "$ErrorActionPreference = 'Stop'; [IO.Directory]::Move('.git', 'moved-control')",
+            "$ErrorActionPreference = 'Stop'; [IO.File]::Delete('.env')",
+        ]
+    } else {
+        ["mv .git moved-control", "rm .env"]
+    };
+    for command in commands {
+        let output = execute_test_command(&sandbox, command).await.unwrap();
+        assert!(
+            !output.timed_out,
+            "denial must not depend on a deadline: {output:?}"
+        );
+        assert_ne!(
+            output.exit_code, 0,
+            "protected entry mutation succeeded: {command}: {output:?}"
+        );
+        assert_eq!(
+            std::fs::read_to_string(workspace.path().join(".git/config")).unwrap(),
+            "host-control"
+        );
+        assert_eq!(
+            std::fs::read_to_string(workspace.path().join(".env")).unwrap(),
+            "host-secret"
+        );
+        assert!(!workspace.path().join("moved-control").exists());
+    }
 }
 
 #[cfg(any(unix, windows))]

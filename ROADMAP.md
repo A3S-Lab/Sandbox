@@ -9,6 +9,27 @@ Status anchor: Gate 0 (`0.1.x`) is shipped. Later gates are opt-in behind
 explicit capability and policy flags. Softening required isolation to ship
 features is forbidden.
 
+## Lifecycle and delivery qualification
+
+The 2026-10-18 campaign follows S0 → S1 → S2 → S3/S4 → S7. S5 follows the
+capability and platform contracts; S6 follows correctness qualification.
+MicroVM ownership remains in `oci-runtime`; Code and desktop packaging consume
+its qualified backend. Native macOS restrictions are not relaxed by this work.
+
+| Task | Exit criterion | Status |
+| --- | --- | --- |
+| S0 baseline | Source identity, compiler pin, corrected claims, retained native baselines | macOS 211/0 and Linux ARM64 215/0; fmt and strict Clippy pass on 1.97.1 |
+| S1 capability/result contract | Lifecycle guarantees and unavailable reasons are explicit; unknown results never become success | Capability admission and negative CLI exit mapping implemented; macOS 214/0, serial Linux ARM64 218/0, Windows cross-check pass; settlement details continue in S2 |
+| S2 execution settlement | Exit, timeout, cancellation, output, and observer failures have bounded cleanup | Implemented on Unix and Windows; macOS 221/0, Linux ARM64 and hosted x86_64 227/0, native Windows 200/0; both Windows observer regressions red before fix and green after; host-death/ACL obligations continue in S4 |
+| S3 Linux lifetime | Real namespace descendants stop on return, cancellation, timeout, and owner death | Linux ARM64 227/0 in parallel; real detached namespace return/timeout/cancel/host-SIGKILL proofs pass and parent-death mutation is detected; relay env race removed; hosted Linux x86_64 227/0 with fmt and strict Clippy pass |
+| S4 Windows lifetime | Creation enters the Job atomically; ACL and cross-host recovery validated | Atomic Job creation, descendant/host-death containment and kill-on-close mutation verified on native Windows; old-ACL suite 203/0. Host-global coordination contracts pass natively. Grant replacement/inheritance restoration and removal of parent delete-child overgrant implemented; the 0.3.0 upstream merge passes macOS 228/0, Linux ARM64 240/0 and strict MSVC compile. Public three-platform acceptance and durable crash recovery remain pending |
+| S5 task quotas | Scope is explicit; requested task quotas enforce or refuse before execution | Pending |
+| S6 performance | Measured startup/output/cleanup improvements retain all security oracles | Pending |
+| S7 delivery | Three-platform evidence, consumer migration, signed artifact identity and SBOM | 0.3.0 candidate prepared with the upstream Go SDK/cgroup implementation retained; bridge and Go probe migration complete. Three-platform CI, source-bound native archives, provenance and publication are release gates |
+| Guest product integration | Packaged signed shim/image/Python dependencies pass installed-app E2E | Pending; external consumer lane |
+
+Evidence: [0.3.0 release qualification](docs/evidence/sandbox/2026-10-18-release/OUTCOME.md).
+
 ## First principles
 
 Before any gate is scheduled, a change must pass this filter:
@@ -81,10 +102,10 @@ Current `0.1.x` is the minimum A3S Bash boundary. Evidence lives in
 
 | Capability | Behaviour |
 | --- | --- |
-| Lifecycle | Async exec, deadlines, process-group / Job Object kill, descendant cleanup, stream observers |
-| macOS | Seatbelt + process group |
+| Lifecycle | Async exec, deadlines, original process-group / platform-boundary cleanup, stream observers; macOS detached lifetime unqualified |
+| macOS | Seatbelt + original process group; complete descendant and host-exit cleanup unqualified |
 | Linux | bwrap user/mount/PID/IPC/UTS + seccomp; network via socket denial, not netns |
-| Windows | PowerShell 7 AppContainer, ACL snapshot/restore, temp drive, kill-on-close Job; per-process serialization |
+| Windows | PowerShell 7 AppContainer, temporary SID grants and inheritance restoration, temp drive, kill-on-close Job; per-workspace serialization within one host |
 | Network / IPC | IPv4/IPv6 and host Unix sockets denied |
 | Filesystem | Workspace + ephemeral scratch writes; credentials and control metadata protected; symlink/hardlink escape resistance with documented package-store residual risk |
 | Environment | Allowlisted env; HOME/TMP redirected; injection vars stripped |

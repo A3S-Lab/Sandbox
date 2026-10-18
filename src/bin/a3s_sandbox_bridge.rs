@@ -2,8 +2,7 @@
 //!
 //! Speaks newline-delimited JSON over stdin/stdout so a Go (or other) SDK can
 //! drive the native sandbox without cgo. The bridge process owns the sandbox:
-//! when it exits — graceful EOF, `shutdown`, or crash — every sandboxed
-//! process tree dies with it via the crate's process-group guards.
+//! lifetime guarantees are reported separately from launcher availability.
 //!
 //! Protocol v1 (one JSON object per line):
 //!
@@ -18,7 +17,9 @@
 //! exits non-zero (fail closed — a desynchronized stream must not be guessed
 //! at).
 
-use a3s_sandbox::{CommandOutput, CommandRequest, NativeSandbox, OutputObserver, OutputSummary};
+use a3s_sandbox::{
+    CapabilityReport, CommandOutput, CommandRequest, NativeSandbox, OutputObserver, OutputSummary,
+};
 use anyhow::{anyhow, Result};
 use serde_json::{json, Value};
 use std::collections::HashMap;
@@ -49,12 +50,14 @@ impl OutputObserver for BridgeObserver {
     }
 
     async fn on_output_complete(&self, summary: &OutputSummary) {
-        self.emit(json!({"event": "output_complete", "id": self.request_id, "summary": {
-            "total_bytes": summary.total_bytes,
-            "captured_bytes": summary.captured_bytes,
-            "truncated": summary.truncated,
-            "timed_out": summary.timed_out,
-        }}));
+        self.emit(
+            json!({"event": "output_complete", "id": self.request_id, "summary": {
+                "total_bytes": summary.total_bytes,
+                "captured_bytes": summary.captured_bytes,
+                "truncated": summary.truncated,
+                "timed_out": summary.timed_out,
+            }}),
+        );
     }
 }
 
@@ -67,17 +70,20 @@ fn send_ok(tx: &mpsc::UnboundedSender<String>, id: u64, result: Value) {
 }
 
 fn send_error(tx: &mpsc::UnboundedSender<String>, id: u64, code: &str, message: String) {
-    send(tx, json!({"id": id, "ok": false, "error": {"code": code, "message": message}}));
+    send(
+        tx,
+        json!({"id": id, "ok": false, "error": {"code": code, "message": message}}),
+    );
 }
 
-fn sandbox_summary(sandbox: &NativeSandbox) -> Value {
-    let report = sandbox.capability_report();
+fn sandbox_summary(sandbox: &NativeSandbox, report: CapabilityReport) -> Value {
     let caps = report.capabilities;
     json!({
         "backend": report.backend,
         "session_id": sandbox.session_id(),
         "policy_digest": sandbox.policy_digest(),
         "unavailable": report.unavailable,
+        "runtime_probed": report.runtime_probed,
         "capabilities": {
             "filesystem_path_policy": caps.filesystem_path_policy,
             "filesystem_readonly_mounts": caps.filesystem_readonly_mounts,
@@ -91,6 +97,8 @@ fn sandbox_summary(sandbox: &NativeSandbox) -> Value {
             "resource_memory_limit": caps.resource_memory_limit,
             "resource_process_limit": caps.resource_process_limit,
             "resource_cpu_limit": caps.resource_cpu_limit,
+            "process_tree_cleanup": caps.process_tree_cleanup,
+            "host_exit_cleanup": caps.host_exit_cleanup,
         },
     })
 }
@@ -104,7 +112,12 @@ fn handle_exec(
     let command = match params.get("command").and_then(Value::as_str) {
         Some(command) if !command.is_empty() => command.to_string(),
         _ => {
-            send_error(&tx, id, "bad_request", "params.command must be a non-empty string".into());
+            send_error(
+                &tx,
+                id,
+                "bad_request",
+                "params.command must be a non-empty string".into(),
+            );
             return None;
         }
     };
@@ -112,10 +125,8 @@ fn handle_exec(
         .get("timeout_ms")
         .and_then(Value::as_u64)
         .unwrap_or(DEFAULT_TIMEOUT_MS);
-    let env: Option<Arc<HashMap<String, String>>> = params
-        .get("env")
-        .and_then(Value::as_object)
-        .map(|map| {
+    let env: Option<Arc<HashMap<String, String>>> =
+        params.get("env").and_then(Value::as_object).map(|map| {
             Arc::new(
                 map.iter()
                     .filter_map(|(key, value)| value.as_str().map(|v| (key.clone(), v.to_string())))
@@ -136,19 +147,30 @@ fn handle_exec(
             env,
         };
         match sandbox.execute(request).await {
-            Ok(CommandOutput { stdout, stderr, exit_code, timed_out }) => {
-                send(&tx, json!({"id": id, "ok": true, "result": {
-                    "stdout": stdout,
-                    "stderr": stderr,
-                    "exit_code": exit_code,
-                    "timed_out": timed_out,
-                }}));
+            Ok(CommandOutput {
+                stdout,
+                stderr,
+                exit_code,
+                timed_out,
+            }) => {
+                send(
+                    &tx,
+                    json!({"id": id, "ok": true, "result": {
+                        "stdout": stdout,
+                        "stderr": stderr,
+                        "exit_code": exit_code,
+                        "timed_out": timed_out,
+                    }}),
+                );
             }
             Err(error) => {
-                send(&tx, json!({"id": id, "ok": false, "error": {
-                    "code": "exec_failed",
-                    "message": format!("{error:#}"),
-                }}));
+                send(
+                    &tx,
+                    json!({"id": id, "ok": false, "error": {
+                        "code": "exec_failed",
+                        "message": format!("{error:#}"),
+                    }}),
+                );
             }
         }
     }))
@@ -183,7 +205,12 @@ async fn run() -> Result<std::process::ExitCode> {
         let request: Value = match serde_json::from_str(trimmed) {
             Ok(value) => value,
             Err(error) => {
-                send_error(&tx, 0, "bad_request", format!("malformed JSON line: {error}"));
+                send_error(
+                    &tx,
+                    0,
+                    "bad_request",
+                    format!("malformed JSON line: {error}"),
+                );
                 // A desynchronized stream cannot be trusted: fail closed.
                 return Ok(std::process::ExitCode::from(1));
             }
@@ -202,7 +229,11 @@ async fn run() -> Result<std::process::ExitCode> {
                     .ok_or_else(|| anyhow!("params.workspace must be an absolute path string"))?;
                 match NativeSandbox::new(workspace) {
                     Ok(sandbox) => {
-                        send_ok(&tx, id, sandbox_summary(&sandbox));
+                        send_ok(
+                            &tx,
+                            id,
+                            sandbox_summary(&sandbox, sandbox.capability_report()),
+                        );
                         state = Some(Arc::new(sandbox));
                     }
                     Err(error) => {
@@ -212,13 +243,17 @@ async fn run() -> Result<std::process::ExitCode> {
             }
             "probe" => match state.as_ref() {
                 Some(sandbox) => match sandbox.probe().await {
-                    Ok(()) => send_ok(&tx, id, json!({"backend": sandbox.backend()})),
+                    Ok(report) => send_ok(&tx, id, sandbox_summary(sandbox, report)),
                     Err(error) => send_error(&tx, id, "probe_failed", format!("{error:#}")),
                 },
                 None => send_error(&tx, id, "not_initialized", "call initialize first".into()),
             },
             "capabilities" => match state.as_ref() {
-                Some(sandbox) => send_ok(&tx, id, sandbox_summary(sandbox)),
+                Some(sandbox) => send_ok(
+                    &tx,
+                    id,
+                    sandbox_summary(sandbox, sandbox.capability_report()),
+                ),
                 None => send_error(&tx, id, "not_initialized", "call initialize first".into()),
             },
             "exec" => match state.clone() {
@@ -234,17 +269,20 @@ async fn run() -> Result<std::process::ExitCode> {
                 send_ok(&tx, id, json!({"bye": true}));
                 break;
             }
-            other => send_error(&tx, id, "unknown_method", format!("unknown method {other:?}")),
+            other => send_error(
+                &tx,
+                id,
+                "unknown_method",
+                format!("unknown method {other:?}"),
+            ),
         }
     }
 
-    // Fail every in-flight exec: aborting the task drops its future, which
-    // drops the crate's ProcessGroupGuard and terminates the sandboxed tree.
-    // Dropping `state` alone would not be enough — running tasks hold clones.
+    // Dropping callers signals the retained execution owners to settle their children.
     for (_, handle) in running.drain() {
         handle.abort();
     }
-    // Yield once so aborted tasks run their destructors before we exit.
+    // Yield to execution owners before runtime teardown.
     tokio::time::sleep(std::time::Duration::from_millis(50)).await;
     drop(state);
     drop(tx);
@@ -253,14 +291,18 @@ async fn run() -> Result<std::process::ExitCode> {
 }
 
 fn main() -> std::process::ExitCode {
-    let runtime = tokio::runtime::Builder::new_multi_thread()
+    let runtime = match tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
-        .expect("tokio runtime");
+    {
+        Ok(runtime) => runtime,
+        Err(error) => {
+            eprintln!("a3s-sandbox-bridge: {error}");
+            return std::process::ExitCode::from(1);
+        }
+    };
     let result = runtime.block_on(run());
-    // Drop the runtime before returning: in-flight exec tasks are aborted and
-    // their ProcessGroupGuard destructors terminate every sandboxed process
-    // group. Never call process::exit here — it would skip those destructors.
+    // Runtime teardown must run process and Job destructors before exiting.
     drop(runtime);
     match result {
         Ok(code) => code,

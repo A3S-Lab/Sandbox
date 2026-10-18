@@ -1,13 +1,11 @@
 //! Windows AppContainer and Job Object backend.
 
-#[cfg(test)]
-use super::windows_security::appcontainer_profile_name;
 use super::windows_security::{AppContainerProfile, ExecutionAcls, SidBuffer};
 use super::windows_shell::{build_powershell_command, encode_powershell_command};
 use crate::policy::{
     requires_directory_placeholder, resolve_executable, EnforcedPolicy, ResolvedResourceBudget,
 };
-use crate::{CommandOutput, CommandRequest};
+use crate::{CommandOutput, CommandRequest, ExecutionFailure, OutputSummary};
 use anyhow::{bail, Context, Result};
 use std::collections::HashMap;
 use std::ffi::{c_void, OsStr, OsString};
@@ -19,9 +17,8 @@ use std::path::{Component, Path, PathBuf, Prefix};
 use std::ptr::{null, null_mut};
 use std::sync::{Mutex, OnceLock};
 use windows_sys::Win32::Foundation::{
-    DuplicateHandle, GetLastError, SetHandleInformation, DUPLICATE_SAME_ACCESS, ERROR_BROKEN_PIPE,
-    ERROR_NO_DATA, ERROR_PIPE_NOT_CONNECTED, GENERIC_READ, HANDLE, HANDLE_FLAG_INHERIT,
-    INVALID_HANDLE_VALUE, WAIT_OBJECT_0,
+    GetLastError, SetHandleInformation, ERROR_BROKEN_PIPE, ERROR_NO_DATA, ERROR_PIPE_NOT_CONNECTED,
+    GENERIC_READ, HANDLE, HANDLE_FLAG_INHERIT, INVALID_HANDLE_VALUE, WAIT_OBJECT_0, WAIT_TIMEOUT,
 };
 use windows_sys::Win32::Security::{SECURITY_ATTRIBUTES, SECURITY_CAPABILITIES};
 use windows_sys::Win32::Storage::FileSystem::{
@@ -31,19 +28,20 @@ use windows_sys::Win32::Storage::FileSystem::{
     FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE, OPEN_EXISTING,
 };
 use windows_sys::Win32::System::JobObjects::{
-    AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
-    SetInformationJobObject, TerminateJobObject, JOBOBJECT_EXTENDED_LIMIT_INFORMATION,
+    CreateJobObjectW, JobObjectBasicAccountingInformation, JobObjectExtendedLimitInformation,
+    QueryInformationJobObject, SetInformationJobObject, TerminateJobObject,
+    JOBOBJECT_BASIC_ACCOUNTING_INFORMATION, JOBOBJECT_EXTENDED_LIMIT_INFORMATION,
     JOB_OBJECT_LIMIT_ACTIVE_PROCESS, JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION,
     JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE, JOB_OBJECT_LIMIT_PROCESS_MEMORY,
 };
 use windows_sys::Win32::System::Pipes::{CreatePipe, PeekNamedPipe};
 use windows_sys::Win32::System::Threading::{
-    CreateProcessW, DeleteProcThreadAttributeList, GetCurrentProcess, GetExitCodeProcess,
+    CreateProcessW, DeleteProcThreadAttributeList, GetExitCodeProcess,
     InitializeProcThreadAttributeList, ResumeThread, TerminateProcess, UpdateProcThreadAttribute,
     WaitForSingleObject, CREATE_NO_WINDOW, CREATE_SUSPENDED, CREATE_UNICODE_ENVIRONMENT,
-    EXTENDED_STARTUPINFO_PRESENT, INFINITE, LPPROC_THREAD_ATTRIBUTE_LIST, PROCESS_INFORMATION,
-    PROC_THREAD_ATTRIBUTE_HANDLE_LIST, PROC_THREAD_ATTRIBUTE_SECURITY_CAPABILITIES,
-    STARTF_USESTDHANDLES, STARTUPINFOEXW,
+    EXTENDED_STARTUPINFO_PRESENT, LPPROC_THREAD_ATTRIBUTE_LIST, PROCESS_INFORMATION,
+    PROC_THREAD_ATTRIBUTE_HANDLE_LIST, PROC_THREAD_ATTRIBUTE_JOB_LIST,
+    PROC_THREAD_ATTRIBUTE_SECURITY_CAPABILITIES, STARTF_USESTDHANDLES, STARTUPINFOEXW,
 };
 
 const READ_CHUNK_BYTES: usize = 8 * 1024;
@@ -94,8 +92,9 @@ impl PlatformSandbox {
         &self,
         policy: &EnforcedPolicy,
         request: CommandRequest,
+        scratch: std::sync::Arc<tempfile::TempDir>,
     ) -> Result<CommandOutput> {
-        self.execute_inner(policy, request, None).await
+        self.execute_inner(policy, request, None, scratch).await
     }
 
     /// Execute with an inherited, already-connected mediation pipe client handle.
@@ -104,8 +103,9 @@ impl PlatformSandbox {
         policy: &EnforcedPolicy,
         request: CommandRequest,
         mediator_client: OwnedHandle,
+        scratch: std::sync::Arc<tempfile::TempDir>,
     ) -> Result<CommandOutput> {
-        self.execute_inner(policy, request, Some(mediator_client))
+        self.execute_inner(policy, request, Some(mediator_client), scratch)
             .await
     }
 
@@ -114,31 +114,25 @@ impl PlatformSandbox {
         policy: &EnforcedPolicy,
         request: CommandRequest,
         mediator_client: Option<OwnedHandle>,
+        scratch: std::sync::Arc<tempfile::TempDir>,
     ) -> Result<CommandOutput> {
-        // Workspace DACLs are restored after each command. Serialize per
-        // workspace so apply/use/restore cannot race. Ancestor ACL mutations
-        // (Temp/home traverse) are globally serialized so concurrent workspaces
-        // cannot corrupt shared parent DACLs.
+        // Keep one owner per workspace while temporary authorization is active.
         let execution_gate = workspace_execution_gate(&policy.workspace);
-        let _execution = execution_gate.lock().await;
+        let execution_guard = execution_gate.lock_owned().await;
         let pins = WorkspacePins::acquire(policy)?;
         let budget = ResolvedResourceBudget::resolve(&policy.resources, request.timeout_ms)?;
         budget.validate_for_backend(crate::policy::BackendCapabilities::native_gate2())?;
-        let mut acls = {
-            let _acl_gate = acl_mutation_gate()
-                .lock()
-                .unwrap_or_else(|poisoned| poisoned.into_inner());
-            ExecutionAcls::apply(policy, &self.profile.sid)?
-        };
-        let execution = match policy.child_environment(request.env.as_deref()) {
-            Ok(mut environment) => {
+        let mut acls = ExecutionAcls::apply(policy, &self.profile.sid)?;
+        let child = policy
+            .child_environment(request.env.as_deref())
+            .and_then(|mut environment| {
                 if let Some(client) = mediator_client.as_ref() {
                     environment.insert(
                         OsString::from("A3S_SANDBOX_MEDIATOR_PIPE_HANDLE"),
                         OsString::from(format!("{}", client.as_raw_handle() as usize)),
                     );
                 }
-                match spawn_appcontainer_process(
+                spawn_appcontainer_process(
                     &self.powershell,
                     &self.profile.sid,
                     &policy.workspace,
@@ -147,22 +141,50 @@ impl PlatformSandbox {
                     environment,
                     &budget,
                     mediator_client,
-                ) {
-                    Ok(child) => capture_process(child, request, &budget).await,
+                )
+            });
+        // Retain ACLs, scratch and the workspace gate until cancellation settles.
+        let (cancel_guard, cancelled) = tokio::sync::oneshot::channel::<()>();
+        let owner = tokio::spawn(async move {
+            let execution = async {
+                let mut child = child?;
+                let captured = tokio::select! {
+                    biased;
+                    _ = cancelled => Err(ExecutionFailure::Cancelled.into()),
+                    output = capture_process(&child, &request, &budget) => output,
+                };
+                drop(child.process);
+                child.job.stop_and_settle().await?;
+                let drive_cleanup = child.workspace_drive.remove();
+                let output = match captured {
+                    Ok((output, summary)) => {
+                        if let Some(observer) = request.output_observer.as_deref() {
+                            tokio::time::timeout(
+                                tokio::time::Duration::from_millis(PIPE_SETTLEMENT_MS),
+                                observer.on_output_complete(&summary),
+                            )
+                            .await
+                            .map_err(|_| ExecutionFailure::ObserverTimeout)?;
+                        }
+                        Ok(output)
+                    }
                     Err(error) => Err(error),
-                }
+                };
+                finish_execution(output, drive_cleanup)
             }
-            Err(error) => Err(error),
-        };
-        let acl_cleanup = {
-            let _acl_gate = acl_mutation_gate()
-                .lock()
-                .unwrap_or_else(|poisoned| poisoned.into_inner());
-            acls.restore()
-        };
-        drop(acls);
-        drop(pins);
-        finish_execution(execution, acl_cleanup)
+            .await;
+            let acl_cleanup = acls.restore();
+            drop(acls);
+            drop(pins);
+            drop(scratch);
+            drop(execution_guard);
+            finish_execution(execution, acl_cleanup)
+        });
+        let result = owner
+            .await
+            .context("Windows sandbox command owner failed")?;
+        drop(cancel_guard);
+        result
     }
 }
 
@@ -180,11 +202,6 @@ fn workspace_execution_gate(workspace: &Path) -> std::sync::Arc<tokio::sync::Mut
 }
 
 fn drive_allocation_gate() -> &'static Mutex<()> {
-    static GATE: OnceLock<Mutex<()>> = OnceLock::new();
-    GATE.get_or_init(|| Mutex::new(()))
-}
-
-fn acl_mutation_gate() -> &'static Mutex<()> {
     static GATE: OnceLock<Mutex<()>> = OnceLock::new();
     GATE.get_or_init(|| Mutex::new(()))
 }
@@ -301,16 +318,56 @@ impl JobGuard {
         self.handle.as_raw_handle()
     }
 
-    fn terminate(&self) {
-        unsafe {
-            TerminateJobObject(self.raw(), 1);
+    fn terminate(&self) -> Result<()> {
+        if unsafe { TerminateJobObject(self.raw(), 1) } == 0 {
+            return Err(last_windows_error("terminate native sandbox Job Object"));
+        }
+        Ok(())
+    }
+
+    async fn stop_and_settle(&self) -> Result<()> {
+        let settlement = async {
+            self.terminate()?;
+            loop {
+                let mut accounting = unsafe { zeroed::<JOBOBJECT_BASIC_ACCOUNTING_INFORMATION>() };
+                if unsafe {
+                    QueryInformationJobObject(
+                        self.raw(),
+                        JobObjectBasicAccountingInformation,
+                        (&mut accounting as *mut JOBOBJECT_BASIC_ACCOUNTING_INFORMATION).cast(),
+                        size_of::<JOBOBJECT_BASIC_ACCOUNTING_INFORMATION>() as u32,
+                        null_mut(),
+                    )
+                } == 0
+                {
+                    return Err(last_windows_error(
+                        "query native sandbox Job Object settlement",
+                    ));
+                }
+                if accounting.ActiveProcesses == 0 {
+                    return Ok(());
+                }
+                tokio::time::sleep(tokio::time::Duration::from_millis(PIPE_POLL_MS)).await;
+            }
+        };
+        match tokio::time::timeout(
+            tokio::time::Duration::from_millis(PIPE_SETTLEMENT_MS),
+            settlement,
+        )
+        .await
+        {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(error)) => {
+                Err(anyhow::Error::new(ExecutionFailure::SettlementUnknown).context(error))
+            }
+            Err(_) => Err(ExecutionFailure::SettlementUnknown.into()),
         }
     }
 }
 
 impl Drop for JobGuard {
     fn drop(&mut self) {
-        self.terminate();
+        let _ = self.terminate();
     }
 }
 
@@ -324,7 +381,7 @@ struct WindowsChild {
     _mediator_client: Option<OwnedHandle>,
     /// Long scripts are launched with `-File` so the command line stays under
     /// the Windows 32767-character limit. Removed after the process exits.
-    script_file: ScriptFile,
+    _script_file: ScriptFile,
 }
 
 struct WorkspaceDrive {
@@ -498,7 +555,8 @@ fn spawn_appcontainer_process(
         CapabilityCount: 0,
         Reserved: 0,
     };
-    let mut attributes = AttributeList::new(2)?;
+    let jobs = [job.raw()];
+    let mut attributes = AttributeList::new(3)?;
     attributes.update(
         usize::try_from(PROC_THREAD_ATTRIBUTE_SECURITY_CAPABILITIES).unwrap_or(131081),
         (&mut capabilities as *mut SECURITY_CAPABILITIES).cast::<c_void>(),
@@ -508,6 +566,12 @@ fn spawn_appcontainer_process(
         usize::try_from(PROC_THREAD_ATTRIBUTE_HANDLE_LIST).unwrap_or(131074),
         inherited.as_ptr().cast::<c_void>(),
         size_of_val(inherited.as_slice()),
+    )?;
+
+    attributes.update(
+        PROC_THREAD_ATTRIBUTE_JOB_LIST as usize,
+        jobs.as_ptr().cast::<c_void>(),
+        size_of_val(&jobs),
     )?;
 
     let workspace_literal = workspace_drive.root().to_string_lossy().replace('\'', "''");
@@ -557,14 +621,8 @@ fn spawn_appcontainer_process(
 
     let process = unsafe { OwnedHandle::from_raw_handle(information.hProcess) };
     let thread = unsafe { OwnedHandle::from_raw_handle(information.hThread) };
-    if unsafe { AssignProcessToJobObject(job.raw(), process.as_raw_handle()) } == 0 {
-        unsafe {
-            TerminateProcess(process.as_raw_handle(), 1);
-        }
-        return Err(last_windows_error(
-            "assign AppContainer process to native sandbox Job Object",
-        ));
-    }
+    #[cfg(test)]
+    lifecycle_tests::require_atomic_job_membership(&process, &job)?;
     if unsafe { ResumeThread(thread.as_raw_handle()) } == u32::MAX {
         unsafe {
             TerminateProcess(process.as_raw_handle(), 1);
@@ -582,7 +640,7 @@ fn spawn_appcontainer_process(
         stderr: stderr_read,
         workspace_drive,
         _mediator_client: mediator_client,
-        script_file,
+        _script_file: script_file,
     })
 }
 
@@ -632,127 +690,96 @@ fn open_null_input() -> Result<OwnedHandle> {
 }
 
 async fn capture_process(
-    child: WindowsChild,
-    request: CommandRequest,
+    child: &WindowsChild,
+    request: &CommandRequest,
     budget: &ResolvedResourceBudget,
-) -> Result<CommandOutput> {
+) -> Result<(CommandOutput, OutputSummary)> {
     use crate::process::{BoundedCapture, OutputStream};
 
-    let WindowsChild {
-        process,
-        job,
-        stdout,
-        stderr,
-        mut workspace_drive,
-        _mediator_client,
-        script_file: _script_file,
-    } = child;
-    let wait_handle = duplicate_handle(&process)?;
-    let mut wait = tokio::task::spawn_blocking(move || {
-        let result = unsafe { WaitForSingleObject(wait_handle.as_raw_handle(), INFINITE) };
-        if result != WAIT_OBJECT_0 {
-            return Err(last_windows_error("wait for AppContainer process"));
-        }
-        Ok::<(), anyhow::Error>(())
-    });
     let mut stdout_buffer = vec![0_u8; READ_CHUNK_BYTES];
     let mut stderr_buffer = vec![0_u8; READ_CHUNK_BYTES];
     let mut stdout_done = false;
     let mut stderr_done = false;
     let mut process_done = false;
-    let mut timed_out = false;
     let mut capture = BoundedCapture::new(budget.max_output_bytes);
-    let deadline = tokio::time::sleep(tokio::time::Duration::from_millis(budget.timeout_ms));
-    tokio::pin!(deadline);
-    let settlement = tokio::time::sleep(tokio::time::Duration::from_secs(24 * 60 * 60));
-    tokio::pin!(settlement);
-    let mut settlement_active = false;
     let mut pipe_poll = tokio::time::interval(tokio::time::Duration::from_millis(PIPE_POLL_MS));
     pipe_poll.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
-
-    while !process_done || !stdout_done || !stderr_done {
-        tokio::select! {
-            _ = pipe_poll.tick(), if !stdout_done || !stderr_done => {
-                if !stdout_done {
-                    match poll_pipe(&stdout, &mut stdout_buffer)? {
-                        PipePoll::Closed => stdout_done = true,
+    let execution = tokio::time::timeout(
+        tokio::time::Duration::from_millis(budget.timeout_ms),
+        async {
+            while !process_done || !stdout_done || !stderr_done {
+                pipe_poll.tick().await;
+                if !process_done {
+                    match unsafe { WaitForSingleObject(child.process.as_raw_handle(), 0) } {
+                        WAIT_OBJECT_0 => {
+                            process_done = true;
+                            child.job.terminate()?;
+                        }
+                        WAIT_TIMEOUT => {}
+                        _ => return Err(last_windows_error("poll AppContainer process exit")),
+                    }
+                }
+                for (stream, handle, buffer, done) in [
+                    (
+                        OutputStream::Stdout,
+                        &child.stdout,
+                        &mut stdout_buffer,
+                        &mut stdout_done,
+                    ),
+                    (
+                        OutputStream::Stderr,
+                        &child.stderr,
+                        &mut stderr_buffer,
+                        &mut stderr_done,
+                    ),
+                ] {
+                    if *done {
+                        continue;
+                    }
+                    match poll_pipe(handle, buffer)? {
+                        PipePoll::Closed => *done = true,
                         PipePoll::Empty => {}
                         PipePoll::Data(count) => {
-                        let bytes = &stdout_buffer[..count];
-                        capture.push(OutputStream::Stdout, bytes);
-                        if let Some(observer) = request.output_observer.as_deref() {
-                            observer.on_output_delta(&String::from_utf8_lossy(bytes)).await;
+                            let bytes = &buffer[..count];
+                            capture.push(stream, bytes);
+                            if let Some(observer) = request.output_observer.as_deref() {
+                                observer
+                                    .on_output_delta(&String::from_utf8_lossy(bytes))
+                                    .await;
+                            }
                         }
                     }
-                    }
-                }
-                if !stderr_done {
-                    match poll_pipe(&stderr, &mut stderr_buffer)? {
-                        PipePoll::Closed => stderr_done = true,
-                        PipePoll::Empty => {}
-                        PipePoll::Data(count) => {
-                        let bytes = &stderr_buffer[..count];
-                        capture.push(OutputStream::Stderr, bytes);
-                        if let Some(observer) = request.output_observer.as_deref() {
-                            observer.on_output_delta(&String::from_utf8_lossy(bytes)).await;
-                        }
-                    }
-                    }
                 }
             }
-            result = &mut wait, if !process_done => {
-                result.context("AppContainer wait task failed")??;
-                process_done = true;
-                if (!stdout_done || !stderr_done) && !settlement_active {
-                    settlement.as_mut().reset(
-                        tokio::time::Instant::now()
-                            + tokio::time::Duration::from_millis(PIPE_SETTLEMENT_MS),
-                    );
-                    settlement_active = true;
-                }
-            }
-            _ = &mut deadline, if !timed_out => {
-                timed_out = true;
-                job.terminate();
-                if !settlement_active {
-                    settlement.as_mut().reset(
-                        tokio::time::Instant::now()
-                            + tokio::time::Duration::from_millis(PIPE_SETTLEMENT_MS),
-                    );
-                    settlement_active = true;
-                }
-            }
-            _ = &mut settlement, if settlement_active => {
-                // A broker or descendant can retain a duplicate write handle
-                // after the root exits. Bound that drain window and kill the
-                // complete job before the temporary ACLs are revoked.
-                job.terminate();
-                break;
-            }
+            Ok(())
+        },
+    )
+    .await;
+    let timed_out = match execution {
+        Ok(result) => {
+            result?;
+            false
         }
-    }
-
-    let summary = capture.summary(timed_out);
-    if let Some(observer) = request.output_observer.as_deref() {
-        observer.on_output_complete(&summary).await;
-    }
+        Err(_) => true,
+    };
     let exit_code = if timed_out {
         -1
     } else {
         let mut code = 0u32;
-        if unsafe { GetExitCodeProcess(process.as_raw_handle(), &mut code) } == 0 {
+        if unsafe { GetExitCodeProcess(child.process.as_raw_handle(), &mut code) } == 0 {
             return Err(last_windows_error("read AppContainer process exit code"));
         }
         i32::try_from(code).unwrap_or(-1)
     };
-    drop(job);
-    workspace_drive.remove()?;
-    Ok(CommandOutput {
-        stdout: capture.render_stream(OutputStream::Stdout),
-        stderr: capture.render_stream(OutputStream::Stderr),
-        exit_code,
-        timed_out,
-    })
+    Ok((
+        CommandOutput {
+            stdout: capture.render_stream(OutputStream::Stdout),
+            stderr: capture.render_stream(OutputStream::Stderr),
+            exit_code,
+            timed_out,
+        },
+        capture.summary(timed_out),
+    ))
 }
 
 enum PipePoll {
@@ -811,26 +838,6 @@ fn poll_pipe(handle: &OwnedHandle, buffer: &mut [u8]) -> Result<PipePoll> {
     Ok(PipePoll::Data(
         usize::try_from(read).context("AppContainer output byte count overflowed")?,
     ))
-}
-
-fn duplicate_handle(handle: &OwnedHandle) -> Result<OwnedHandle> {
-    let process = unsafe { GetCurrentProcess() };
-    let mut duplicate = null_mut();
-    if unsafe {
-        DuplicateHandle(
-            process,
-            handle.as_raw_handle(),
-            process,
-            &mut duplicate,
-            0,
-            0,
-            DUPLICATE_SAME_ACCESS,
-        )
-    } == 0
-    {
-        return Err(last_windows_error("duplicate AppContainer process handle"));
-    }
-    Ok(unsafe { OwnedHandle::from_raw_handle(duplicate) })
 }
 
 fn environment_block(
@@ -1121,14 +1128,6 @@ mod tests {
     }
 
     #[test]
-    fn appcontainer_name_is_stable_and_process_scoped() {
-        let first = appcontainer_profile_name();
-        let same = appcontainer_profile_name();
-        assert_eq!(first, same);
-        assert!(first.starts_with("A3S.Sandbox.Execution."));
-    }
-
-    #[test]
     fn process_paths_drop_verbatim_prefixes() {
         assert_eq!(
             win32_process_path(Path::new(r"\\?\C:\work tree")),
@@ -1165,7 +1164,7 @@ mod tests {
         use tokio::sync::oneshot;
 
         let workspace = tempfile::tempdir().unwrap();
-        let scratch = tempfile::tempdir().unwrap();
+        let scratch = std::sync::Arc::new(tempfile::tempdir().unwrap());
         let sandbox = PlatformSandbox::new(workspace.path()).unwrap();
 
         let upstream = TcpListener::bind("127.0.0.1:0").await.unwrap();
@@ -1248,6 +1247,7 @@ $client.Dispose()
                     env: None,
                 },
                 client,
+                scratch.clone(),
             )
             .await
             .expect("allow execute");
@@ -1322,6 +1322,7 @@ $client.Dispose()
                     env: None,
                 },
                 deny_client,
+                scratch.clone(),
             )
             .await
             .expect("deny execute");
@@ -1367,6 +1368,7 @@ try {{
                     output_observer: None,
                     env: None,
                 },
+                scratch.clone(),
             )
             .await
             .expect("egress execute");
@@ -1382,3 +1384,7 @@ try {{
         );
     }
 }
+
+#[cfg(test)]
+#[path = "windows_lifecycle_tests.rs"]
+mod lifecycle_tests;

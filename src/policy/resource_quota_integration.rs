@@ -68,7 +68,7 @@ async fn cgroup_process_quota_bounds_the_process_tree() {
         let error = NativeSandbox::with_policy(workspace.path(), quota_policy(Some(8), None))
             .expect_err("without delegation the quota policy must refuse");
         assert!(
-            error.to_string().contains("process limit"),
+            format!("{error:#}").contains("process limit"),
             "refusal must be a capability failure: {error}"
         );
         return;

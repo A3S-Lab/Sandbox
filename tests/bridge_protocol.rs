@@ -33,6 +33,7 @@ impl Bridge {
         let response = bridge.read_response();
         assert_eq!(response["id"], 1);
         assert_eq!(response["ok"], true, "initialize failed: {response}");
+        assert_eq!(response["result"]["runtime_probed"], false);
         bridge
     }
 
@@ -63,6 +64,13 @@ impl Bridge {
     }
 }
 
+impl Drop for Bridge {
+    fn drop(&mut self) {
+        let _ = self.child.kill();
+        let _ = self.child.wait();
+    }
+}
+
 #[test]
 fn handshake_probe_exec_and_shutdown() {
     let workspace = tempfile::tempdir().expect("temp workspace");
@@ -71,12 +79,16 @@ fn handshake_probe_exec_and_shutdown() {
     bridge.request(2, serde_json::json!({"method": "probe"}));
     let response = bridge.read_response();
     assert_eq!(response["id"], 2);
-    if response["ok"] != true {
-        // A host without an enforceable boundary fails closed here; that is a
-        // valid outcome, and exec assertions below would not hold.
-        eprintln!("probe failed on this host: {response}");
-        return;
-    }
+    assert_eq!(response["ok"], true, "probe failed: {response}");
+    assert_eq!(response["result"]["runtime_probed"], true);
+    assert_eq!(
+        response["result"]["capabilities"]["process_tree_cleanup"],
+        cfg!(any(target_os = "linux", windows))
+    );
+    assert_eq!(
+        response["result"]["capabilities"]["host_exit_cleanup"],
+        cfg!(target_os = "linux")
+    );
 
     bridge.request(
         3,
@@ -91,7 +103,10 @@ fn handshake_probe_exec_and_shutdown() {
     };
     assert_eq!(response["ok"], true, "exec failed: {response}");
     assert!(
-        response["result"]["stdout"].as_str().unwrap().contains("bridge-ok"),
+        response["result"]["stdout"]
+            .as_str()
+            .unwrap()
+            .contains("bridge-ok"),
         "stdout: {response}"
     );
     assert_eq!(response["result"]["exit_code"], 0);

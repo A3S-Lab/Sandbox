@@ -1,3 +1,68 @@
+## [0.3.0] - 2026-10-18
+
+### Changed
+
+- Capability reports distinguish launcher probes from process-tree and host-exit
+  cleanup guarantees. `NativeSandbox::probe` now returns its `CapabilityReport`;
+  wrappers returning `Result<()>` must discard that report explicitly. Public
+  report/capability struct changes require a breaking-version release.
+- `CapabilityReport::require_lifetime_containment` refuses missing guarantees
+  with stable typed `ExecutionUnavailable` reasons. macOS native cleanup and
+  Windows host-exit cleanup are not advertised as qualified.
+
+### Fixed
+
+- Independent Windows sandboxes no longer share an AppContainer SID. ACL cleanup
+  revokes only its own SID instead of restoring a stale whole-DACL snapshot.
+  Restrictions replace inherited grants and restore their original inheritance
+  state at cleanup. Parent delete-child rights no longer bypass protected
+  children, and Windows applies goal-loop write exceptions.
+
+- Windows ACL read/modify/write operations coordinate through a host-global
+  mutex with bounded acquisition and abandoned-owner recovery. Cross-host
+  workspace ownership and durable crash recovery remain unqualified; Windows
+  host-exit lifetime admission remains unavailable.
+
+- The machine bridge and Go `ProbeReport` expose runtime-probed lifecycle
+  capabilities. Existing Go `Probe` callers retain their error-only API.
+
+- Windows creates AppContainer processes inside their kill-on-close Job using
+  `PROC_THREAD_ATTRIBUTE_JOB_LIST`, closing the suspended-process orphan window.
+  This requires Windows 10 / Server 2016 or newer; unsupported creation refuses.
+- Windows output deadlines include delta observers; completion observers are
+  bounded. Cancellation retains ACL, scratch and workspace ownership until Job
+  settlement; unconfirmed termination is a typed non-replayable failure.
+
+- CLI execution no longer converts a signal/unknown negative exit code into
+  successful exit zero.
+- Unix capture observes root exit while draining pipes, stops the original
+  process group before waiting for inherited pipe EOF, and bounds completion
+  observers. Read failures no longer become successful output text.
+- Unix cancellation retains an execution owner to reap the child, including
+  cancellation before that owner is first polled. Unconfirmed reaping and
+  observer timeouts preserve typed non-replayable `ExecutionFailure` reasons.
+
+## [0.2.3] - 2026-10-15
+
+### Added
+
+- Linux finds bubblewrap through `A3S_SANDBOX_BWRAP_PATH`, then
+  `/usr/bin/bwrap`, then `bwrap` on `PATH` (NixOS, Homebrew on Linux, custom
+  prefixes). A set override is authoritative: it does not fall back to
+  `PATH`.
+
+## [0.2.2] - 2026-10-06
+
+### Fixed
+
+- Seatbelt profiles no longer deny a source file whose every hard-link name
+  is inside the workspace, including names under `node_modules` and `target`.
+  macOS `sandbox-exec` rejects a compiled profile larger than 65535 bytes.
+  Treating package-store duplicates as outside aliases overflowed that limit.
+  A path stays denied when its link count is greater than the number of names
+  found in the workspace, or when that count cannot be proven. Credential
+  aliases inside package stores stay denied.
+
 ## [0.2.0] - 2026-09-25
 
 ### Added

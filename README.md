@@ -33,7 +33,7 @@ the version intentionally when adopting a newer release:
 
 ```toml
 [dependencies]
-a3s-sandbox = "0.2.0"
+a3s-sandbox = "0.3.0"
 ```
 
 Run a command through the native boundary:
@@ -46,8 +46,8 @@ async fn main() -> anyhow::Result<()> {
     let workspace = std::env::current_dir()?;
     let sandbox = NativeSandbox::new(workspace)?;
 
-    // Fail before running a tool when the host cannot provide the boundary.
-    sandbox.probe().await?;
+    let report = sandbox.probe().await?;
+    report.require_lifetime_containment()?;
 
     let output = sandbox.exec_command("echo inside sandbox").await?;
     println!("{}", output.stdout);
@@ -75,12 +75,23 @@ The default A3S Bash profile is intentionally strict:
   injection variables are removed;
 - host-held secret environment entries are delivered only as redacted
   sentinels and refuse to run without an active mediation boundary;
-- deadlines terminate the complete descendant tree, and output capture stays
-  bounded;
+- deadlines terminate the original process group on macOS and the native
+  isolation boundary on Linux/Windows; output capture stays bounded;
 - a missing launcher, unavailable namespace, or failed capability probe returns
   an error instead of executing on the host.
 
-These guarantees apply to the process tree, not only to the first shell.
+macOS descendants can escape the original process group with `setsid` or
+`setpgid`. The Seatbelt backend does not guarantee complete descendant cleanup
+or cleanup after the host exits. `probe()` proves launcher availability, not
+lifetime containment. Hosts requiring that guarantee must use a qualified
+execution backend; a successful probe must not waive that requirement.
+
+`capability_report()` describes compiled capabilities without starting a
+command (`runtime_probed=false`). `probe()` returns a report after a real
+launcher check (`runtime_probed=true`). `require_lifetime_containment()`
+returns a typed `ExecutionUnavailable` reason when the probe or either
+lifetime guarantee is missing. Windows host-exit admission remains unavailable while S4 qualification,
+including cross-host ACL recovery, is incomplete.
 Read the [security model](SECURITY.md) and [threat model](THREAT_MODEL.md) for
 platform claims, residuals, exact protected paths, and the Gate 7 review
 checklist. Generate a CycloneDX SBOM with:
@@ -93,15 +104,16 @@ checklist. Generate a CycloneDX SBOM with:
 
 | Host | Boundary | Host requirement |
 | --- | --- | --- |
-| macOS | Seatbelt profile plus process-group lifecycle | System `/usr/bin/sandbox-exec` |
+| macOS | Seatbelt profile plus original process-group cleanup; detached lifetime unqualified | System `/usr/bin/sandbox-exec` |
 | Linux | Bubblewrap user/mount/PID/IPC/UTS namespaces plus seccomp | `/usr/bin/bwrap` and an unprivileged user namespace |
-| Windows | PowerShell 7 inside an AppContainer, restricted workspace ACLs, temporary drive, and kill-on-close Job Object | PowerShell 7 under system Program Files |
+| Windows | PowerShell 7 inside an AppContainer, restricted workspace ACLs, temporary drive, and kill-on-close Job Object | Windows 10 / Server 2016 or newer; PowerShell 7 under system Program Files |
 | Other targets | Explicit unsupported-platform error | No host fallback |
 
 The backend is selected at compile time, while policy construction and command
-output stay platform-neutral. Windows executions are serialized because
-temporary ACL and device-map changes are shared process state; cleanup restores
-the exact prior ACL state.
+output stay platform-neutral. Same-workspace Windows executions serialize
+inside one host. Each sandbox has an independent AppContainer identity, and
+cleanup removes only that identity’s temporary ACL entries. Cross-host
+coordination and recovery after a host crash remain unqualified.
 
 ## Execution model
 
@@ -123,8 +135,9 @@ decisions; they do not silently broaden them when a host feature is missing.
 
 ## Scope and roadmap
 
-Gate 0—the complete A3S Bash baseline—is shipped and tested on macOS, Linux,
-and Windows. Later gates follow a first-principles order: typed policy, then
+Gate 0's filesystem, environment, and network controls are shipped and tested
+on macOS, Linux, and Windows. Complete macOS native descendant containment is
+not qualified. Later gates follow a first-principles order: typed policy, then
 structured denials and OS resource quotas, then deeper filesystem mounts,
 then opt-in mediated HTTP(S), then broader IPC/SOCKS, then CLI/adapters, then
 security release. Virtual bash and in-process language VMs are non-goals.
@@ -148,7 +161,7 @@ cargo test --all-targets
 `a3s-sandbox-relay` is the guest TCP→Unix CONNECT helper used by the Linux
 netns mediation bridge. It is built alongside `a3s-sandbox`. Place it next to
 the host executable or set `A3S_SANDBOX_RELAY`. macOS, Linux, and Windows claim
-`mediated_http` after live guest proof; SOCKS remains macOS-only.
+`mediated_http` after live guest proof; SOCKS is available on macOS and Linux.
 
 Release packaging helpers:
 

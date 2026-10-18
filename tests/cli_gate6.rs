@@ -1,5 +1,7 @@
 //! Gate 6 CLI integration: probe / digest / capabilities reproduction.
 
+#![cfg(test)]
+
 use std::process::Command;
 
 fn bin() -> &'static str {
@@ -43,6 +45,15 @@ fn cli_capabilities_emits_backend_and_unavailable() {
     assert!(json["backend"].as_str().is_some());
     assert!(json["capabilities"]["network_deny_all"].as_bool().unwrap());
     assert!(json["unavailable"].is_array());
+    assert_eq!(json["runtime_probed"], false);
+    assert_eq!(
+        json["capabilities"]["process_tree_cleanup"],
+        cfg!(any(target_os = "linux", windows))
+    );
+    assert_eq!(
+        json["capabilities"]["host_exit_cleanup"],
+        cfg!(target_os = "linux")
+    );
 }
 
 #[test]
@@ -75,4 +86,24 @@ fn cli_exec_runs_command_in_sandbox() {
         String::from_utf8_lossy(&output.stdout)
     );
     assert!(String::from_utf8_lossy(&output.stdout).contains("gate6-cli-ok"));
+}
+
+#[cfg(unix)]
+#[test]
+fn cli_exec_does_not_report_a_signaled_command_as_success() {
+    let workspace = tempfile::tempdir().unwrap();
+    let output = Command::new(bin())
+        .args([
+            "exec",
+            "--workspace",
+            workspace.path().to_str().unwrap(),
+            "--",
+            "kill -TERM $$",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        !output.status.success(),
+        "a command without a normal exit code must not become CLI exit zero"
+    );
 }

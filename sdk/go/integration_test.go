@@ -41,10 +41,16 @@ func newIntegrationClient(t *testing.T) *Client {
 
 func TestIntegrationProbeAndCapabilities(t *testing.T) {
 	c := newIntegrationClient(t)
-	if err := c.Probe(context.Background()); err != nil {
+	if c.Report().RuntimeProbed {
+		t.Fatal("initialize must not claim a completed runtime probe")
+	}
+	report, err := c.ProbeReport(context.Background())
+	if err != nil {
 		t.Fatalf("probe: %v", err)
 	}
-	report := c.Report()
+	if !report.RuntimeProbed {
+		t.Fatal("successful probe must return a runtime-probed report")
+	}
 	if report.Backend == "" {
 		t.Fatal("backend is empty")
 	}
