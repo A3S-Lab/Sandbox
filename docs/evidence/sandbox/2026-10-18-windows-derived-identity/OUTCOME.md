@@ -1,6 +1,22 @@
 # Windows derived AppContainer identity candidate
 
-## Result
+## Native outcome: rejected
+
+[Exact-source native run 39102584990](https://github.com/A3S-Lab/Sandbox/actions/runs/39102584990)
+for `8264c276fc60d316ebbbd137e5186734216c0216` completes with Linux and
+macOS passing, but Windows fails the isolated ordinary-command profile tests.
+The corrected canonical-system fixture, observable WindowsApps authorization,
+and constructor-without-registration contracts pass independently. Both the
+completed-command and host-death profile contracts instead fail before a guest
+command can run: CreateProcessW returns Windows error 2. The host-death fixture
+then also reports that the host exited before its readiness marker.
+
+The derived-SID-only candidate is therefore rejected for execution. A constructor
+that leaves no profile state is insufficient without a working real process.
+The full Windows suite and negative mutations did not run. The original failing
+contracts remain required. [Full native job log](native-windows.log).
+
+## Candidate change
 
 A candidate removes persistent profile registration from sandbox construction.
 It follows the three independently observed native
@@ -54,7 +70,7 @@ ACL, mediation, crash and negative-mutation qualification.
 
 ## Explicitly not claimed
 
-- No native passing result for this candidate until exact-source CI completes.
+- No native Windows passing result or usable execution qualification for this candidate.
 - No cleanup of legacy unjournaled profiles, DOS-device recovery, complete S4,
   arbitrary crash-cutpoint, relocation, runtime-abort, cross-principal or
   power-loss proof. `host_exit_cleanup` remains false.
