@@ -4,8 +4,27 @@
 
 The native lifecycle and Windows ACL repair lane is merged with the existing
 upstream Go SDK, machine bridge and Linux cgroup quota implementation. Version
-0.3.0 reflects the breaking Rust probe return type. The exact release commit
-must pass the three-platform CI workflow before tagging and publication.
+0.3.0 reflects the breaking Rust probe return type and is published at
+[GitHub Releases](https://github.com/A3S-Lab/Sandbox/releases/tag/v0.3.0) and
+[crates.io](https://crates.io/crates/a3s-sandbox/0.3.0).
+
+Release source `0f2bb18dc4f16a1ebe12bc282db5c1499ad5fe05` is merged into public
+`main`. Signed tags `v0.3.0` and `sdk/go/v0.3.0` resolve to that exact commit.
+[The final native workflow](https://github.com/A3S-Lab/Sandbox/actions/runs/39087183495)
+passes Linux x86_64 240/0, macOS ARM64 228/0 and Windows x86_64 214/0, with
+zero ignored Rust tests. Windows includes the 64-round soak and expected-red
+Job kill-on-close mutation. The downloaded macOS optimized bridge also passes
+all five Go integration cases with the race detector.
+
+All 27 release assets were downloaded again, byte-compared with the originals,
+and checked against the signed SHA-256 manifest. Each native archive's GitHub
+Sigstore bundle verifies its exact repository, workflow and source digest,
+rejecting self-hosted runners. The published crate was downloaded from the
+registry and its checksum and embedded Git source identity verified. The Go
+module resolves as `github.com/A3S-Lab/Sandbox/sdk/go@v0.3.0` on the same source.
+The release retains raw native CI logs, a 65-component CycloneDX SBOM,
+provenance, registry identities and
+[the complete evidence manifest](https://github.com/A3S-Lab/Sandbox/releases/download/v0.3.0/EVIDENCE.md).
 
 Local Rust 1.97.1 verification: macOS all-target suite 228/0 and parallel
 Linux ARM64 suite 240/0, zero ignored. Native macOS and all-target MSVC strict
