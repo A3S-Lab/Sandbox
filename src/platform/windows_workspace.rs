@@ -12,8 +12,8 @@ use tokio::sync::{oneshot, Mutex};
 use windows_sys::Win32::Foundation::{WAIT_ABANDONED, WAIT_OBJECT_0, WAIT_TIMEOUT};
 use windows_sys::Win32::Storage::FileSystem::{
     FileIdInfo, GetFileInformationByHandleEx, FILE_ATTRIBUTE_REPARSE_POINT,
-    FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT, FILE_ID_INFO, FILE_READ_ATTRIBUTES,
-    FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE,
+    FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT, FILE_ID_INFO, FILE_LIST_DIRECTORY,
+    FILE_READ_ATTRIBUTES, FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE,
 };
 use windows_sys::Win32::System::Threading::{ReleaseMutex, WaitForSingleObject};
 
@@ -76,9 +76,10 @@ impl WorkspaceDirectory {
         acquired
             .await
             .context("Windows workspace ownership worker stopped before acquisition")??;
+        // Attribute-only handles do not enforce sharing checks, including delete exclusion.
         let handle = open_directory(
             &self.path,
-            FILE_READ_ATTRIBUTES,
+            FILE_LIST_DIRECTORY | FILE_READ_ATTRIBUTES,
             FILE_SHARE_READ | FILE_SHARE_WRITE,
         )
         .context("pin Windows workspace root during execution")?;

@@ -112,7 +112,7 @@ checklist. Generate a CycloneDX SBOM with:
 The backend is selected at compile time, while policy construction and command
 output stay platform-neutral. Same-workspace Windows executions acquire a
 directory-identity mutex across hosts, including differently cased paths. A
-metadata handle prevents root replacement during execution while allowing
+directory-read handle prevents root replacement during execution while allowing
 ordinary child updates. Each sandbox has an independent AppContainer
 identity, and cleanup removes only that identity’s temporary ACL entries.
 Native lease qualification is pending, and recovery after a host crash remains
