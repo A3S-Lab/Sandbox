@@ -13,10 +13,12 @@ use std::ptr::{null, null_mut};
 use std::sync::OnceLock;
 use windows_sys::Win32::Foundation::{
     CloseHandle, GetLastError, LocalFree, ERROR_ACCESS_DENIED, INVALID_HANDLE_VALUE,
+    WAIT_ABANDONED, WAIT_OBJECT_0, WAIT_TIMEOUT,
 };
 use windows_sys::Win32::Security::Authorization::{
-    GetNamedSecurityInfoW, SetEntriesInAclW, SetNamedSecurityInfoW, EXPLICIT_ACCESS_W,
-    GRANT_ACCESS, REVOKE_ACCESS, SET_ACCESS, SE_FILE_OBJECT, TRUSTEE_IS_SID, TRUSTEE_IS_UNKNOWN,
+    ConvertStringSecurityDescriptorToSecurityDescriptorW, GetNamedSecurityInfoW, SetEntriesInAclW,
+    SetNamedSecurityInfoW, EXPLICIT_ACCESS_W, GRANT_ACCESS, REVOKE_ACCESS, SDDL_REVISION_1,
+    SET_ACCESS, SE_FILE_OBJECT, TRUSTEE_IS_SID, TRUSTEE_IS_UNKNOWN,
 };
 use windows_sys::Win32::Security::Isolation::{
     CreateAppContainerProfile, DeriveAppContainerSidFromAppContainerName,
@@ -24,13 +26,19 @@ use windows_sys::Win32::Security::Isolation::{
 use windows_sys::Win32::Security::{
     FreeSid, GetLengthSid, GetSecurityDescriptorControl, InitializeSecurityDescriptor,
     SetKernelObjectSecurity, SetSecurityDescriptorDacl, ACL, DACL_SECURITY_INFORMATION,
-    NO_INHERITANCE, PROTECTED_DACL_SECURITY_INFORMATION, PSID, SECURITY_DESCRIPTOR,
-    SE_DACL_PROTECTED, SUB_CONTAINERS_AND_OBJECTS_INHERIT, UNPROTECTED_DACL_SECURITY_INFORMATION,
+    NO_INHERITANCE, PROTECTED_DACL_SECURITY_INFORMATION, PSID, SECURITY_ATTRIBUTES,
+    SECURITY_DESCRIPTOR, SE_DACL_PROTECTED, SUB_CONTAINERS_AND_OBJECTS_INHERIT,
+    UNPROTECTED_DACL_SECURITY_INFORMATION,
 };
 use windows_sys::Win32::Storage::FileSystem::{
-    CreateFileW, DELETE, FILE_DELETE_CHILD, FILE_FLAG_BACKUP_SEMANTICS, FILE_GENERIC_EXECUTE,
-    FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE,
-    FILE_TRAVERSE, OPEN_EXISTING,
+    CreateFileW, DELETE, FILE_FLAG_BACKUP_SEMANTICS, FILE_GENERIC_EXECUTE, FILE_GENERIC_READ,
+    FILE_GENERIC_WRITE, FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE, FILE_TRAVERSE,
+    OPEN_EXISTING,
+};
+
+use windows_sys::Win32::System::Threading::{
+    CreateMutexExW, ReleaseMutex, WaitForSingleObject, MUTEX_MODIFY_STATE,
+    SYNCHRONIZATION_SYNCHRONIZE,
 };
 
 const HRESULT_ALREADY_EXISTS: u32 = 0x8007_00b7;
@@ -117,7 +125,7 @@ impl AppContainerProfile {
         let name = wide_null(OsStr::new(&name));
         let display = wide_null(OsStr::new("A3S Native Sandbox"));
         let description = wide_null(OsStr::new(
-            "Process-scoped AppContainer for fail-closed A3S command execution",
+            "Sandbox-scoped AppContainer for fail-closed A3S command execution",
         ));
         let mut sid = null_mut();
         let status = unsafe {
@@ -152,10 +160,16 @@ impl AppContainerProfile {
     }
 }
 
-pub(super) fn appcontainer_profile_name() -> String {
+fn appcontainer_profile_name() -> String {
     static PROCESS_SCOPE: OnceLock<u128> = OnceLock::new();
+    static NEXT_PROFILE: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
     let mut hasher = Sha256::new();
     hasher.update(std::process::id().to_le_bytes());
+    hasher.update(
+        NEXT_PROFILE
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+            .to_le_bytes(),
+    );
     let process_scope = PROCESS_SCOPE.get_or_init(|| {
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -170,10 +184,17 @@ pub(super) fn appcontainer_profile_name() -> String {
     format!("A3S.Sandbox.Execution.{suffix}")
 }
 
-pub(super) struct ExecutionAcls<'a> {
-    sid: &'a SidBuffer,
-    paths: Vec<(PathBuf, DaclSnapshot, bool)>,
+pub(super) struct ExecutionAcls {
+    sid: SidBuffer,
+    paths: Vec<(PathBuf, bool, Option<bool>)>,
     modified: HashSet<PathBuf>,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum DaclProtection {
+    Preserve,
+    Restrict,
+    Restore,
 }
 
 fn system_tree_prefixes() -> Vec<PathBuf> {
@@ -214,31 +235,24 @@ fn is_toolchain_binary(path: &Path) -> bool {
     )
 }
 
-impl<'a> ExecutionAcls<'a> {
-    pub(super) fn apply(policy: &EnforcedPolicy, sid: &'a SidBuffer) -> Result<Self> {
+impl ExecutionAcls {
+    pub(super) fn apply(policy: &EnforcedPolicy, sid: &SidBuffer) -> Result<Self> {
         let mut guard = Self {
-            sid,
+            sid: sid.clone(),
             paths: Vec::new(),
             modified: HashSet::new(),
         };
         guard.grant_ancestor_traversal(&policy.workspace)?;
         guard.grant_ancestor_traversal(&policy.scratch)?;
+        // Parent DELETE_CHILD would bypass protected children's own delete permissions.
         guard.modify(
             &policy.workspace,
-            FILE_GENERIC_READ
-                | FILE_GENERIC_WRITE
-                | FILE_GENERIC_EXECUTE
-                | DELETE
-                | FILE_DELETE_CHILD,
+            FILE_GENERIC_READ | FILE_GENERIC_WRITE | FILE_GENERIC_EXECUTE | DELETE,
             GRANT_ACCESS,
         )?;
         guard.modify(
             &policy.scratch,
-            FILE_GENERIC_READ
-                | FILE_GENERIC_WRITE
-                | FILE_GENERIC_EXECUTE
-                | DELETE
-                | FILE_DELETE_CHILD,
+            FILE_GENERIC_READ | FILE_GENERIC_WRITE | FILE_GENERIC_EXECUTE | DELETE,
             GRANT_ACCESS,
         )?;
         // System trees already carry AppContainer grants. User-owned PATH
@@ -259,11 +273,7 @@ impl<'a> ExecutionAcls<'a> {
             if policy.allow_write.iter().any(|writable| writable == path) {
                 guard.modify(
                     path,
-                    FILE_GENERIC_READ
-                        | FILE_GENERIC_WRITE
-                        | FILE_GENERIC_EXECUTE
-                        | DELETE
-                        | FILE_DELETE_CHILD,
+                    FILE_GENERIC_READ | FILE_GENERIC_WRITE | FILE_GENERIC_EXECUTE | DELETE,
                     GRANT_ACCESS,
                 )?;
             } else {
@@ -292,6 +302,15 @@ impl<'a> ExecutionAcls<'a> {
                 continue;
             }
             guard.restrict(path, FILE_GENERIC_READ | FILE_GENERIC_EXECUTE)?;
+        }
+        for path in &policy.write_exceptions {
+            if path.exists() {
+                guard.modify(
+                    path,
+                    FILE_GENERIC_READ | FILE_GENERIC_WRITE | FILE_GENERIC_EXECUTE | DELETE,
+                    GRANT_ACCESS,
+                )?;
+            }
         }
         Ok(guard)
     }
@@ -410,19 +429,38 @@ impl<'a> ExecutionAcls<'a> {
         let local_only = inheritance == NO_INHERITANCE && !protect_dacl;
         let tracked = self.modified.contains(path);
         if !tracked {
-            let snapshot = capture_path_dacl(path)?;
             self.modified.insert(path.to_path_buf());
-            self.paths.push((path.to_path_buf(), snapshot, local_only));
+            self.paths.push((path.to_path_buf(), local_only, None));
+        } else if let Some((_, recorded_local_only, _)) = self
+            .paths
+            .iter_mut()
+            .find(|(recorded, _, _)| recorded == path)
+        {
+            *recorded_local_only &= local_only;
         }
+        let (_, _, original_protection) = self
+            .paths
+            .iter_mut()
+            .find(|(recorded, _, _)| recorded == path)
+            .context("Windows ACL restoration record is absent")?;
+        let protection = if protect_dacl {
+            DaclProtection::Restrict
+        } else {
+            DaclProtection::Preserve
+        };
         if let Err(error) = modify_path_acl(
             path,
-            self.sid,
+            &self.sid,
             permissions,
             access_mode,
             inheritance,
-            protect_dacl,
+            protection,
+            original_protection,
         ) {
-            if !tracked {
+            if !tracked
+                && original_protection.is_none()
+                && error.downcast_ref::<AclDenied>().is_some()
+            {
                 self.paths.pop();
                 self.modified.remove(path);
             }
@@ -433,21 +471,40 @@ impl<'a> ExecutionAcls<'a> {
 
     pub(super) fn restore(&mut self) -> Result<()> {
         let mut failure = None;
-        for (path, snapshot, local_only) in self.paths.drain(..).rev() {
-            let restored = if local_only {
-                restore_path_dacl_locally(&path, &snapshot)
+        let mut pending = Vec::new();
+        for (path, local_only, mut original_protection) in
+            std::mem::take(&mut self.paths).into_iter().rev()
+        {
+            let inheritance = if local_only {
+                NO_INHERITANCE
             } else {
-                restore_path_dacl(&path, &snapshot)
+                SUB_CONTAINERS_AND_OBJECTS_INHERIT
             };
-            if let Err(error) = restored {
-                if failure.is_none() {
-                    failure = Some(
-                        error.context(format!("failed to restore the ACL for {}", path.display())),
-                    );
+            match modify_path_acl(
+                &path,
+                &self.sid,
+                0,
+                REVOKE_ACCESS,
+                inheritance,
+                DaclProtection::Restore,
+                &mut original_protection,
+            ) {
+                Ok(()) => {
+                    self.modified.remove(&path);
+                }
+                Err(error) => {
+                    if failure.is_none() {
+                        failure = Some(error.context(format!(
+                            "failed to revoke the sandbox ACL for {}",
+                            path.display()
+                        )));
+                    }
+                    pending.push((path, local_only, original_protection));
                 }
             }
-            self.modified.remove(&path);
         }
+        pending.reverse();
+        self.paths = pending;
         match failure {
             Some(error) => Err(error),
             None => Ok(()),
@@ -455,7 +512,7 @@ impl<'a> ExecutionAcls<'a> {
     }
 }
 
-impl Drop for ExecutionAcls<'_> {
+impl Drop for ExecutionAcls {
     fn drop(&mut self) {
         let _ = self.restore();
     }
@@ -471,119 +528,6 @@ impl Drop for LocalAllocation {
             }
         }
     }
-}
-
-struct DaclSnapshot {
-    words: Option<Vec<u32>>,
-    protected: bool,
-}
-
-fn capture_path_dacl(path: &Path) -> Result<DaclSnapshot> {
-    let security_path = win32_process_path(path);
-    let wide = wide_null(security_path.as_os_str());
-    let mut acl: *mut ACL = null_mut();
-    let mut descriptor = null_mut();
-    let status = unsafe {
-        GetNamedSecurityInfoW(
-            wide.as_ptr(),
-            SE_FILE_OBJECT,
-            DACL_SECURITY_INFORMATION,
-            null_mut(),
-            null_mut(),
-            &mut acl,
-            null_mut(),
-            &mut descriptor,
-        )
-    };
-    if is_skippable_acl_error(status) {
-        return Err(acl_denied(path));
-    }
-    if status != 0 {
-        bail!(
-            "GetNamedSecurityInfoW failed for {} with error {}",
-            path.display(),
-            status
-        );
-    }
-    if descriptor.is_null() {
-        bail!(
-            "Windows returned an empty security descriptor for {}",
-            path.display()
-        );
-    }
-    let _descriptor = LocalAllocation(descriptor);
-    let mut control = 0_u16;
-    let mut revision = 0_u32;
-    if unsafe { GetSecurityDescriptorControl(descriptor, &mut control, &mut revision) } == 0 {
-        return Err(last_windows_error("inspect Windows DACL inheritance state"));
-    }
-    let protected = control & SE_DACL_PROTECTED != 0;
-    if acl.is_null() {
-        return Ok(DaclSnapshot {
-            words: None,
-            protected,
-        });
-    }
-    let bytes = usize::from(unsafe { (*acl).AclSize });
-    if bytes < size_of::<ACL>() {
-        bail!("Windows returned an invalid DACL for {}", path.display());
-    }
-    let mut words = vec![0_u32; bytes.div_ceil(size_of::<u32>())];
-    unsafe {
-        std::ptr::copy_nonoverlapping(acl.cast::<u8>(), words.as_mut_ptr().cast::<u8>(), bytes);
-    }
-    Ok(DaclSnapshot {
-        words: Some(words),
-        protected,
-    })
-}
-
-fn restore_path_dacl(path: &Path, snapshot: &DaclSnapshot) -> Result<()> {
-    let security_path = win32_process_path(path);
-    let wide = wide_null(security_path.as_os_str());
-    let acl = snapshot
-        .words
-        .as_ref()
-        .map_or(null_mut(), |words| words.as_ptr().cast_mut().cast::<ACL>());
-    let inheritance = if snapshot.protected {
-        PROTECTED_DACL_SECURITY_INFORMATION
-    } else {
-        UNPROTECTED_DACL_SECURITY_INFORMATION
-    };
-    let status = unsafe {
-        SetNamedSecurityInfoW(
-            wide.as_ptr(),
-            SE_FILE_OBJECT,
-            DACL_SECURITY_INFORMATION | inheritance,
-            null_mut(),
-            null_mut(),
-            acl,
-            null(),
-        )
-    };
-    if status != 0 {
-        bail!(
-            "SetNamedSecurityInfoW failed while restoring {} with error {}",
-            path.display(),
-            status
-        );
-    }
-    Ok(())
-}
-
-fn restore_path_dacl_locally(path: &Path, snapshot: &DaclSnapshot) -> Result<()> {
-    let security_path = win32_process_path(path);
-    let wide = wide_null(security_path.as_os_str());
-    let acl = snapshot
-        .words
-        .as_ref()
-        .map_or(null_mut(), |words| words.as_ptr().cast_mut().cast::<ACL>());
-    let inheritance = if snapshot.protected {
-        PROTECTED_DACL_SECURITY_INFORMATION
-    } else {
-        UNPROTECTED_DACL_SECURITY_INFORMATION
-    };
-    set_dacl_on_object(path, &wide, acl, DACL_SECURITY_INFORMATION | inheritance)
 }
 
 fn set_dacl_on_object(
@@ -657,24 +601,98 @@ fn set_dacl_on_object(
     Ok(())
 }
 
+const ACL_MUTATION_MUTEX_NAME: &str = r"Global\A3S.Sandbox.AclMutation.v1";
+
+struct AclMutationGuard {
+    handle: OwnedHandle,
+    // Windows mutex ownership belongs to the acquiring OS thread.
+    _thread_bound: std::marker::PhantomData<*mut ()>,
+}
+
+impl Drop for AclMutationGuard {
+    fn drop(&mut self) {
+        unsafe {
+            ReleaseMutex(self.handle.as_raw_handle());
+        }
+    }
+}
+
+fn lock_acl_mutation(timeout_ms: u32) -> Result<AclMutationGuard> {
+    let sddl = wide_null(OsStr::new(
+        "D:P(D;;GA;;;S-1-15-2-1)(D;;GA;;;S-1-15-2-2)(A;;GA;;;SY)(A;;GA;;;BA)(A;;0x00100001;;;AU)",
+    ));
+    let mut descriptor = null_mut();
+    if unsafe {
+        ConvertStringSecurityDescriptorToSecurityDescriptorW(
+            sddl.as_ptr(),
+            SDDL_REVISION_1,
+            &mut descriptor,
+            null_mut(),
+        )
+    } == 0
+    {
+        return Err(last_windows_error(
+            "create ACL coordination security descriptor",
+        ));
+    }
+    let _descriptor = LocalAllocation(descriptor);
+    let attributes = SECURITY_ATTRIBUTES {
+        nLength: size_of::<SECURITY_ATTRIBUTES>() as u32,
+        lpSecurityDescriptor: descriptor,
+        bInheritHandle: 0,
+    };
+    let name = wide_null(OsStr::new(ACL_MUTATION_MUTEX_NAME));
+    let raw = unsafe {
+        CreateMutexExW(
+            &attributes,
+            name.as_ptr(),
+            0,
+            SYNCHRONIZATION_SYNCHRONIZE | MUTEX_MODIFY_STATE,
+        )
+    };
+    if raw.is_null() {
+        return Err(last_windows_error("open host-global ACL mutation mutex"));
+    }
+    let handle = unsafe { OwnedHandle::from_raw_handle(raw) };
+    match unsafe { WaitForSingleObject(handle.as_raw_handle(), timeout_ms) } {
+        WAIT_OBJECT_0 | WAIT_ABANDONED => Ok(AclMutationGuard {
+            handle,
+            _thread_bound: std::marker::PhantomData,
+        }),
+        WAIT_TIMEOUT => Err(anyhow::Error::from(std::io::Error::from(
+            std::io::ErrorKind::WouldBlock,
+        ))
+        .context("timed out waiting for host-global ACL mutation ownership")),
+        _ => Err(last_windows_error("acquire host-global ACL mutation mutex")),
+    }
+}
+
 fn modify_path_acl(
     path: &Path,
     sid: &SidBuffer,
     permissions: u32,
     access_mode: i32,
     inheritance: u32,
-    protect_dacl: bool,
+    protection: DaclProtection,
+    original_protection: &mut Option<bool>,
 ) -> Result<()> {
+    let _mutation = lock_acl_mutation(5_000)?;
     let security_path = win32_process_path(path);
     let wide = wide_null(security_path.as_os_str());
     let (mut old_acl, mut descriptor) = query_path_dacl(path, &wide)?;
 
-    if protect_dacl {
-        // Inherited ACEs cannot be replaced while the DACL still participates
-        // in automatic inheritance. Protecting the current DACL first turns
-        // those ACEs into explicit entries; the following SET_ACCESS or
-        // REVOKE_ACCESS operation can then replace every package-SID entry with
-        // the bounded mask.
+    if protection == DaclProtection::Restrict {
+        if original_protection.is_none() {
+            let mut control = 0;
+            let mut revision = 0;
+            if unsafe { GetSecurityDescriptorControl(descriptor.0, &mut control, &mut revision) }
+                == 0
+            {
+                return Err(last_windows_error("inspect Windows DACL inheritance state"));
+            }
+            *original_protection = Some(control & SE_DACL_PROTECTED != 0);
+        }
+        // AppContainer restrictions must replace inherited grants, rather than rely on package-SID denies.
         let status = unsafe {
             SetNamedSecurityInfoW(
                 wide.as_ptr(),
@@ -688,9 +706,8 @@ fn modify_path_acl(
         };
         if status != 0 {
             bail!(
-                "SetNamedSecurityInfoW failed while protecting {} with error {}",
-                path.display(),
-                status
+                "protecting the Windows DACL for {} failed with error {status}",
+                path.display()
             );
         }
         drop(descriptor);
@@ -717,31 +734,27 @@ fn modify_path_acl(
         );
     }
     let _new_acl = LocalAllocation(new_acl.cast::<c_void>());
-    let security_information = if protect_dacl {
-        DACL_SECURITY_INFORMATION | PROTECTED_DACL_SECURITY_INFORMATION
-    } else {
-        DACL_SECURITY_INFORMATION
+    let protection_flags = match (protection, *original_protection) {
+        (DaclProtection::Restrict, _) | (DaclProtection::Restore, Some(true)) => {
+            PROTECTED_DACL_SECURITY_INFORMATION
+        }
+        (DaclProtection::Restore, Some(false)) => UNPROTECTED_DACL_SECURITY_INFORMATION,
+        _ => 0,
     };
-    // SetNamedSecurityInfo rewrites the merged DACL and then walks every
-    // descendant of an inheritable ACE already on that directory. A traverse
-    // grant on an ancestor must not walk the user profile.
-    if inheritance == NO_INHERITANCE && !protect_dacl {
-        return set_dacl_on_object(path, &wide, new_acl, security_information);
+    if inheritance == NO_INHERITANCE && protection_flags == 0 {
+        return set_dacl_on_object(path, &wide, new_acl, DACL_SECURITY_INFORMATION);
     }
     let status = unsafe {
         SetNamedSecurityInfoW(
             wide.as_ptr(),
             SE_FILE_OBJECT,
-            security_information,
+            DACL_SECURITY_INFORMATION | protection_flags,
             null_mut(),
             null_mut(),
             new_acl,
             null(),
         )
     };
-    if is_skippable_acl_error(status) {
-        return Err(acl_denied(path));
-    }
     if status != 0 {
         bail!(
             "SetNamedSecurityInfoW failed for {} with error {}",
@@ -1058,3 +1071,7 @@ mod tests {
         assert!(!is_skippable_acl_error(32));
     }
 }
+
+#[cfg(test)]
+#[path = "windows_acl_tests.rs"]
+mod acl_tests;

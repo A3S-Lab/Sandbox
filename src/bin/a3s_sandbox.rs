@@ -33,9 +33,11 @@ async fn run() -> Result<ExitCode> {
         "probe" => {
             let workspace = parse_workspace(&args)?;
             let sandbox = NativeSandbox::new(&workspace)?;
-            sandbox.probe().await?;
-            let report = sandbox.capability_report();
-            println!("ok backend={}", report.backend);
+            let report = sandbox.probe().await?;
+            println!(
+                "ok backend={} runtime_probed={}",
+                report.backend, report.runtime_probed
+            );
             print_unavailable(&report);
             Ok(ExitCode::SUCCESS)
         }
@@ -61,7 +63,7 @@ async fn run() -> Result<ExitCode> {
             if output.timed_out {
                 bail!("command timed out");
             }
-            Ok(ExitCode::from(output.exit_code.clamp(0, 255) as u8))
+            Ok(ExitCode::from(u8::try_from(output.exit_code).unwrap_or(1)))
         }
         "relay" => {
             let (unix, listen) = parse_relay(&args)?;
@@ -169,6 +171,7 @@ fn print_capabilities_json(report: &CapabilityReport) -> Result<()> {
         "backend": report.backend,
         "policy_digest": report.policy_digest,
         "unavailable": report.unavailable,
+        "runtime_probed": report.runtime_probed,
         "capabilities": {
             "filesystem_path_policy": caps.filesystem_path_policy,
             "filesystem_readonly_mounts": caps.filesystem_readonly_mounts,
@@ -181,6 +184,8 @@ fn print_capabilities_json(report: &CapabilityReport) -> Result<()> {
             "resource_output_limit": caps.resource_output_limit,
             "resource_memory_limit": caps.resource_memory_limit,
             "resource_process_limit": caps.resource_process_limit,
+            "process_tree_cleanup": caps.process_tree_cleanup,
+            "host_exit_cleanup": caps.host_exit_cleanup,
         }
     });
     println!("{payload}");

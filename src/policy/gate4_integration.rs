@@ -1,3 +1,5 @@
+#![cfg(test)]
+
 //! Gate 4: mediated HTTP policy shape — fail closed until a real mediator ships.
 
 use crate::policy::{BackendCapabilities, NetworkAllowRule, SandboxPolicy, SessionWriteMode};
@@ -145,10 +147,7 @@ async fn gate4_linux_sandbox_mediator_tunnels_allowed_connect() {
     use std::net::SocketAddr;
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
     use tokio::net::TcpListener;
-    use tokio::sync::Mutex;
-
-    static RELAY_ENV_LOCK: Mutex<()> = Mutex::const_new(());
-    let _guard = RELAY_ENV_LOCK.lock().await;
+    crate::tests::prepare_guest_relay();
 
     let upstream = TcpListener::bind(SocketAddr::from(([127, 0, 0, 1], 0)))
         .await
@@ -170,15 +169,6 @@ async fn gate4_linux_sandbox_mediator_tunnels_allowed_connect() {
         port: Some(upstream_port),
         path_prefix: None,
     });
-
-    let test_exe = std::env::current_exe().unwrap();
-    let relay_bin = test_exe
-        .parent()
-        .and_then(|p| p.parent())
-        .map(|debug| debug.join("a3s-sandbox-relay"))
-        .unwrap();
-    assert!(relay_bin.is_file(), "missing {}", relay_bin.display());
-    std::env::set_var("A3S_SANDBOX_RELAY", &relay_bin);
 
     let sandbox = NativeSandbox::with_policy(workspace.path(), policy).unwrap();
     let probe = workspace.path().join("gate4_linux_probe.py");
@@ -212,7 +202,6 @@ print('gate4-linux-tunnel-ok')\n",
         })
         .await
         .unwrap();
-    std::env::remove_var("A3S_SANDBOX_RELAY");
     assert!(
         output.stdout.contains("gate4-linux-tunnel-ok"),
         "stdout={} stderr={} exit={}",

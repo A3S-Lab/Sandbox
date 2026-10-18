@@ -799,10 +799,7 @@ mod tests {
         use crate::policy::NetworkAllowRule;
         use tokio::io::{AsyncReadExt, AsyncWriteExt};
         use tokio::net::TcpListener;
-        use tokio::sync::Mutex;
-
-        static RELAY_ENV_LOCK: Mutex<()> = Mutex::const_new(());
-        let _guard = RELAY_ENV_LOCK.lock().await;
+        crate::tests::prepare_guest_relay();
 
         let workspace = tempfile::tempdir().unwrap();
         let scratch = tempfile::tempdir().unwrap();
@@ -842,19 +839,6 @@ mod tests {
         policy.mediator_unix_path = Some(sock.clone());
         policy.mediator_port = Some(crate::GUEST_HTTP_CONNECT_RELAY_PORT);
 
-        let test_exe = std::env::current_exe().expect("test exe");
-        let relay_bin = test_exe
-            .parent()
-            .and_then(|p| p.parent())
-            .map(|debug| debug.join("a3s-sandbox-relay"))
-            .expect("resolve target/debug");
-        assert!(
-            relay_bin.is_file(),
-            "expected relay at {} (run cargo test --bins first if missing)",
-            relay_bin.display()
-        );
-        std::env::set_var("A3S_SANDBOX_RELAY", &relay_bin);
-
         let sandbox = PlatformSandbox::new(workspace.path()).unwrap();
         let probe = workspace.path().join("connect_probe.py");
         std::fs::write(
@@ -889,7 +873,6 @@ print(s.recv(4).decode())\n",
             )
             .await
             .expect("linux bridge execute");
-        std::env::remove_var("A3S_SANDBOX_RELAY");
         assert_eq!(output.exit_code, 0, "stderr={}", output.stderr);
         assert_eq!(output.stdout.trim(), "pong");
         upstream_task.await.unwrap();
@@ -900,10 +883,7 @@ print(s.recv(4).decode())\n",
     async fn linux_bridge_wire_denies_forbidden_connect_and_raw_egress() {
         use crate::network::ConnectMediator;
         use crate::policy::NetworkAllowRule;
-        use tokio::sync::Mutex;
-
-        static RELAY_ENV_LOCK: Mutex<()> = Mutex::const_new(());
-        let _guard = RELAY_ENV_LOCK.lock().await;
+        crate::tests::prepare_guest_relay();
 
         let workspace = tempfile::tempdir().unwrap();
         let scratch = tempfile::tempdir().unwrap();
@@ -928,15 +908,6 @@ print(s.recv(4).decode())\n",
             .expect("unix CONNECT mediator");
         policy.mediator_unix_path = Some(sock.clone());
         policy.mediator_port = Some(crate::GUEST_HTTP_CONNECT_RELAY_PORT);
-
-        let test_exe = std::env::current_exe().expect("test exe");
-        let relay_bin = test_exe
-            .parent()
-            .and_then(|p| p.parent())
-            .map(|debug| debug.join("a3s-sandbox-relay"))
-            .expect("resolve target/debug");
-        assert!(relay_bin.is_file(), "missing {}", relay_bin.display());
-        std::env::set_var("A3S_SANDBOX_RELAY", &relay_bin);
 
         let probe = workspace.path().join("deny_probe.py");
         std::fs::write(
@@ -978,7 +949,6 @@ print('denied-ok')\n",
             )
             .await
             .expect("linux deny bridge execute");
-        std::env::remove_var("A3S_SANDBOX_RELAY");
         assert_eq!(output.exit_code, 0, "stderr={}", output.stderr);
         assert_eq!(output.stdout.trim(), "denied-ok");
         mediator.shutdown().await;
@@ -989,10 +959,7 @@ print('denied-ok')\n",
         use crate::network::Socks5Mediator;
         use crate::policy::NetworkAllowRule;
         use tokio::net::TcpListener;
-        use tokio::sync::Mutex;
-
-        static RELAY_ENV_LOCK: Mutex<()> = Mutex::const_new(());
-        let _guard = RELAY_ENV_LOCK.lock().await;
+        crate::tests::prepare_guest_relay();
 
         let workspace = tempfile::tempdir().unwrap();
         let scratch = tempfile::tempdir().unwrap();
@@ -1034,19 +1001,6 @@ print('denied-ok')\n",
         policy.socks_mediator_unix_path = Some(sock.clone());
         policy.socks_mediator_port = Some(crate::GUEST_SOCKS_CONNECT_RELAY_PORT);
 
-        let test_exe = std::env::current_exe().expect("test exe");
-        let relay_bin = test_exe
-            .parent()
-            .and_then(|p| p.parent())
-            .map(|debug| debug.join("a3s-sandbox-relay"))
-            .expect("resolve target/debug");
-        assert!(
-            relay_bin.is_file(),
-            "expected relay at {} (run cargo test --bins first if missing)",
-            relay_bin.display()
-        );
-        std::env::set_var("A3S_SANDBOX_RELAY", &relay_bin);
-
         let sandbox = PlatformSandbox::new(workspace.path()).unwrap();
         let probe = workspace.path().join("socks_probe.py");
         std::fs::write(
@@ -1081,7 +1035,6 @@ print(s.recv(4).decode())\n",
             )
             .await
             .expect("linux socks bridge execute");
-        std::env::remove_var("A3S_SANDBOX_RELAY");
         assert_eq!(output.exit_code, 0, "stderr={}", output.stderr);
         assert_eq!(output.stdout.trim(), "pong");
         upstream_task.await.unwrap();
@@ -1092,10 +1045,7 @@ print(s.recv(4).decode())\n",
     async fn linux_socks_bridge_wire_denies_forbidden_connect() {
         use crate::network::Socks5Mediator;
         use crate::policy::NetworkAllowRule;
-        use tokio::sync::Mutex;
-
-        static RELAY_ENV_LOCK: Mutex<()> = Mutex::const_new(());
-        let _guard = RELAY_ENV_LOCK.lock().await;
+        crate::tests::prepare_guest_relay();
 
         let workspace = tempfile::tempdir().unwrap();
         let scratch = tempfile::tempdir().unwrap();
@@ -1120,15 +1070,6 @@ print(s.recv(4).decode())\n",
             .expect("unix SOCKS mediator");
         policy.socks_mediator_unix_path = Some(sock.clone());
         policy.socks_mediator_port = Some(crate::GUEST_SOCKS_CONNECT_RELAY_PORT);
-
-        let test_exe = std::env::current_exe().expect("test exe");
-        let relay_bin = test_exe
-            .parent()
-            .and_then(|p| p.parent())
-            .map(|debug| debug.join("a3s-sandbox-relay"))
-            .expect("resolve target/debug");
-        assert!(relay_bin.is_file(), "missing {}", relay_bin.display());
-        std::env::set_var("A3S_SANDBOX_RELAY", &relay_bin);
 
         let sandbox = PlatformSandbox::new(workspace.path()).unwrap();
         let probe = workspace.path().join("socks_deny_probe.py");
@@ -1160,7 +1101,6 @@ print('socks-denied-ok')\n",
             )
             .await
             .expect("linux socks bridge deny execute");
-        std::env::remove_var("A3S_SANDBOX_RELAY");
         assert_eq!(output.exit_code, 0, "stderr={}", output.stderr);
         assert_eq!(output.stdout.trim(), "socks-denied-ok");
         mediator.shutdown().await;

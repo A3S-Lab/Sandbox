@@ -11,12 +11,16 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, RwLock};
 
+mod availability;
+mod execution;
 mod network;
 mod observability;
 mod platform;
 mod policy;
 mod process;
 
+pub use availability::ExecutionUnavailable;
+pub use execution::ExecutionFailure;
 pub use network::{
     default_guest_relay_addr, posix_shell_single_quote, resolve_relay_executable,
     stage_relay_into_scratch, wrap_command_with_guest_relay, wrap_command_with_guest_relays,
@@ -148,6 +152,24 @@ pub struct CapabilityReport {
     pub capabilities: BackendCapabilities,
     pub policy_digest: String,
     pub unavailable: Vec<&'static str>,
+    /// A launcher command succeeded; this is not a containment certification.
+    pub runtime_probed: bool,
+}
+
+impl CapabilityReport {
+    /// Admit only a probed backend with complete descendant and owner-exit cleanup.
+    pub fn require_lifetime_containment(&self) -> std::result::Result<(), ExecutionUnavailable> {
+        if !self.runtime_probed {
+            return Err(ExecutionUnavailable::RuntimeProbeRequired);
+        }
+        if !self.capabilities.process_tree_cleanup {
+            return Err(ExecutionUnavailable::ProcessTreeCleanup);
+        }
+        if !self.capabilities.host_exit_cleanup {
+            return Err(ExecutionUnavailable::HostExitCleanup);
+        }
+        Ok(())
+    }
 }
 
 impl NativeSandbox {
@@ -240,11 +262,18 @@ impl NativeSandbox {
         if !capabilities.resource_process_limit {
             unavailable.push("resource_process_limit");
         }
+        if !capabilities.process_tree_cleanup {
+            unavailable.push("process_tree_cleanup");
+        }
+        if !capabilities.host_exit_cleanup {
+            unavailable.push("host_exit_cleanup");
+        }
         CapabilityReport {
             backend: self.backend(),
             capabilities,
             policy_digest: self.policy_digest(),
             unavailable,
+            runtime_probed: false,
         }
     }
 
@@ -337,7 +366,7 @@ impl NativeSandbox {
     }
 
     /// Prove that the selected operating-system boundary can start a command.
-    pub async fn probe(&self) -> Result<()> {
+    pub async fn probe(&self) -> Result<CapabilityReport> {
         #[cfg(windows)]
         let command = format!("[Console]::Out.Write('{PROBE_MARKER}')");
         #[cfg(not(windows))]
@@ -363,7 +392,9 @@ impl NativeSandbox {
                 output.stderr
             );
         }
-        Ok(())
+        let mut report = self.capability_report();
+        report.runtime_probed = true;
+        Ok(report)
     }
 
     /// Execute a command with a default two-minute deadline.
@@ -490,6 +521,8 @@ impl NativeSandbox {
             .prefix("a3s-sandbox-")
             .tempdir()
             .context("failed to create native sandbox scratch directory")?;
+        #[cfg(windows)]
+        let scratch = Arc::new(scratch);
         let digest = self.policy_digest();
         // Snapshot so a concurrent replace_policy cannot race a running
         // command.
@@ -656,10 +689,12 @@ impl NativeSandbox {
             {
                 if let Some(client) = mediator_pipe_client {
                     self.platform
-                        .execute_with_mediator_client(&policy, request, client)
+                        .execute_with_mediator_client(&policy, request, client, scratch.clone())
                         .await?
                 } else {
-                    self.platform.execute(&policy, request).await?
+                    self.platform
+                        .execute(&policy, request, scratch.clone())
+                        .await?
                 }
             }
             #[cfg(not(windows))]

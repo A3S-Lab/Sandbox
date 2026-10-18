@@ -1,3 +1,5 @@
+#![cfg(test)]
+
 //! Gate 8: credential containment — host-held secret env never lands.
 //!
 //! Slice 1 proves the sentinel + fail-closed spine: secret values supplied by
@@ -37,24 +39,9 @@ fn secret_map(name: &str, value: &str) -> Option<Arc<HashMap<String, String>>> {
     )])))
 }
 
-/// Point the Linux netns bridge at the relay binary that `cargo test
-/// --all-targets` has already built. Idempotent; a no-op off Linux.
 fn ensure_guest_relay_available() {
     #[cfg(target_os = "linux")]
-    {
-        static ONCE: std::sync::Once = std::sync::Once::new();
-        ONCE.call_once(|| {
-            let test_exe = std::env::current_exe().expect("current test executable");
-            if let Some(debug_dir) = test_exe.parent().and_then(|parent| parent.parent()) {
-                let relay = debug_dir.join("a3s-sandbox-relay");
-                if relay.is_file() {
-                    std::env::set_var("A3S_SANDBOX_RELAY", &relay);
-                }
-            }
-        });
-    }
-    #[cfg(not(target_os = "linux"))]
-    {}
+    crate::tests::prepare_guest_relay();
 }
 
 fn print_secret_command() -> String {

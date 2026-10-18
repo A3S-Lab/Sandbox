@@ -39,8 +39,8 @@ async fn main() -> anyhow::Result<()> {
     let workspace = std::env::current_dir()?;
     let sandbox = NativeSandbox::new(workspace)?;
 
-    // Fail before running a tool when the host cannot provide the boundary.
-    sandbox.probe().await?;
+    let report = sandbox.probe().await?;
+    report.require_lifetime_containment()?;
 
     let output = sandbox.exec_command("echo inside sandbox").await?;
     println!("{}", output.stdout);
@@ -59,21 +59,23 @@ async fn main() -> anyhow::Result<()> {
 - 保护凭证、密钥文件、`.git`、`.a3s`、Agent 元数据，以及 shell/工具引导文件；
 - 拒绝符号链接与硬链接逃逸路径；
 - 清理子进程环境、重定向临时状态，并移除 shell 注入变量；
-- 截止时间终止完整后代树，输出捕获保持有界；
+- 截止时间终止 macOS 原始进程组或 Linux/Windows 原生隔离边界，输出捕获保持有界；
 - 缺少启动器、命名空间不可用或能力探测失败时返回错误，而不是在宿主上执行。
 
-这些保证适用于进程树，而不仅是第一个 shell。威胁模型、平台注意事项与精确受保护路径见 [安全模型](SECURITY.md)。
+macOS 后代进程能通过 `setsid` 或 `setpgid` 脱离原始进程组。Seatbelt 后端尚不保证完整后代清理，也不保证宿主退出后的清理。`probe()` 只证明启动器可用，不能证明进程生命周期受控。要求完整清理的宿主必须使用通过验收的执行后端。威胁模型、平台注意事项与精确受保护路径见 [安全模型](SECURITY.md)。
+
+`capability_report()` 不启动命令，报告的 `runtime_probed` 为 `false`。`probe()` 在真实启动检查后返回 `runtime_probed=true` 的报告。`require_lifetime_containment()` 在未探测或缺少任一清理保证时，返回类型化的 `ExecutionUnavailable` 原因。Windows 的宿主退出清理准入仍不可用，需完成 S4 验收，包括跨宿主 ACL 恢复。
 
 ## 原生边界
 
 | 宿主 | 边界 | 宿主要求 |
 | --- | --- | --- |
-| macOS | Seatbelt 配置文件加上进程组生命周期 | 系统 `/usr/bin/sandbox-exec` |
+| macOS | Seatbelt 配置文件加上原始进程组清理；脱离后的生命周期未通过验收 | 系统 `/usr/bin/sandbox-exec` |
 | Linux | Bubblewrap 用户/挂载/PID/IPC/UTS 命名空间加上 seccomp | `/usr/bin/bwrap` 与非特权用户命名空间 |
-| Windows | AppContainer 内的 PowerShell 7、受限工作区 ACL、临时驱动器，以及 kill-on-close Job Object | 系统 Program Files 下的 PowerShell 7 |
+| Windows | AppContainer 内的 PowerShell 7、受限工作区 ACL、临时驱动器，以及 kill-on-close Job Object | Windows 10 / Server 2016 及以上；系统 Program Files 下的 PowerShell 7 |
 | 其他目标 | 显式的不支持平台错误 | 无宿主回退 |
 
-后端在编译时选择，而策略构造与命令输出保持平台中立。Windows 执行会串行化，因为临时 ACL 与设备映射变更是共享进程状态；清理会恢复精确的先前 ACL 状态。
+后端在编译时选择，而策略构造与命令输出保持平台中立。同一宿主中的相同工作区执行会串行化。每个 Windows 沙箱使用独立的 AppContainer 身份，清理仅撤销该身份的临时 ACL 权限项；跨宿主协调和宿主崩溃后的恢复仍待验收。
 
 ## 执行模型
 
@@ -94,7 +96,7 @@ CommandRequest
 
 ## 范围与路线图
 
-Gate 0——完整的 A3S Bash 基线——已在 macOS、Linux 与 Windows 上交付并测试。后续门禁按第一性原理排序：类型化策略 → 结构化拒绝与 OS 资源配额 → 更深的文件系统挂载 → 可选中介 HTTP(S) → 更广的 IPC/SOCKS → CLI/适配器 → 安全发布。虚拟 bash 与进程内语言 VM 为非目标。
+Gate 0 的文件系统、环境与网络控制已在 macOS、Linux 与 Windows 上交付并测试。macOS 原生后端的完整后代清理尚未通过验收。后续门禁按第一性原理排序：类型化策略 → 结构化拒绝与 OS 资源配额 → 更深的文件系统挂载 → 可选中介 HTTP(S) → 更广的 IPC/SOCKS → CLI/适配器 → 安全发布。虚拟 bash 与进程内语言 VM 为非目标。
 
 使命、非目标、能力排序、退出条件、架构与风险见 [ROADMAP.md](ROADMAP.md)。
 

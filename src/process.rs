@@ -4,7 +4,7 @@ use crate::OutputSummary;
 #[cfg(test)]
 use crate::MAX_OUTPUT_SIZE;
 #[cfg(unix)]
-use crate::{CommandOutput, CommandRequest, OutputObserver};
+use crate::{CommandOutput, CommandRequest, ExecutionFailure, OutputObserver};
 #[cfg(unix)]
 use anyhow::{Context, Result};
 use std::collections::VecDeque;
@@ -217,17 +217,17 @@ pub(crate) async fn read_process_output(
     timeout_ms: u64,
     max_output_bytes: usize,
     observer: Option<&dyn OutputObserver>,
-) -> io::Result<CapturedProcessOutput> {
+) -> Result<CapturedProcessOutput> {
     let mut stdout = match child.stdout.take() {
         Some(stdout) => stdout,
         None => {
-            return Err(io::Error::other("child stdout was not piped"));
+            return Err(io::Error::other("child stdout was not piped").into());
         }
     };
     let mut stderr = match child.stderr.take() {
         Some(stderr) => stderr,
         None => {
-            return Err(io::Error::other("child stderr was not piped"));
+            return Err(io::Error::other("child stderr was not piped").into());
         }
     };
 
@@ -239,88 +239,89 @@ pub(crate) async fn read_process_output(
     let mut stderr_buffer = vec![0_u8; READ_CHUNK_BYTES];
 
     let execution = tokio::time::timeout(tokio::time::Duration::from_millis(timeout_ms), async {
-        while !stdout_done || !stderr_done {
+        let mut status = None;
+        loop {
+            if stdout_done && stderr_done {
+                if let Some(status) = status {
+                    break Ok(status);
+                }
+            }
             tokio::select! {
+                exited = child.wait(), if status.is_none() => {
+                    status = Some(exited?);
+                    process_group.kill();
+                }
                 read = stdout.read(&mut stdout_buffer), if !stdout_done => {
-                    match read {
-                        Ok(0) => stdout_done = true,
-                        Ok(count) => {
+                    match read? {
+                        0 => stdout_done = true,
+                        count => {
                             let bytes = &stdout_buffer[..count];
                             capture.push(OutputStream::Stdout, bytes);
                             if let Some(observer) = observer {
                                 observer.on_output_delta(&String::from_utf8_lossy(bytes)).await;
                             }
                         }
-                        Err(error) => {
-                            let message = format!("\n[failed to read command stdout: {error}]\n");
-                            capture.push(OutputStream::Stderr, message.as_bytes());
-                            stdout_done = true;
-                        }
                     }
                 }
                 read = stderr.read(&mut stderr_buffer), if !stderr_done => {
-                    match read {
-                        Ok(0) => stderr_done = true,
-                        Ok(count) => {
+                    match read? {
+                        0 => stderr_done = true,
+                        count => {
                             let bytes = &stderr_buffer[..count];
                             capture.push(OutputStream::Stderr, bytes);
                             if let Some(observer) = observer {
                                 observer.on_output_delta(&String::from_utf8_lossy(bytes)).await;
                             }
                         }
-                        Err(error) => {
-                            let message = format!("\n[failed to read command stderr: {error}]\n");
-                            capture.push(OutputStream::Stderr, message.as_bytes());
-                            stderr_done = true;
-                        }
                     }
                 }
             }
         }
-
-        child.wait().await
     })
     .await;
 
-    let (status, timed_out, wait_error) = match execution {
-        Ok(Ok(status)) => {
-            // A shell can exit successfully while a background descendant
-            // keeps running after closing both inherited pipes.  Tear down
-            // the complete process group before returning so a successful
-            // command cannot leak work beyond the sandbox lifetime.
+    let (status, timed_out) = match execution {
+        Ok(Ok(status)) => (status, false),
+        Ok(Err(error)) => {
             process_group.kill();
-            (Some(status), false, None)
+            stop_and_reap(child).await?;
+            return Err(error);
         }
-        Ok(Err(error)) => (None, false, Some(error)),
         Err(_) => {
             process_group.kill();
-            child.start_kill().ok();
-            let status = match tokio::time::timeout(
-                tokio::time::Duration::from_millis(PROCESS_SETTLEMENT_MS),
-                child.wait(),
-            )
-            .await
-            {
-                Ok(Ok(status)) => Some(status),
-                Ok(Err(_)) | Err(_) => None,
-            };
-            (status, true, None)
+            (stop_and_reap(child).await?, true)
         }
     };
 
     let summary = capture.summary(timed_out);
     if let Some(observer) = observer {
-        observer.on_output_complete(&summary).await;
-    }
-    if let Some(error) = wait_error {
-        return Err(error);
+        tokio::time::timeout(
+            tokio::time::Duration::from_millis(PROCESS_SETTLEMENT_MS),
+            observer.on_output_complete(&summary),
+        )
+        .await
+        .map_err(|_| ExecutionFailure::ObserverTimeout)?;
     }
     Ok(CapturedProcessOutput {
         stdout: capture.render_stream(OutputStream::Stdout),
         stderr: capture.render_stream(OutputStream::Stderr),
-        status,
+        status: Some(status),
         timed_out,
     })
+}
+
+#[cfg(unix)]
+async fn stop_and_reap(child: &mut Child) -> Result<ExitStatus> {
+    let _ = child.start_kill();
+    match tokio::time::timeout(
+        tokio::time::Duration::from_millis(PROCESS_SETTLEMENT_MS),
+        child.wait(),
+    )
+    .await
+    {
+        Ok(Ok(status)) => Ok(status),
+        Ok(Err(_)) | Err(_) => Err(ExecutionFailure::SettlementUnknown.into()),
+    }
 }
 
 #[cfg(unix)]
@@ -340,14 +341,30 @@ pub(super) async fn run_tokio_command(
     let mut child = command
         .spawn()
         .with_context(|| format!("failed to start {description}"))?;
-    let output = read_process_output(
-        &mut child,
-        budget.timeout_ms,
-        budget.max_output_bytes,
-        request.output_observer.as_deref(),
-    )
-    .await
-    .with_context(|| format!("failed to wait for {description}"))?;
+    let budget = *budget;
+    // Cancellation drops only the sender, so the owner can finish reaping.
+    let (cancel_guard, cancelled) = tokio::sync::oneshot::channel::<()>();
+    let owner = tokio::spawn(async move {
+        tokio::select! {
+            biased;
+            _ = cancelled => {
+                ProcessGroupGuard::for_child(&child).kill();
+                stop_and_reap(&mut child).await?;
+                Err(ExecutionFailure::Cancelled.into())
+            }
+            output = read_process_output(
+                &mut child,
+                budget.timeout_ms,
+                budget.max_output_bytes,
+                request.output_observer.as_deref(),
+            ) => output,
+        }
+    });
+    let output = owner
+        .await
+        .context("sandbox command owner failed")?
+        .with_context(|| format!("failed to wait for {description}"))?;
+    drop(cancel_guard);
 
     Ok(CommandOutput {
         stdout: output.stdout,
@@ -372,6 +389,10 @@ fn apply_budget_pre_exec(
     }
     Ok(())
 }
+
+#[cfg(all(test, unix))]
+#[path = "process_lifecycle_tests.rs"]
+mod lifecycle_tests;
 
 #[cfg(test)]
 mod tests {

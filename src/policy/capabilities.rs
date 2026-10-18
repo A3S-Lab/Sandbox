@@ -17,6 +17,10 @@ pub struct BackendCapabilities {
     pub resource_output_limit: bool,
     pub resource_memory_limit: bool,
     pub resource_process_limit: bool,
+    /// The OS boundary contains descendants that leave the original process group.
+    pub process_tree_cleanup: bool,
+    /// The OS boundary stops the workload when the owning host process dies.
+    pub host_exit_cleanup: bool,
 }
 
 impl BackendCapabilities {
@@ -43,6 +47,8 @@ impl BackendCapabilities {
             resource_output_limit: true,
             resource_memory_limit: cfg!(any(windows, target_os = "linux")),
             resource_process_limit: cfg!(windows),
+            process_tree_cleanup: cfg!(any(target_os = "linux", windows)),
+            host_exit_cleanup: cfg!(target_os = "linux"),
         }
     }
 

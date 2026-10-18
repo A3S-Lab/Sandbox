@@ -176,9 +176,12 @@ pub fn posix_shell_single_quote(value: &str) -> String {
 /// that mount namespace, so mediation must stage a guest-visible copy under
 /// session scratch (which is always allow_read + allow_write).
 pub fn stage_relay_into_scratch(scratch: &Path) -> Result<PathBuf> {
-    let host = resolve_relay_executable()?;
+    stage_relay_from_path(scratch, &resolve_relay_executable()?)
+}
+
+fn stage_relay_from_path(scratch: &Path, host: &Path) -> Result<PathBuf> {
     let guest = scratch.join("a3s-sandbox-relay");
-    std::fs::copy(&host, &guest).with_context(|| {
+    std::fs::copy(host, &guest).with_context(|| {
         format!(
             "failed to stage relay {} into {}",
             host.display(),
@@ -382,10 +385,8 @@ mod tests {
             perms.set_mode(0o700);
             std::fs::set_permissions(&host, perms).unwrap();
         }
-        std::env::set_var("A3S_SANDBOX_RELAY", &host);
         let scratch = tempfile::tempdir().unwrap();
-        let staged = stage_relay_into_scratch(scratch.path()).unwrap();
-        std::env::remove_var("A3S_SANDBOX_RELAY");
+        let staged = stage_relay_from_path(scratch.path(), &host).unwrap();
         assert_eq!(staged, scratch.path().join("a3s-sandbox-relay"));
         assert_eq!(std::fs::read(&staged).unwrap(), b"relay-bytes");
         #[cfg(unix)]

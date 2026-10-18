@@ -20,6 +20,12 @@ Enterprise GA for this crate means **A is shipped and evidenced**, and **B stays
 explicitly refused** until an independent reviewer signs
 [`INDEPENDENT_REVIEW.md`](INDEPENDENT_REVIEW.md).
 
+Lifecycle correction (2026-10-18): the historical Claim A does not qualify
+complete macOS descendant or host-exit cleanup. Its Seatbelt boundary retains
+filesystem/network enforcement; process-group cleanup does not contain
+`setsid`/`setpgid` descendants. The current qualification campaign is tracked
+in [ROADMAP.md](../ROADMAP.md#lifecycle-and-delivery-qualification).
+
 ## Gate evidence (Claim A)
 
 | Requirement | Evidence | Status |

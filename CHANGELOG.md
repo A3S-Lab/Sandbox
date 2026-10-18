@@ -1,3 +1,37 @@
+## [Unreleased]
+
+### Changed
+
+- Capability reports distinguish launcher probes from process-tree and host-exit
+  cleanup guarantees. `NativeSandbox::probe` now returns its `CapabilityReport`;
+  wrappers returning `Result<()>` must discard that report explicitly. Public
+  report/capability struct changes require a breaking-version release.
+- `CapabilityReport::require_lifetime_containment` refuses missing guarantees
+  with stable typed `ExecutionUnavailable` reasons. macOS native cleanup and
+  Windows host-exit cleanup are not advertised as qualified.
+
+### Fixed
+
+- Independent Windows sandboxes no longer share an AppContainer SID. ACL cleanup
+  revokes only its own SID instead of restoring a stale whole-DACL snapshot.
+  Denials preserve inheritance, and Windows applies goal-loop write exceptions.
+
+- Windows creates AppContainer processes inside their kill-on-close Job using
+  `PROC_THREAD_ATTRIBUTE_JOB_LIST`, closing the suspended-process orphan window.
+  This requires Windows 10 / Server 2016 or newer; unsupported creation refuses.
+- Windows output deadlines include delta observers; completion observers are
+  bounded. Cancellation retains ACL, scratch and workspace ownership until Job
+  settlement; unconfirmed termination is a typed non-replayable failure.
+
+- CLI execution no longer converts a signal/unknown negative exit code into
+  successful exit zero.
+- Unix capture observes root exit while draining pipes, stops the original
+  process group before waiting for inherited pipe EOF, and bounds completion
+  observers. Read failures no longer become successful output text.
+- Unix cancellation retains an execution owner to reap the child, including
+  cancellation before that owner is first polled. Unconfirmed reaping and
+  observer timeouts preserve typed non-replayable `ExecutionFailure` reasons.
+
 ## [0.2.3] - 2026-10-15
 
 ### Added
