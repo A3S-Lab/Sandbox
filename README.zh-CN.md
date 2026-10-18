@@ -75,7 +75,7 @@ macOS 后代进程能通过 `setsid` 或 `setpgid` 脱离原始进程组。Seatb
 | Windows | AppContainer 内的 PowerShell 7、受限工作区 ACL、临时驱动器，以及 kill-on-close Job Object | Windows 10 / Server 2016 及以上；系统 Program Files 下的 PowerShell 7 |
 | 其他目标 | 显式的不支持平台错误 | 无宿主回退 |
 
-后端在编译时选择，而策略构造与命令输出保持平台中立。同一宿主中的相同工作区执行会串行化。每个 Windows 沙箱使用独立的 AppContainer 身份，清理仅撤销该身份的临时 ACL 权限项；跨宿主协调和宿主崩溃后的恢复仍待验收。
+后端在编译时选择，而策略构造与命令输出保持平台中立。Windows 执行使用物理目录租约协调跨宿主的同一工作区，覆盖大小写不同的路径。宿主需要对工作区根目录拥有添加文件权限；租约阻止执行期间替换根目录。每个沙箱使用独立的 AppContainer 身份，清理仅撤销该身份的临时 ACL 权限项。原生租约验收仍待完成，宿主崩溃后的恢复仍未通过验收，完整宿主退出清理准入保持不可用。
 
 ## 执行模型
 

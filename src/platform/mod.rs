@@ -35,6 +35,8 @@ mod windows;
 mod windows_security;
 #[cfg(windows)]
 mod windows_shell;
+#[cfg(windows)]
+mod windows_workspace;
 
 #[cfg(target_os = "linux")]
 pub(crate) use linux::PlatformSandbox;

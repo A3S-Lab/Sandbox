@@ -527,6 +527,8 @@ impl NativeSandbox {
         if request.command.contains('\0') {
             bail!("native sandbox command contains a NUL byte");
         }
+        #[cfg(windows)]
+        let workspace_lease = self.platform.acquire_workspace_lease().await?;
         let scratch = tempfile::Builder::new()
             .prefix("a3s-sandbox-")
             .tempdir()
@@ -699,11 +701,17 @@ impl NativeSandbox {
             {
                 if let Some(client) = mediator_pipe_client {
                     self.platform
-                        .execute_with_mediator_client(&policy, request, client, scratch.clone())
+                        .execute_with_mediator_client(
+                            &policy,
+                            request,
+                            client,
+                            scratch.clone(),
+                            workspace_lease,
+                        )
                         .await?
                 } else {
                     self.platform
-                        .execute(&policy, request, scratch.clone())
+                        .execute(&policy, request, scratch.clone(), workspace_lease)
                         .await?
                 }
             }

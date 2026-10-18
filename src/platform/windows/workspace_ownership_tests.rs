@@ -5,8 +5,12 @@ use std::io::{Read, Write};
 use std::time::Duration;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 
-async fn acquire(workspace: &Path) -> tokio::sync::OwnedMutexGuard<()> {
-    workspace_execution_gate(workspace).lock_owned().await
+async fn acquire(workspace: &Path) -> WorkspaceLease {
+    WorkspaceDirectory::capture(workspace)
+        .unwrap()
+        .acquire()
+        .await
+        .unwrap()
 }
 
 #[tokio::test]
@@ -92,4 +96,72 @@ async fn case_aliases_share_one_workspace_owner() {
             .is_err(),
         "a differently cased path bypassed ownership of the physical directory"
     );
+}
+
+#[tokio::test]
+async fn different_workspaces_keep_independent_owners() {
+    let left = tempfile::tempdir().unwrap();
+    let right = tempfile::tempdir().unwrap();
+    let _left = acquire(left.path()).await;
+    let _right = tokio::time::timeout(Duration::from_secs(2), acquire(right.path()))
+        .await
+        .unwrap();
+    std::fs::write(left.path().join("left"), b"left").unwrap();
+    std::fs::write(right.path().join("right"), b"right").unwrap();
+    assert!(!left.path().join("right").exists());
+    assert!(!right.path().join("left").exists());
+}
+
+#[tokio::test]
+async fn directory_ownership_can_be_released_from_another_thread() {
+    let workspace = tempfile::tempdir().unwrap();
+    let lease = acquire(workspace.path()).await;
+    std::thread::spawn(move || drop(lease)).join().unwrap();
+    let _next = tokio::time::timeout(Duration::from_secs(2), acquire(workspace.path()))
+        .await
+        .unwrap();
+    std::fs::write(workspace.path().join("next-owner"), b"ready").unwrap();
+    assert_eq!(
+        std::fs::read(workspace.path().join("next-owner")).unwrap(),
+        b"ready"
+    );
+}
+
+#[tokio::test]
+async fn an_active_owner_pins_the_root_name_but_allows_file_writes() {
+    let parent = tempfile::tempdir().unwrap();
+    let workspace = parent.path().join("workspace");
+    let moved = parent.path().join("moved");
+    std::fs::create_dir(&workspace).unwrap();
+    let lease = acquire(&workspace).await;
+    assert!(std::fs::rename(&workspace, &moved).is_err());
+    std::fs::write(workspace.join("during-lease"), b"allowed").unwrap();
+    drop(lease);
+    std::fs::rename(&workspace, &moved).unwrap();
+    assert_eq!(
+        std::fs::read(moved.join("during-lease")).unwrap(),
+        b"allowed"
+    );
+}
+
+#[tokio::test]
+async fn replacing_the_bound_root_is_refused_before_policy_initialization() {
+    let parent = tempfile::tempdir().unwrap();
+    let workspace = parent.path().join("workspace");
+    let moved = parent.path().join("original");
+    std::fs::create_dir(&workspace).unwrap();
+    let sandbox = crate::NativeSandbox::new(&workspace).unwrap();
+    std::fs::rename(&workspace, &moved).unwrap();
+    std::fs::create_dir(&workspace).unwrap();
+    let error = sandbox
+        .exec_command("Set-Content -LiteralPath sentinel -Value unexpected")
+        .await
+        .unwrap_err();
+    assert!(
+        error.to_string().contains("workspace identity changed"),
+        "{error:#}"
+    );
+    assert!(!workspace.join("sentinel").exists());
+    assert!(!workspace.join(".a3s").exists());
+    assert!(!moved.join("sentinel").exists());
 }

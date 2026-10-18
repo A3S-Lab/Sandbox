@@ -2,6 +2,7 @@
 
 use super::windows_security::{AppContainerProfile, ExecutionAcls, SidBuffer};
 use super::windows_shell::{build_powershell_command, encode_powershell_command};
+use super::windows_workspace::{WorkspaceDirectory, WorkspaceLease};
 use crate::policy::{
     requires_directory_placeholder, resolve_executable, EnforcedPolicy, ResolvedResourceBudget,
 };
@@ -52,6 +53,7 @@ const PROCESS_LIMIT: u32 = 256;
 pub(crate) struct PlatformSandbox {
     powershell: PathBuf,
     profile: AppContainerProfile,
+    workspace: WorkspaceDirectory,
 }
 
 impl PlatformSandbox {
@@ -60,11 +62,17 @@ impl PlatformSandbox {
     }
     pub(crate) fn new(workspace: &Path) -> Result<Self> {
         let powershell = resolve_powershell(workspace)?;
+        let workspace = WorkspaceDirectory::capture(workspace)?;
         let profile = AppContainerProfile::create()?;
         Ok(Self {
             powershell,
             profile,
+            workspace,
         })
+    }
+
+    pub(crate) async fn acquire_workspace_lease(&self) -> Result<WorkspaceLease> {
+        self.workspace.acquire().await
     }
 
     /// Factory that recreates the same pipe name with the session AppContainer SID.
@@ -93,8 +101,10 @@ impl PlatformSandbox {
         policy: &EnforcedPolicy,
         request: CommandRequest,
         scratch: std::sync::Arc<tempfile::TempDir>,
+        workspace_lease: WorkspaceLease,
     ) -> Result<CommandOutput> {
-        self.execute_inner(policy, request, None, scratch).await
+        self.execute_inner(policy, request, None, scratch, workspace_lease)
+            .await
     }
 
     /// Execute with an inherited, already-connected mediation pipe client handle.
@@ -104,9 +114,16 @@ impl PlatformSandbox {
         request: CommandRequest,
         mediator_client: OwnedHandle,
         scratch: std::sync::Arc<tempfile::TempDir>,
+        workspace_lease: WorkspaceLease,
     ) -> Result<CommandOutput> {
-        self.execute_inner(policy, request, Some(mediator_client), scratch)
-            .await
+        self.execute_inner(
+            policy,
+            request,
+            Some(mediator_client),
+            scratch,
+            workspace_lease,
+        )
+        .await
     }
 
     async fn execute_inner(
@@ -115,10 +132,8 @@ impl PlatformSandbox {
         request: CommandRequest,
         mediator_client: Option<OwnedHandle>,
         scratch: std::sync::Arc<tempfile::TempDir>,
+        workspace_lease: WorkspaceLease,
     ) -> Result<CommandOutput> {
-        // Keep one owner per workspace while temporary authorization is active.
-        let execution_gate = workspace_execution_gate(&policy.workspace);
-        let execution_guard = execution_gate.lock_owned().await;
         let pins = WorkspacePins::acquire(policy)?;
         let budget = ResolvedResourceBudget::resolve(&policy.resources, request.timeout_ms)?;
         budget.validate_for_backend(crate::policy::BackendCapabilities::native_gate2())?;
@@ -177,7 +192,7 @@ impl PlatformSandbox {
             drop(acls);
             drop(pins);
             drop(scratch);
-            drop(execution_guard);
+            drop(workspace_lease);
             finish_execution(execution, acl_cleanup)
         });
         let result = owner
@@ -190,19 +205,6 @@ impl PlatformSandbox {
 
 #[cfg(test)]
 mod workspace_ownership_tests;
-
-fn workspace_execution_gate(workspace: &Path) -> std::sync::Arc<tokio::sync::Mutex<()>> {
-    use std::sync::Arc;
-    static GATES: OnceLock<Mutex<HashMap<PathBuf, Arc<tokio::sync::Mutex<()>>>>> = OnceLock::new();
-    let gates = GATES.get_or_init(|| Mutex::new(HashMap::new()));
-    let key = workspace.to_path_buf();
-    let mut map = gates
-        .lock()
-        .unwrap_or_else(|poisoned| poisoned.into_inner());
-    map.entry(key)
-        .or_insert_with(|| Arc::new(tokio::sync::Mutex::new(())))
-        .clone()
-}
 
 fn drive_allocation_gate() -> &'static Mutex<()> {
     static GATE: OnceLock<Mutex<()>> = OnceLock::new();
@@ -1142,15 +1144,6 @@ mod tests {
         );
     }
 
-    #[test]
-    fn workspace_execution_gates_are_isolated_by_path() {
-        let left = workspace_execution_gate(Path::new(r"C:\sandbox-a"));
-        let right = workspace_execution_gate(Path::new(r"C:\sandbox-b"));
-        let left_again = workspace_execution_gate(Path::new(r"C:\sandbox-a"));
-        assert!(!std::sync::Arc::ptr_eq(&left, &right));
-        assert!(std::sync::Arc::ptr_eq(&left, &left_again));
-    }
-
     /// Live AppContainer guest proof for the named-pipe CONNECT bridge.
     ///
     /// Runs only on Windows. Green on Windows CI is the evidence behind
@@ -1251,6 +1244,7 @@ $client.Dispose()
                 },
                 client,
                 scratch.clone(),
+                sandbox.acquire_workspace_lease().await.unwrap(),
             )
             .await
             .expect("allow execute");
@@ -1326,6 +1320,7 @@ $client.Dispose()
                 },
                 deny_client,
                 scratch.clone(),
+                sandbox.acquire_workspace_lease().await.unwrap(),
             )
             .await
             .expect("deny execute");
@@ -1372,6 +1367,7 @@ try {{
                     env: None,
                 },
                 scratch.clone(),
+                sandbox.acquire_workspace_lease().await.unwrap(),
             )
             .await
             .expect("egress execute");
