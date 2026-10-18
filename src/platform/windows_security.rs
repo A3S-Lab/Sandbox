@@ -24,7 +24,9 @@ use windows_sys::Win32::Security::Authorization::{
     SetSecurityInfo, EXPLICIT_ACCESS_W, GRANT_ACCESS, REVOKE_ACCESS, SDDL_REVISION_1, SET_ACCESS,
     SE_FILE_OBJECT, TRUSTEE_IS_SID, TRUSTEE_IS_UNKNOWN,
 };
-use windows_sys::Win32::Security::Isolation::DeriveAppContainerSidFromAppContainerName;
+use windows_sys::Win32::Security::Isolation::{
+    CreateAppContainerProfile, DeleteAppContainerProfile, DeriveAppContainerSidFromAppContainerName,
+};
 use windows_sys::Win32::Security::{
     DeleteAce, FreeSid, GetAce, GetLengthSid, GetSecurityDescriptorControl,
     InitializeSecurityDescriptor, IsValidSid, SetKernelObjectSecurity, SetSecurityDescriptorDacl,
@@ -119,29 +121,156 @@ impl SidBuffer {
 #[derive(Debug)]
 pub(super) struct AppContainerProfile {
     pub(super) sid: SidBuffer,
-    #[cfg(test)]
     pub(super) name: String,
 }
 
 impl AppContainerProfile {
     pub(super) fn create() -> Result<Self> {
-        let profile_name = appcontainer_profile_name();
-        let name = wide_null(OsStr::new(&profile_name));
+        let name = appcontainer_profile_name();
+        Ok(Self {
+            sid: derive_profile_sid(&name)?,
+            name,
+        })
+    }
+
+    pub(super) fn register(&self, lease: &WorkspaceLease) -> Result<RegisteredProfile> {
+        let journal = profile_journal(lease)?;
+        if journal.read()?.is_some() {
+            bail!("Windows AppContainer profile recovery is incomplete");
+        }
+        let intent = ProfileIntent {
+            version: 1,
+            workspace: lease.journal_name.clone(),
+            name: self.name.clone(),
+            sid: self.sid.clone(),
+        };
+        journal.write(
+            &serde_json::to_vec(&intent).context("encode Windows profile recovery intent")?,
+        )?;
+        let registered = RegisteredProfile {
+            journal,
+            name: self.name.clone(),
+            active: true,
+        };
+        let name = wide_null(OsStr::new(&self.name));
         let mut sid = null_mut();
-        // Commands use private scratch storage; registering a profile would leave persistent state.
-        let status = unsafe { DeriveAppContainerSidFromAppContainerName(name.as_ptr(), &mut sid) };
+        let status = unsafe {
+            CreateAppContainerProfile(
+                name.as_ptr(),
+                name.as_ptr(),
+                name.as_ptr(),
+                null(),
+                0,
+                &mut sid,
+            )
+        };
+        let actual = if sid.is_null() {
+            None
+        } else {
+            Some(SidBuffer::from_allocated(sid)?)
+        };
         if status < 0 {
             bail!(
-                "DeriveAppContainerSidFromAppContainerName failed with HRESULT 0x{:08x}",
+                "CreateAppContainerProfile failed with HRESULT 0x{:08x}",
                 status as u32
             );
         }
-        Ok(Self {
-            sid: SidBuffer::from_allocated(sid)?,
-            #[cfg(test)]
-            name: profile_name,
-        })
+        if actual.as_ref().map(|sid| &sid.words) != Some(&self.sid.words) {
+            bail!("registered AppContainer profile has an unexpected SID");
+        }
+        Ok(registered)
     }
+
+    pub(super) fn recover(lease: &WorkspaceLease) -> Result<()> {
+        let journal = profile_journal(lease)?;
+        let Some(bytes) = journal.read()? else {
+            return Ok(());
+        };
+        let intent: ProfileIntent =
+            serde_json::from_slice(&bytes).context("decode Windows profile recovery intent")?;
+        let valid_name = intent
+            .name
+            .strip_prefix("A3S.Sandbox.Execution.")
+            .is_some_and(|suffix| {
+                suffix.len() == 32
+                    && suffix
+                        .bytes()
+                        .all(|byte| matches!(byte, b'0'..=b'9' | b'a'..=b'f'))
+            });
+        if intent.version != 1
+            || intent.workspace != lease.journal_name
+            || !valid_name
+            || derive_profile_sid(&intent.name)?.words != intent.sid.words
+        {
+            bail!("Windows profile recovery intent has an invalid identity or workspace");
+        }
+        RegisteredProfile {
+            journal,
+            name: intent.name,
+            active: true,
+        }
+        .remove()
+        .context("recover abandoned Windows AppContainer profile")
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ProfileIntent {
+    version: u8,
+    workspace: String,
+    name: String,
+    sid: SidBuffer,
+}
+
+pub(super) struct RegisteredProfile {
+    journal: RecoveryJournal,
+    name: String,
+    active: bool,
+}
+
+impl RegisteredProfile {
+    pub(super) fn remove(&mut self) -> Result<()> {
+        if !self.active {
+            return Ok(());
+        }
+        let name = wide_null(OsStr::new(&self.name));
+        let status = unsafe { DeleteAppContainerProfile(name.as_ptr()) };
+        if status < 0 {
+            bail!(
+                "DeleteAppContainerProfile failed with HRESULT 0x{:08x}",
+                status as u32
+            );
+        }
+        self.journal.clear()?;
+        self.active = false;
+        Ok(())
+    }
+}
+
+impl Drop for RegisteredProfile {
+    fn drop(&mut self) {
+        if let Err(error) = self.remove() {
+            tracing::warn!(error = %error, "Windows AppContainer profile cleanup remains pending");
+        }
+    }
+}
+
+fn profile_journal(lease: &WorkspaceLease) -> Result<RecoveryJournal> {
+    RecoveryJournal::open(&format!("{}.profile", lease.journal_name))
+}
+
+fn derive_profile_sid(profile_name: &str) -> Result<SidBuffer> {
+    let name = wide_null(OsStr::new(profile_name));
+    let mut sid = null_mut();
+    let status = unsafe { DeriveAppContainerSidFromAppContainerName(name.as_ptr(), &mut sid) };
+    if status < 0 {
+        bail!(
+            "DeriveAppContainerSidFromAppContainerName failed with HRESULT 0x{:08x}",
+            status as u32
+        );
+    }
+    SidBuffer::from_allocated(sid)
 }
 
 fn appcontainer_profile_name() -> String {

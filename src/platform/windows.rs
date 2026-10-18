@@ -75,6 +75,7 @@ impl PlatformSandbox {
         let lease = self.workspace.acquire().await?;
         tokio::task::spawn_blocking(move || {
             ExecutionAcls::recover(&lease)?;
+            AppContainerProfile::recover(&lease)?;
             Ok(lease)
         })
         .await
@@ -143,6 +144,7 @@ impl PlatformSandbox {
         let pins = WorkspacePins::acquire(policy)?;
         let budget = ResolvedResourceBudget::resolve(&policy.resources, request.timeout_ms)?;
         budget.validate_for_backend(crate::policy::BackendCapabilities::native_gate2())?;
+        let mut profile = self.profile.register(&workspace_lease)?;
         let mut acls = ExecutionAcls::apply(policy, &self.profile.sid, &workspace_lease)?;
         let child = policy
             .child_environment(request.env.as_deref())
@@ -196,10 +198,12 @@ impl PlatformSandbox {
             .await;
             let acl_cleanup = acls.restore();
             drop(acls);
+            let profile_cleanup = profile.remove();
+            drop(profile);
             drop(pins);
             drop(scratch);
             drop(workspace_lease);
-            finish_execution(execution, acl_cleanup)
+            finish_execution(finish_execution(execution, acl_cleanup), profile_cleanup)
         });
         let result = owner
             .await
