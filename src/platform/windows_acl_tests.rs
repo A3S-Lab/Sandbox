@@ -99,6 +99,85 @@ fn acl_state(path: &Path) -> (bool, Vec<Vec<u8>>) {
     (control & SE_DACL_PROTECTED != 0, entries)
 }
 
+#[tokio::test]
+async fn restarting_after_host_death_restores_workspace_authorization() {
+    const CHILD: &str = "A3S_SANDBOX_TEST_ACL_CRASH_CHILD";
+    if let Some(workspace) = std::env::var_os(CHILD) {
+        let workspace = PathBuf::from(workspace);
+        let ready = workspace
+            .join("ready")
+            .to_string_lossy()
+            .replace('\'', "''");
+        let sandbox = crate::NativeSandbox::new(&workspace).unwrap();
+        sandbox
+            .exec_command(format!(
+                "[IO.File]::WriteAllText('{ready}', 'running'); Start-Sleep -Seconds 120"
+            ))
+            .await
+            .unwrap();
+        panic!("the fixture host must be terminated while its command is running");
+    }
+
+    let workspace = tempfile::tempdir().unwrap();
+    let control = workspace.path().join(".git");
+    let policy = control.join("config");
+    std::fs::create_dir(&control).unwrap();
+    std::fs::write(&policy, b"host-policy").unwrap();
+    let paths = [workspace.path(), control.as_path(), policy.as_path()];
+    let original = paths.map(acl_state);
+    let mut owner = tokio::process::Command::new(std::env::current_exe().unwrap())
+        .args([
+            "--exact",
+            "platform::windows_security::acl_tests::restarting_after_host_death_restores_workspace_authorization",
+            "--nocapture",
+        ])
+        .env(CHILD, workspace.path())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::inherit())
+        .kill_on_drop(true)
+        .spawn()
+        .unwrap();
+    tokio::time::timeout(std::time::Duration::from_secs(60), async {
+        while !workspace.path().join("ready").exists() {
+            assert!(owner.try_wait().unwrap().is_none(), "fixture host exited");
+            tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .expect("the real sandbox command must run before host termination");
+    assert_ne!(
+        acl_state(workspace.path()),
+        original[0],
+        "the fixture must observe active temporary authorization"
+    );
+    owner.start_kill().unwrap();
+    let status = tokio::time::timeout(std::time::Duration::from_secs(5), owner.wait())
+        .await
+        .unwrap()
+        .unwrap();
+    assert!(!status.success());
+
+    let replacement = crate::NativeSandbox::new(workspace.path()).unwrap();
+    let output = tokio::time::timeout(
+        std::time::Duration::from_secs(30),
+        replacement.exec_command("[Console]::Out.Write('recovered')"),
+    )
+    .await
+    .unwrap()
+    .unwrap();
+    assert_eq!(output.exit_code, 0, "{output:?}");
+    assert_eq!(output.stdout, "recovered");
+    for (path, expected) in paths.into_iter().zip(original) {
+        assert_eq!(
+            acl_state(path),
+            expected,
+            "restarting left stale workspace authorization on {}",
+            path.display()
+        );
+    }
+    assert_eq!(std::fs::read(&policy).unwrap(), b"host-policy");
+}
+
 #[test]
 fn cleanup_preserves_host_acl_entries_and_inheritance() {
     for already_protected in [false, true] {
