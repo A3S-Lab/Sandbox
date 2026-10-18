@@ -184,6 +184,9 @@ func TestCloseKillAfterGrace(t *testing.T) {
 	if elapsed := time.Since(start); elapsed < 100*time.Millisecond {
 		t.Fatalf("close returned after %v; kill grace was not applied", elapsed)
 	}
+	if err := c.Close(); err != nil {
+		t.Fatalf("repeated close after forced termination: %v", err)
+	}
 }
 
 // --- Liveness and fresh capabilities ----------------------------------------

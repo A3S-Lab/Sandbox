@@ -309,24 +309,23 @@ func (c *Client) ExecStream(ctx context.Context, onDelta func(delta string), com
 // depend on the reported backend guarantees. Close is idempotent.
 func (c *Client) Close() error {
 	c.mu.Lock()
-	if c.closed {
-		c.mu.Unlock()
-		<-c.waitDone
-		return c.waitErr
-	}
+	alreadyClosed := c.closed
 	c.closed = true
 	c.mu.Unlock()
-
-	_ = c.stdin.Close() // EOF: the bridge drops the sandbox and kills the trees
-	timer := time.NewTimer(c.grace)
-	defer timer.Stop()
-	select {
-	case <-c.waitDone:
-	case <-timer.C:
-		if c.cmd.Process != nil {
-			_ = c.cmd.Process.Kill()
-		}
+	if alreadyClosed {
 		<-c.waitDone
+	} else {
+		_ = c.stdin.Close() // EOF: the bridge drops the sandbox and kills the trees
+		timer := time.NewTimer(c.grace)
+		defer timer.Stop()
+		select {
+		case <-c.waitDone:
+		case <-timer.C:
+			if c.cmd.Process != nil {
+				_ = c.cmd.Process.Kill()
+			}
+			<-c.waitDone
+		}
 	}
 	c.mu.Lock()
 	err := c.waitErr

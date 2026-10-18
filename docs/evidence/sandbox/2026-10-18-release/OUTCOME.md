@@ -41,6 +41,17 @@ an ACL edit made while the directory is protected; both cleanup contracts run
 before the complete Windows campaign. Strict all-target MSVC Clippy passes;
 native acceptance remains required before publication.
 
+Run https://github.com/A3S-Lab/Sandbox/actions/runs/39086933515 passes both
+Windows cleanup contracts in isolation. The macOS Rust suite remains green,
+but `TestCloseFailsSubsequentCalls` exposes inconsistent Go close results after
+a bridge pipe-close race. That case passes 200 isolated local repetitions;
+the forced-termination close contract deterministically reproduces the same
+idempotence defect when repeated close is added (first close succeeds, second
+returns `ErrBridgeExited: signal: killed`). Both calls now share the original
+close-result normalization and synchronized exit-error reads. The amended
+contract passes alone and the full Go SDK race-detector suite passes locally;
+the final three-platform gate follows.
+
 ## What landed
 
 The public workflow pins Rust 1.97.1 and action identities, records its source

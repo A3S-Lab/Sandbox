@@ -17,11 +17,12 @@ func (c *Client) call(ctx context.Context, method string, params any) (json.RawM
 func (c *Client) callWithSink(ctx context.Context, method string, params any, sink func(outputEvent)) (json.RawMessage, error) {
 	c.mu.Lock()
 	if c.closed {
+		waitErr := c.waitErr
 		c.mu.Unlock()
 		// A closed client implies the bridge exited (see Close); surface the
 		// precise exit error when one was recorded.
-		if c.waitErr != nil {
-			return nil, fmt.Errorf("sandbox: %w", c.waitErr)
+		if waitErr != nil {
+			return nil, fmt.Errorf("sandbox: %w", waitErr)
 		}
 		return nil, ErrBridgeExited
 	}

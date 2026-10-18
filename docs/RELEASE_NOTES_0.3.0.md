@@ -28,6 +28,7 @@ The Go SDK adds `ProbeReport`; its existing error-only `Probe` remains valid.
   inheritance, and remove parent delete-child rights over protected entries.
 - Coordinate Windows ACL mutations with a host-global mutex and bounded waits.
 - Preserve signal failures as nonzero CLI exits.
+- Keep Go SDK close idempotent after forced bridge termination or a pipe-close race.
 - Preserve the Go SDK, bridge, runtime-probed Linux cgroup quota support,
   credential hardlink checks and bubblewrap executable discovery.
 
