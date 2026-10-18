@@ -522,7 +522,9 @@ fn canonical_system_toolchains_do_not_receive_temporary_grants() {
         let system = root.join("system").canonicalize().unwrap();
         let binary = system.join("tool.exe");
         let original = [acl_state(&system), acl_state(&binary)];
+        let configured = std::env::var_os("PROGRAMFILES");
         let profile = AppContainerProfile::create().unwrap();
+        let observed = system_tree_prefixes();
         let mut permissions = lease(&profile.sid);
         permissions
             .grant_user_toolchain_binaries(
@@ -534,7 +536,8 @@ fn canonical_system_toolchains_do_not_receive_temporary_grants() {
         assert_eq!(
             acl_state(&system),
             original[0],
-            "a canonical system root received a grant"
+            "a canonical system root received a grant: root={system:?}; before={configured:?}; after={:?}; prefixes={observed:?}",
+            std::env::var_os("PROGRAMFILES"),
         );
         assert_eq!(
             acl_state(&binary),
@@ -554,6 +557,29 @@ fn canonical_system_toolchains_do_not_receive_temporary_grants() {
         .env("PROGRAMFILES", root.path().join("system"))
         .status().unwrap();
     assert!(status.success(), "canonical system-tree exclusion failed");
+}
+
+#[test]
+fn windows_apps_root_does_not_receive_temporary_authorization() {
+    let local = std::env::var_os("LOCALAPPDATA").expect("Windows host must provide LOCALAPPDATA");
+    let windows_apps = PathBuf::from(local).join("Microsoft").join("WindowsApps");
+    let original = windows_apps.is_dir().then(|| acl_state(&windows_apps));
+    let canonical = windows_apps.canonicalize().unwrap_or(windows_apps.clone());
+    let workspace = tempfile::tempdir().unwrap();
+    let scratch = tempfile::tempdir().unwrap();
+    let profile = AppContainerProfile::create().unwrap();
+    let mut permissions = lease(&profile.sid);
+    permissions
+        .grant_user_toolchain_binaries(&[canonical], workspace.path(), scratch.path())
+        .unwrap();
+    assert_eq!(windows_apps.is_dir(), original.is_some());
+    if let Some(original) = original {
+        assert_eq!(
+            acl_state(&windows_apps),
+            original,
+            "WindowsApps received temporary authorization"
+        );
+    }
 }
 
 #[test]

@@ -47,6 +47,14 @@ jobs:
       - name: Verify macOS CONNECT in isolation
         if: runner.os == 'macOS'
         run: cargo test --lib --locked policy::gate4_integration::gate4_macos_sandbox_mediator_tunnels_allowed_connect -- --exact --nocapture
+      - name: Verify Windows system toolchain classification in isolation
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cargo test --lib --locked platform::windows_security::acl_tests::canonical_system_toolchains_do_not_receive_temporary_grants -- --exact --nocapture 2>&1 | Tee-Object system-toolchain.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo test --lib --locked platform::windows_security::acl_tests::windows_apps_root_does_not_receive_temporary_authorization -- --exact --nocapture 2>&1 | Tee-Object windows-apps.log
+          exit $LASTEXITCODE
       - name: Verify Windows root pin and ordinary updates in isolation
         if: runner.os == 'Windows'
         shell: pwsh

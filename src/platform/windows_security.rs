@@ -1010,7 +1010,13 @@ fn modify_path_acl(
 
 #[cfg(test)]
 fn query_path_dacl(path: &Path, _wide: &[u16]) -> Result<(*mut ACL, LocalAllocation)> {
-    query_handle_dacl(&open_acl_target(path)?, path)
+    let target = OpenOptions::new()
+        .read(true)
+        .access_mode(READ_CONTROL | FILE_READ_ATTRIBUTES)
+        .share_mode(FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE)
+        .custom_flags(FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT)
+        .open(win32_process_path(path))?;
+    query_handle_dacl(&target, path)
 }
 
 fn query_handle_dacl(target: &File, path: &Path) -> Result<(*mut ACL, LocalAllocation)> {
@@ -1297,25 +1303,6 @@ mod tests {
         let err = unsafe { GetLastError() };
         assert_eq!(err, 5, "expected ERROR_ACCESS_DENIED (5), got {err}");
         drop(server);
-    }
-
-    #[test]
-    fn windows_apps_execution_aliases_are_not_acl_targets() {
-        let Some(local_app_data) = std::env::var_os("LOCALAPPDATA") else {
-            return;
-        };
-        let windows_apps = PathBuf::from(local_app_data)
-            .join("Microsoft")
-            .join("WindowsApps");
-        assert!(
-            system_tree_prefixes()
-                .iter()
-                .any(|prefix| prefix == &windows_apps),
-            "WindowsApps must be skipped; alias stubs return ERROR_CANT_RESOLVE_FILENAME"
-        );
-        assert!(is_skippable_acl_error(ERROR_ACCESS_DENIED));
-        assert!(is_skippable_acl_error(ERROR_CANT_RESOLVE_FILENAME));
-        assert!(!is_skippable_acl_error(32));
     }
 }
 

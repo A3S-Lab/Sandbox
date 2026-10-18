@@ -3,8 +3,10 @@
 ## Result
 
 A replacement for rejected source
-`91720eb4f10923ee7d8a747058a6f5a3b416e506` is prepared. Native qualification
-is pending. [The complete rejected Windows job](rejected-candidate-windows.log)
+`91720eb4f10923ee7d8a747058a6f5a3b416e506` is prepared. Native testing observes successful ordinary operation and ACL
+crash recovery, but two system-path classification contracts fail in the suite
+and alone; [diagnostic follow-up](../2026-10-18-windows-system-path-diagnostics/OUTCOME.md)
+retains the exact-source job. Full qualification remains pending. [The complete rejected Windows job](rejected-candidate-windows.log)
 retains its isolated 0 / 1 / 0 ordinary-operation failure and 126.91-second
 failed attempt. Linux and macOS jobs passed in
 [CI 39100432917](https://github.com/A3S-Lab/Sandbox/actions/runs/39100432917).
