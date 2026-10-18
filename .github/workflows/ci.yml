@@ -47,6 +47,9 @@ jobs:
       - name: Verify macOS CONNECT in isolation
         if: runner.os == 'macOS'
         run: cargo test --lib --locked policy::gate4_integration::gate4_macos_sandbox_mediator_tunnels_allowed_connect -- --exact --nocapture
+      - name: Verify Windows ACL restoration
+        if: runner.os == 'Windows'
+        run: cargo test --lib --locked platform::windows_security::acl_tests::cleanup_ -- --test-threads=1 --nocapture
       - name: Run tests
         id: unix-suite
         if: runner.os != 'Windows'

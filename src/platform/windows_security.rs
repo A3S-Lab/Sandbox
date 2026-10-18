@@ -24,11 +24,11 @@ use windows_sys::Win32::Security::Isolation::{
     CreateAppContainerProfile, DeriveAppContainerSidFromAppContainerName,
 };
 use windows_sys::Win32::Security::{
-    FreeSid, GetLengthSid, GetSecurityDescriptorControl, InitializeSecurityDescriptor,
-    SetKernelObjectSecurity, SetSecurityDescriptorDacl, ACL, DACL_SECURITY_INFORMATION,
-    NO_INHERITANCE, PROTECTED_DACL_SECURITY_INFORMATION, PSID, SECURITY_ATTRIBUTES,
-    SECURITY_DESCRIPTOR, SE_DACL_PROTECTED, SUB_CONTAINERS_AND_OBJECTS_INHERIT,
-    UNPROTECTED_DACL_SECURITY_INFORMATION,
+    DeleteAce, FreeSid, GetAce, GetLengthSid, GetSecurityDescriptorControl,
+    InitializeSecurityDescriptor, SetKernelObjectSecurity, SetSecurityDescriptorDacl, ACE_HEADER,
+    ACL, DACL_SECURITY_INFORMATION, INHERITED_ACE, NO_INHERITANCE,
+    PROTECTED_DACL_SECURITY_INFORMATION, PSID, SECURITY_ATTRIBUTES, SECURITY_DESCRIPTOR,
+    SE_DACL_PROTECTED, SUB_CONTAINERS_AND_OBJECTS_INHERIT, UNPROTECTED_DACL_SECURITY_INFORMATION,
 };
 use windows_sys::Win32::Storage::FileSystem::{
     CreateFileW, DELETE, FILE_FLAG_BACKUP_SEMANTICS, FILE_GENERIC_EXECUTE, FILE_GENERIC_READ,
@@ -186,8 +186,13 @@ fn appcontainer_profile_name() -> String {
 
 pub(super) struct ExecutionAcls {
     sid: SidBuffer,
-    paths: Vec<(PathBuf, bool, Option<bool>)>,
+    paths: Vec<(PathBuf, bool, Option<DaclRestoration>)>,
     modified: HashSet<PathBuf>,
+}
+
+struct DaclRestoration {
+    protected: bool,
+    converted_inherited: Vec<Vec<u8>>,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -674,23 +679,48 @@ fn modify_path_acl(
     access_mode: i32,
     inheritance: u32,
     protection: DaclProtection,
-    original_protection: &mut Option<bool>,
+    original_protection: &mut Option<DaclRestoration>,
 ) -> Result<()> {
     let _mutation = lock_acl_mutation(5_000)?;
     let security_path = win32_process_path(path);
     let wide = wide_null(security_path.as_os_str());
     let (mut old_acl, mut descriptor) = query_path_dacl(path, &wide)?;
+    let mut control = 0;
+    let mut revision = 0;
+    if protection != DaclProtection::Preserve
+        && unsafe { GetSecurityDescriptorControl(descriptor.0, &mut control, &mut revision) } == 0
+    {
+        return Err(last_windows_error("inspect Windows DACL inheritance state"));
+    }
 
     if protection == DaclProtection::Restrict {
         if original_protection.is_none() {
-            let mut control = 0;
-            let mut revision = 0;
-            if unsafe { GetSecurityDescriptorControl(descriptor.0, &mut control, &mut revision) }
-                == 0
-            {
-                return Err(last_windows_error("inspect Windows DACL inheritance state"));
+            let protected = control & SE_DACL_PROTECTED != 0;
+            let mut converted_inherited = Vec::new();
+            if !protected && !old_acl.is_null() {
+                for index in 0..u32::from(unsafe { (*old_acl).AceCount }) {
+                    let mut entry = null_mut();
+                    if unsafe { GetAce(old_acl, index, &mut entry) } == 0 {
+                        return Err(last_windows_error("inspect an inherited Windows ACE"));
+                    }
+                    let header = unsafe { &*entry.cast::<ACE_HEADER>() };
+                    if header.AceFlags & INHERITED_ACE as u8 != 0 {
+                        let mut bytes = unsafe {
+                            std::slice::from_raw_parts(
+                                entry.cast::<u8>(),
+                                usize::from(header.AceSize),
+                            )
+                        }
+                        .to_vec();
+                        bytes[1] &= !(INHERITED_ACE as u8);
+                        converted_inherited.push(bytes);
+                    }
+                }
             }
-            *original_protection = Some(control & SE_DACL_PROTECTED != 0);
+            *original_protection = Some(DaclRestoration {
+                protected,
+                converted_inherited,
+            });
         }
         // AppContainer restrictions must replace inherited grants, rather than rely on package-SID denies.
         let status = unsafe {
@@ -734,7 +764,33 @@ fn modify_path_acl(
         );
     }
     let _new_acl = LocalAllocation(new_acl.cast::<c_void>());
-    let protection_flags = match (protection, *original_protection) {
+    if protection == DaclProtection::Restore && control & SE_DACL_PROTECTED != 0 {
+        if let Some(original) = original_protection.as_ref() {
+            // Protection converts inherited ACEs to explicit ones; unprotecting alone duplicates them.
+            for converted in &original.converted_inherited {
+                for index in 0..u32::from(unsafe { (*new_acl).AceCount }) {
+                    let mut entry = null_mut();
+                    if unsafe { GetAce(new_acl, index, &mut entry) } == 0 {
+                        return Err(last_windows_error("inspect a converted Windows ACE"));
+                    }
+                    let header = unsafe { &*entry.cast::<ACE_HEADER>() };
+                    let bytes = unsafe {
+                        std::slice::from_raw_parts(entry.cast::<u8>(), usize::from(header.AceSize))
+                    };
+                    if bytes == converted {
+                        if unsafe { DeleteAce(new_acl, index) } == 0 {
+                            return Err(last_windows_error("remove a converted Windows ACE"));
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    let protection_flags = match (
+        protection,
+        original_protection.as_ref().map(|state| state.protected),
+    ) {
         (DaclProtection::Restrict, _) | (DaclProtection::Restore, Some(true)) => {
             PROTECTED_DACL_SECURITY_INFORMATION
         }

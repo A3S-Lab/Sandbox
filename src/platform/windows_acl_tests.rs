@@ -152,6 +152,34 @@ fn cleanup_preserves_host_acl_entries_and_inheritance() {
 }
 
 #[test]
+fn cleanup_preserves_acl_edits_made_while_a_directory_is_protected() {
+    let workspace = tempfile::tempdir().unwrap();
+    let control = workspace.path().join("control");
+    std::fs::create_dir(&control).unwrap();
+    let sandbox = AppContainerProfile::create().unwrap();
+    let other = AppContainerProfile::create().unwrap();
+    let mut permissions = lease(&sandbox.sid);
+    permissions
+        .modify(workspace.path(), FILE_GENERIC_WRITE, GRANT_ACCESS)
+        .unwrap();
+    permissions.restrict(&control, FILE_GENERIC_READ).unwrap();
+    let mut concurrent = lease(&other.sid);
+    concurrent
+        .modify(&control, FILE_GENERIC_WRITE, GRANT_ACCESS)
+        .unwrap();
+
+    permissions.restore().unwrap();
+
+    assert_eq!(write_rights(&control, &sandbox.sid), 0);
+    assert_ne!(
+        write_rights(&control, &other.sid),
+        0,
+        "cleanup discarded an ACL edit made during execution"
+    );
+    concurrent.restore().unwrap();
+}
+
+#[test]
 fn cross_host_acl_mutations_wait_for_the_current_owner() {
     const FIXTURE: &str = "A3S_SANDBOX_ACL_MUTEX_FIXTURE";
     if let Some(directory) = std::env::var_os(FIXTURE) {

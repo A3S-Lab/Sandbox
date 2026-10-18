@@ -29,6 +29,18 @@ alone before the full suite to investigate the first run's intermittent EPERM.
 The first Linux archive's GitHub attestation verifies against its exact source
 digest, repository and workflow, with self-hosted runners rejected.
 
+Run https://github.com/A3S-Lab/Sandbox/actions/runs/39086650755 completes the
+macOS and Linux native/Go/build/attestation pipelines. macOS CONNECT also
+passes alone on the hosted runner and in 64 consecutive local executions.
+The Windows job of run 39086451839 reports 199/1: ACL round-trip restoration
+leaves explicit copies of three inherited host ACEs. The same contract fails
+alone, confirming a real restoration defect. Cleanup now removes only the
+copies introduced by temporary protection before restoring inheritance, while
+retaining unrelated current entries. An additional native contract preserves
+an ACL edit made while the directory is protected; both cleanup contracts run
+before the complete Windows campaign. Strict all-target MSVC Clippy passes;
+native acceptance remains required before publication.
+
 ## What landed
 
 The public workflow pins Rust 1.97.1 and action identities, records its source
