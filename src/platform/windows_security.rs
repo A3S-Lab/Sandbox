@@ -623,6 +623,21 @@ impl Drop for AclMutationGuard {
 }
 
 fn lock_acl_mutation(timeout_ms: u32) -> Result<AclMutationGuard> {
+    let handle = open_host_mutex(ACL_MUTATION_MUTEX_NAME)?;
+    match unsafe { WaitForSingleObject(handle.as_raw_handle(), timeout_ms) } {
+        WAIT_OBJECT_0 | WAIT_ABANDONED => Ok(AclMutationGuard {
+            handle,
+            _thread_bound: std::marker::PhantomData,
+        }),
+        WAIT_TIMEOUT => Err(anyhow::Error::from(std::io::Error::from(
+            std::io::ErrorKind::WouldBlock,
+        ))
+        .context("timed out waiting for host-global ACL mutation ownership")),
+        _ => Err(last_windows_error("acquire host-global ACL mutation mutex")),
+    }
+}
+
+pub(super) fn open_host_mutex(name: &str) -> Result<OwnedHandle> {
     let sddl = wide_null(OsStr::new(
         "D:P(D;;GA;;;S-1-15-2-1)(D;;GA;;;S-1-15-2-2)(A;;GA;;;SY)(A;;GA;;;BA)(A;;0x00100001;;;AU)",
     ));
@@ -637,7 +652,7 @@ fn lock_acl_mutation(timeout_ms: u32) -> Result<AclMutationGuard> {
     } == 0
     {
         return Err(last_windows_error(
-            "create ACL coordination security descriptor",
+            "create host coordination security descriptor",
         ));
     }
     let _descriptor = LocalAllocation(descriptor);
@@ -646,7 +661,7 @@ fn lock_acl_mutation(timeout_ms: u32) -> Result<AclMutationGuard> {
         lpSecurityDescriptor: descriptor,
         bInheritHandle: 0,
     };
-    let name = wide_null(OsStr::new(ACL_MUTATION_MUTEX_NAME));
+    let name = wide_null(OsStr::new(name));
     let raw = unsafe {
         CreateMutexExW(
             &attributes,
@@ -656,20 +671,9 @@ fn lock_acl_mutation(timeout_ms: u32) -> Result<AclMutationGuard> {
         )
     };
     if raw.is_null() {
-        return Err(last_windows_error("open host-global ACL mutation mutex"));
+        return Err(last_windows_error("open host-global coordination mutex"));
     }
-    let handle = unsafe { OwnedHandle::from_raw_handle(raw) };
-    match unsafe { WaitForSingleObject(handle.as_raw_handle(), timeout_ms) } {
-        WAIT_OBJECT_0 | WAIT_ABANDONED => Ok(AclMutationGuard {
-            handle,
-            _thread_bound: std::marker::PhantomData,
-        }),
-        WAIT_TIMEOUT => Err(anyhow::Error::from(std::io::Error::from(
-            std::io::ErrorKind::WouldBlock,
-        ))
-        .context("timed out waiting for host-global ACL mutation ownership")),
-        _ => Err(last_windows_error("acquire host-global ACL mutation mutex")),
-    }
+    Ok(unsafe { OwnedHandle::from_raw_handle(raw) })
 }
 
 fn modify_path_acl(

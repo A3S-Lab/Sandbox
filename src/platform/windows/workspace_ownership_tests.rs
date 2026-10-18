@@ -128,7 +128,7 @@ async fn directory_ownership_can_be_released_from_another_thread() {
 }
 
 #[tokio::test]
-async fn an_active_owner_pins_the_root_name_but_allows_file_writes() {
+async fn an_active_owner_pins_the_root_but_allows_child_updates() {
     let parent = tempfile::tempdir().unwrap();
     let workspace = parent.path().join("workspace");
     let moved = parent.path().join("moved");
@@ -136,6 +136,11 @@ async fn an_active_owner_pins_the_root_name_but_allows_file_writes() {
     let lease = acquire(&workspace).await;
     assert!(std::fs::rename(&workspace, &moved).is_err());
     std::fs::write(workspace.join("during-lease"), b"allowed").unwrap();
+    std::fs::create_dir(workspace.join("ordinary")).unwrap();
+    std::fs::write(workspace.join("ordinary/content"), b"content").unwrap();
+    std::fs::rename(workspace.join("ordinary"), workspace.join("renamed")).unwrap();
+    std::fs::remove_file(workspace.join("renamed/content")).unwrap();
+    std::fs::remove_dir(workspace.join("renamed")).unwrap();
     drop(lease);
     std::fs::rename(&workspace, &moved).unwrap();
     assert_eq!(

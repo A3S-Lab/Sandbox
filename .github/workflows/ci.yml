@@ -99,12 +99,12 @@ jobs:
           $path = Join-Path $PWD 'src/platform/windows_workspace.rs'
           $original = [IO.File]::ReadAllText($path)
           try {
-            $mutated = $original.Replace('FILE_ADD_FILE | FILE_READ_ATTRIBUTES', 'FILE_READ_ATTRIBUTES')
+            $mutated = $original.Replace('unsafe { WaitForSingleObject(handle.as_raw_handle(), 10) }', 'WAIT_OBJECT_0')
             if ($mutated -eq $original) { throw 'directory ownership mutation did not apply' }
             [IO.File]::WriteAllText($path, $mutated)
             $PSNativeCommandUseErrorActionPreference = $false
             cargo test --lib --locked platform::windows::workspace_ownership_tests -- --test-threads=1 --nocapture 2>&1 | Tee-Object lease-mutation.log
-            if ($LASTEXITCODE -eq 0) { throw 'workspace oracle accepted missing share-mode exclusion' }
+            if ($LASTEXITCODE -eq 0) { throw 'workspace oracle accepted missing cross-host exclusion' }
             foreach ($message in @('a second host acquired the live workspace lease', 'a differently cased path bypassed ownership of the physical directory')) {
               if (-not (Select-String -Path lease-mutation.log -SimpleMatch $message -Quiet)) { throw "mutation did not expose: $message" }
             }

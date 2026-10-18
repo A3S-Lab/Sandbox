@@ -1,5 +1,12 @@
 # Windows physical-workspace lease
 
+This certificate records the first candidate. Subsequent native CI
+[39096372575](https://github.com/A3S-Lab/Sandbox/actions/runs/39096372575) rejected
+it: the six new contracts passed, but ordinary guest directory rename failed in
+the full suite and alone. The [replacement certificate](../2026-10-18-windows-workspace-mutex/OUTCOME.md)
+retains those results and the change to a directory-identity mutex. The failed
+share-mode candidate is not qualified or released.
+
 ## Result
 
 The process-local path-keyed mutex is replaced by an operating-system directory

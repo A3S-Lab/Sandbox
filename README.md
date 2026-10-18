@@ -111,9 +111,9 @@ checklist. Generate a CycloneDX SBOM with:
 
 The backend is selected at compile time, while policy construction and command
 output stay platform-neutral. Same-workspace Windows executions acquire a
-physical-directory lease across hosts, including differently cased paths. The
-host needs add-file access to the workspace root; the lease prevents root
-replacement during execution. Each sandbox has an independent AppContainer
+directory-identity mutex across hosts, including differently cased paths. A
+metadata handle prevents root replacement during execution while allowing
+ordinary child updates. Each sandbox has an independent AppContainer
 identity, and cleanup removes only that identity’s temporary ACL entries.
 Native lease qualification is pending, and recovery after a host crash remains
 unqualified; complete host-exit admission stays unavailable.
