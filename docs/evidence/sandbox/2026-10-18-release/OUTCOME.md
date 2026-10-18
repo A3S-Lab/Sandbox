@@ -21,6 +21,14 @@ mediated-CONNECT failure (Python connect returns EPERM); Windows is still
 running its 64-round native campaign. Failed Unix cases now receive the same
 individual rerun treatment as Windows before diagnosis.
 
+The second run, https://github.com/A3S-Lab/Sandbox/actions/runs/39086451839 ,
+passes the complete macOS Rust suite. Its Go step exposes a missing Go
+installation on that runner image; the workflow now provisions Go explicitly
+using the pinned official setup action. The macOS CONNECT contract also runs
+alone before the full suite to investigate the first run's intermittent EPERM.
+The first Linux archive's GitHub attestation verifies against its exact source
+digest, repository and workflow, with self-hosted runners rejected.
+
 ## What landed
 
 The public workflow pins Rust 1.97.1 and action identities, records its source

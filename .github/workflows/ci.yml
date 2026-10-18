@@ -44,6 +44,9 @@ jobs:
       - run: cargo clippy --all-targets --locked -- -D warnings
       - name: Build bins for mediation relay tests
         run: cargo build --bins --locked
+      - name: Verify macOS CONNECT in isolation
+        if: runner.os == 'macOS'
+        run: cargo test --lib --locked policy::gate4_integration::gate4_macos_sandbox_mediator_tunnels_allowed_connect -- --exact --nocapture
       - name: Run tests
         id: unix-suite
         if: runner.os != 'Windows'
@@ -105,6 +108,10 @@ jobs:
           }
           git diff --exit-code -- src/platform/windows.rs
           exit $LASTEXITCODE
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version: 'stable'
+          cache: false
       - name: Test Go SDK protocol
         working-directory: sdk/go
         run: go test ./...
