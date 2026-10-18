@@ -122,12 +122,14 @@ impl SidBuffer {
 #[derive(Debug)]
 pub(super) struct AppContainerProfile {
     pub(super) sid: SidBuffer,
+    #[cfg(test)]
+    pub(super) name: String,
 }
 
 impl AppContainerProfile {
     pub(super) fn create() -> Result<Self> {
-        let name = appcontainer_profile_name();
-        let name = wide_null(OsStr::new(&name));
+        let profile_name = appcontainer_profile_name();
+        let name = wide_null(OsStr::new(&profile_name));
         let display = wide_null(OsStr::new("A3S Native Sandbox"));
         let description = wide_null(OsStr::new(
             "Sandbox-scoped AppContainer for fail-closed A3S command execution",
@@ -161,6 +163,8 @@ impl AppContainerProfile {
         }
         Ok(Self {
             sid: SidBuffer::from_allocated(sid)?,
+            #[cfg(test)]
+            name: profile_name,
         })
     }
 }

@@ -210,6 +210,8 @@ impl PlatformSandbox {
 }
 
 #[cfg(test)]
+mod profile_lifetime_tests;
+#[cfg(test)]
 mod workspace_ownership_tests;
 
 fn drive_allocation_gate() -> &'static Mutex<()> {

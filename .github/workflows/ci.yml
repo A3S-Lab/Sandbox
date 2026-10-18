@@ -47,14 +47,26 @@ jobs:
       - name: Verify macOS CONNECT in isolation
         if: runner.os == 'macOS'
         run: cargo test --lib --locked policy::gate4_integration::gate4_macos_sandbox_mediator_tunnels_allowed_connect -- --exact --nocapture
-      - name: Verify Windows system toolchain classification in isolation
+      - name: Verify Windows classification and profile contracts in isolation
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          cargo test --lib --locked platform::windows_security::acl_tests::canonical_system_toolchains_do_not_receive_temporary_grants -- --exact --nocapture 2>&1 | Tee-Object system-toolchain.log
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          cargo test --lib --locked platform::windows_security::acl_tests::windows_apps_root_does_not_receive_temporary_authorization -- --exact --nocapture 2>&1 | Tee-Object windows-apps.log
-          exit $LASTEXITCODE
+          $PSNativeCommandUseErrorActionPreference = $false
+          $tests = @(
+            'platform::windows_security::acl_tests::canonical_system_toolchains_do_not_receive_temporary_grants',
+            'platform::windows_security::acl_tests::windows_apps_root_does_not_receive_temporary_authorization',
+            'platform::windows::profile_lifetime_tests::constructing_a_sandbox_does_not_register_a_persistent_profile',
+            'platform::windows::profile_lifetime_tests::completing_a_command_leaves_no_persistent_profile',
+            'platform::windows::profile_lifetime_tests::restarting_after_host_death_leaves_no_persistent_profile'
+          )
+          $failed = 0
+          $index = 0
+          foreach ($test in $tests) {
+            cargo test --lib --locked $test -- --exact --nocapture 2>&1 | Tee-Object "qualification-$index.log"
+            if ($LASTEXITCODE -ne 0) { $failed++ }
+            $index++
+          }
+          if ($failed -ne 0) { exit 1 }
       - name: Verify Windows root pin and ordinary updates in isolation
         if: runner.os == 'Windows'
         shell: pwsh
