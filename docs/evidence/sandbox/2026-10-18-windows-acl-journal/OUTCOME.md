@@ -2,13 +2,32 @@
 
 ## Result
 
-A durable, host-only ACL recovery candidate is prepared on top of
-`71337f23c931d3b76c3734b023ae413e3ce9db70`. Native qualification is pending.
+The first durable, host-only ACL recovery candidate was prepared on top of
+`71337f23c931d3b76c3734b023ae413e3ce9db70` and committed as
+`91720eb4f10923ee7d8a747058a6f5a3b416e506`. Native testing rejects it;
+[the replacement](../2026-10-18-windows-acl-journal-batch/OUTCOME.md) retains the
+failing job and addresses its toolchain compatibility and write amplification.
 The prerequisite [crash/restart red](../2026-10-18-windows-crash-acl-red/OUTCOME.md)
 is observed in the Windows full suite and solo rerun. This candidate does not
 promote `host_exit_cleanup`; complete S4 qualification remains open.
 
-## Change and affected surfaces
+## Native rejection
+
+[CI 39100432917](https://github.com/A3S-Lab/Sandbox/actions/runs/39100432917)
+passes its Linux and macOS jobs. The Windows root-pin contract passes alone.
+The next isolated ordinary-operation contract fails before command start on the
+reparse-point executable `Program Files (x86)\pipx_bin\yamllint.exe`.
+The failed attempt takes 126.91 seconds, including setup and error cleanup;
+this is not a measurement of pure command runtime. The Windows full suite and
+crash/restart contract are skipped after that early failure.
+
+The uncanonicalized system-prefix comparison missed this extended-length PATH
+root. The new blanket reparse-point rejection then turned an optional toolchain
+entry into a fatal error. Per-target journal writes and hive flushes also cause
+avoidable write amplification. These results reject this implementation; they
+do not weaken the existing ordinary-operation contract.
+
+## Original change and affected surfaces
 
 - Store an internal, versioned recovery record under the protected per-user
   `Software\A3S\Sandbox\Recovery.v1` registry key, with one value per physical

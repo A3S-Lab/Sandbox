@@ -1,0 +1,543 @@
+check (windows-latest)	Set up job	﻿2026-10-18T05:24:29.8754676Z Current runner version: '2.337.0'
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8823059Z ##[group]Runner Image Provisioner
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8824499Z Hosted Compute Agent
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8825509Z Version: 20261002.596
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8826593Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8827852Z Build Date: 2026-10-02T22:28:27Z
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8828984Z Worker ID: {4aa109c1-6ec2-4ab7-97d0-11da2039b3f1}
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8830171Z Region: southcentralus
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8831193Z Cloud: Azure
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8832075Z ##[endgroup]
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8834127Z ##[group]Operating System
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8835257Z Microsoft Windows Server 2025
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8836394Z 10.0.26100
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8837336Z Datacenter
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8838227Z ##[endgroup]
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8839152Z ##[group]Runner Image
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8840143Z Image: windows-2025-vs2026
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8841532Z Version: 20261007.264.1
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8843609Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20261007.264/images/windows/Windows2025-VS2026-Readme.md
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8847275Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20261007.264
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8849120Z ##[endgroup]
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8851251Z ##[group]GITHUB_TOKEN Permissions
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8853776Z Attestations: write
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8854805Z Contents: read
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8855805Z Metadata: read
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8856705Z ##[endgroup]
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8859442Z Secret source: Actions
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8861339Z Cache mode: write
+check (windows-latest)	Set up job	2026-10-18T05:24:29.8862510Z Prepare workflow directory
+check (windows-latest)	Set up job	2026-10-18T05:24:29.9199159Z Prepare all required actions
+check (windows-latest)	Set up job	2026-10-18T05:24:29.9250837Z Getting action download info
+check (windows-latest)	Set up job	2026-10-18T05:24:30.1686908Z Download action repository 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+check (windows-latest)	Set up job	2026-10-18T05:24:30.3059937Z Download action repository 'dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8' (SHA:683b588c487a69d01f6c6ddf40f036ff682cc2c8)
+check (windows-latest)	Set up job	2026-10-18T05:24:30.4787010Z Download action repository 'actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e' (SHA:b7ad1dad31e06c5925ef5d2fc7ad053ef454303e)
+check (windows-latest)	Set up job	2026-10-18T05:24:30.9332559Z Download action repository 'actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6' (SHA:1e69f48acb82d1966a394da916b4c1698aa569d6)
+check (windows-latest)	Set up job	2026-10-18T05:24:31.3602812Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+check (windows-latest)	Set up job	2026-10-18T05:24:31.7834837Z Complete job name: check (windows-latest)
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	﻿2026-10-18T05:24:31.9709632Z ##[group]Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:31.9711754Z with:
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:31.9712644Z   repository: A3S-Lab/Sandbox
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:31.9719958Z   token: ***
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:31.9720681Z   ssh-strict: true
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:31.9721877Z   ssh-user: git
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:31.9722694Z   persist-credentials: true
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:31.9723510Z   clean: true
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:31.9724244Z   sparse-checkout-cone-mode: true
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:31.9725109Z   fetch-depth: 1
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:31.9725824Z   fetch-tags: false
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:31.9726571Z   show-progress: true
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:31.9727333Z   lfs: false
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:31.9728026Z   submodules: false
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:31.9728779Z   set-safe-directory: true
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:31.9729639Z   allow-unsafe-pr-checkout: false
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:31.9730778Z ##[endgroup]
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.1229966Z Syncing repository: A3S-Lab/Sandbox
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.1232320Z ##[group]Getting Git version info
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.1233419Z Working directory is 'D:\a\Sandbox\Sandbox'
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.2146606Z [command]"C:\Program Files\Git\bin\git.exe" version
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.5828004Z git version 2.56.0.windows.2
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.5880113Z ##[endgroup]
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.5899779Z Temporarily overriding HOME='D:\a\_temp\cced9d7c-c89b-4236-a673-a913f60ac8cf' before making global git config changes
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.5902586Z Adding repository directory to the temporary git global config as a safe directory
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.5911430Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\Sandbox\Sandbox
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.6601240Z Deleting the contents of 'D:\a\Sandbox\Sandbox'
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.6608393Z ##[group]Initializing the repository
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.6617423Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\Sandbox\Sandbox
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.7584121Z Initialized empty Git repository in D:/a/Sandbox/Sandbox/.git/
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.7629304Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/A3S-Lab/Sandbox
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.8414702Z ##[endgroup]
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.8415835Z ##[group]Disabling automatic garbage collection
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.8431713Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.9049628Z ##[endgroup]
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.9050571Z ##[group]Setting up auth
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.9063159Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:32.9490515Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:34.7166617Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:34.7531919Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:35.2830231Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:35.3213371Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:35.8910721Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:35.9279137Z ##[endgroup]
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:35.9279633Z ##[group]Fetching the repository
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:35.9291887Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +91720eb4f10923ee7d8a747058a6f5a3b416e506:refs/remotes/origin/codex/sandbox-s4-20261018
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:37.2412794Z From https://github.com/A3S-Lab/Sandbox
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:37.2413843Z  * [new ref]         91720eb4f10923ee7d8a747058a6f5a3b416e506 -> origin/codex/sandbox-s4-20261018
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:37.2451168Z ##[endgroup]
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:37.2451887Z ##[group]Determining the checkout info
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:37.2454593Z ##[endgroup]
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:37.2469981Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:37.3018410Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:37.3409988Z ##[group]Checking out the ref
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:37.3420499Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B codex/sandbox-s4-20261018 refs/remotes/origin/codex/sandbox-s4-20261018
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:37.4448356Z Switched to a new branch 'codex/sandbox-s4-20261018'
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:37.4512234Z branch 'codex/sandbox-s4-20261018' set up to track 'origin/codex/sandbox-s4-20261018'.
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:37.5044597Z ##[endgroup]
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:37.5052091Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:24:37.5392479Z 91720eb4f10923ee7d8a747058a6f5a3b416e506
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	﻿2026-10-18T05:24:37.5953018Z ##[group]Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.5953521Z with:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.5954343Z   toolchain: 1.97.1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.5954546Z   components: rustfmt, clippy
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.5954784Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6019803Z ##[start-action display=Parse toolchain version;id=__dtolnay_rust-toolchain.parse]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6207802Z ##[group]Run if [[ -z $toolchain ]]; then
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6208240Z ^[[36;1mif [[ -z $toolchain ]]; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6208797Z ^[[36;1m  # GitHub does not enforce `required: true` inputs itself. https://github.com/actions/runner/issues/1070^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6209359Z ^[[36;1m  echo "'toolchain' is a required input" >&2^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6209632Z ^[[36;1m  exit 1^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6209940Z ^[[36;1melif [[ $toolchain =~ ^stable' '[0-9]+' '(year|month|week|day)s?' 'ago$ ]]; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6210341Z ^[[36;1m  if [[ Windows == macOS ]]; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6210894Z ^[[36;1m    echo "toolchain=1.$((($(date -v-$(sed 's/stable \([0-9]*\) \(.\).*/\1\2/' <<< $toolchain) +%s)/60/60/24-16569)/7/6))" >> $GITHUB_OUTPUT^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6211474Z ^[[36;1m  else^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6211859Z ^[[36;1m    echo "toolchain=1.$((($(date --date "${toolchain#stable }" +%s)/60/60/24-16569)/7/6))" >> $GITHUB_OUTPUT^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6212296Z ^[[36;1m  fi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6212567Z ^[[36;1melif [[ $toolchain =~ ^stable' 'minus' '[0-9]+' 'releases?$ ]]; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6213076Z ^[[36;1m  echo "toolchain=1.$((($(date +%s)/60/60/24-16569)/7/6-${toolchain//[^0-9]/}))" >> $GITHUB_OUTPUT^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6213521Z ^[[36;1melif [[ $toolchain =~ ^1\.[0-9]+$ ]]; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6214023Z ^[[36;1m  echo "toolchain=1.$((i=${toolchain#1.}, c=($(date +%s)/60/60/24-16569)/7/6, i+9*i*(10*i<=c)+90*i*(100*i<=c)))" >> $GITHUB_OUTPUT^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6214497Z ^[[36;1melse^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6214675Z ^[[36;1m  delimiter=EOF^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6214967Z ^[[36;1m  while [[ $toolchain == *$delimiter* ]]; do delimiter+=_; done^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6215469Z ^[[36;1m  printf 'toolchain<<%s\n%s\n%s\n' "$delimiter" "$toolchain" "$delimiter" >> $GITHUB_OUTPUT^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6215865Z ^[[36;1mfi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6234643Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6235049Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6235277Z   toolchain: 1.97.1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.6235472Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.7994389Z ##[end-action id=__dtolnay_rust-toolchain.parse;outcome=success;conclusion=success;duration_ms=197]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.7999066Z ##[start-action display=Set $CARGO_HOME;id=__dtolnay_rust-toolchain.__run]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.8148621Z ##[group]Run echo CARGO_HOME=${CARGO_HOME:-"$USERPROFILE\.cargo"} >> $GITHUB_ENV
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.8149155Z ^[[36;1mecho CARGO_HOME=${CARGO_HOME:-"$USERPROFILE\.cargo"} >> $GITHUB_ENV^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.8164582Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.8164992Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.8554116Z ##[end-action id=__dtolnay_rust-toolchain.__run;outcome=success;conclusion=success;duration_ms=55]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.8556491Z ##[start-action display=Install rustup if needed;id=__dtolnay_rust-toolchain.__run_2]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.8567301Z ##[end-action id=__dtolnay_rust-toolchain.__run_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.8569422Z ##[start-action display=Install rustup if needed on windows;id=__dtolnay_rust-toolchain.__run_3]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.8729273Z ##[group]Run if ! command -v rustup &>/dev/null; then
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.8729647Z ^[[36;1mif ! command -v rustup &>/dev/null; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.8730389Z ^[[36;1m  curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused --location --silent --show-error --fail https://win.rustup.rs/x86_64 --output 'D:\a\_temp\rustup-init.exe'^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.8731744Z ^[[36;1m  'D:\a\_temp\rustup-init.exe' --default-toolchain none --no-modify-path -y^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.8734014Z ^[[36;1m  echo "$CARGO_HOME\bin" >> $GITHUB_PATH^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.8734442Z ^[[36;1mfi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.8748872Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.8749263Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.8749458Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.8749704Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9259910Z ##[end-action id=__dtolnay_rust-toolchain.__run_3;outcome=success;conclusion=success;duration_ms=68]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9276769Z ##[start-action display=rustup toolchain install 1.97.1;id=__dtolnay_rust-toolchain.__run_4]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9406043Z ##[group]Run set -f  # split targets and components on commas and whitespace, without glob expansion
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9407149Z ^[[36;1mset -f  # split targets and components on commas and whitespace, without glob expansion^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9407659Z ^[[36;1mflags=()^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9407940Z ^[[36;1mfor t in ${targets//,/ }; do flags+=(--target "$t"); done^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9408339Z ^[[36;1mfor c in ${components//,/ }; do flags+=(--component "$c"); done^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9408814Z ^[[36;1mif [[ $toolchain == nightly && -n $components ]]; then flags+=(--allow-downgrade); fi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9409213Z ^[[36;1mlog=$(mktemp)^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9409424Z ^[[36;1mtrap 'rm -f "$log"' EXIT^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9409661Z ^[[36;1mfor attempt in 1 2 3 4 5; do^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9410215Z ^[[36;1m  if rustup toolchain install "$toolchain" "${flags[@]}" --profile minimal --no-self-update --force-non-host 2>&1 | tee "$log"; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9410757Z ^[[36;1m    break^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9410927Z ^[[36;1m  else^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9411097Z ^[[36;1m    status=$?^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9411281Z ^[[36;1m  fi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9411543Z ^[[36;1m  if [[ $attempt == 5 ]] || ! grep -Fq 'checksum failed for ' "$log" \^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9412077Z ^[[36;1m      || ! grep -Fq 'this is likely due to an ongoing update of the official release server' "$log"; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9412518Z ^[[36;1m    exit "$status"^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9412723Z ^[[36;1m  fi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9413050Z ^[[36;1m  echo "Retrying rustup toolchain install in 30 seconds (retry $attempt of 4)" >&2^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9413445Z ^[[36;1m  sleep 30^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9413621Z ^[[36;1mdone^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9429255Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9429646Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9429835Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9430089Z   toolchain: 1.97.1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9430272Z   targets:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9430455Z   components: rustfmt, clippy
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9430680Z   RUSTUP_PERMIT_COPY_RENAME: 1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:37.9430889Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:38.7529754Z info: syncing channel updates for 1.97.1-x86_64-pc-windows-msvc
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:39.4809919Z info: latest update on 2026-07-16 for version 1.97.1 (8bab26f4f 2026-07-14)
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:39.4966475Z info: downloading 5 components
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.5686259Z
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.6004232Z   1.97.1-x86_64-pc-windows-msvc installed - rustc 1.97.1 (8bab26f4f 2026-07-14)
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.6005124Z
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.6465538Z ##[end-action id=__dtolnay_rust-toolchain.__run_4;outcome=success;conclusion=success;duration_ms=11718]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.6472131Z ##[start-action display=rustup default 1.97.1;id=__dtolnay_rust-toolchain.__run_5]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.6604127Z ##[group]Run rustup default "$toolchain" --force-non-host
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.6604500Z ^[[36;1mrustup default "$toolchain" --force-non-host^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.6619175Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.6619561Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.6619738Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.6619986Z   toolchain: 1.97.1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.6621461Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.7285966Z info: using existing install for 1.97.1-x86_64-pc-windows-msvc
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.7345768Z info: default toolchain set to 1.97.1-x86_64-pc-windows-msvc
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.7346256Z
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.7537280Z   1.97.1-x86_64-pc-windows-msvc unchanged - rustc 1.97.1 (8bab26f4f 2026-07-14)
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.7537770Z
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.7541793Z info: note that the toolchain '1.97.1-x86_64-pc-windows-msvc' is currently in use (overridden by 'D:\a\Sandbox\Sandbox\rust-toolchain.toml')
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.7611055Z ##[end-action id=__dtolnay_rust-toolchain.__run_5;outcome=success;conclusion=success;duration_ms=113]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.7614491Z ##[start-action display=Create cachekey;id=__dtolnay_rust-toolchain.rustc-version]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.7734298Z ##[group]Run DATE=$(rustc +"$toolchain" --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.7735154Z ^[[36;1mDATE=$(rustc +"$toolchain" --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.7735830Z ^[[36;1mHASH=$(rustc +"$toolchain" --version --verbose | sed -ne 's/^commit-hash: //p')^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.7736325Z ^[[36;1mecho "cachekey=$(echo $DATE$HASH | head -c12)" >> $GITHUB_OUTPUT^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.7751242Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.7751626Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.7751809Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.7752061Z   toolchain: 1.97.1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:49.7752245Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.6358126Z ##[end-action id=__dtolnay_rust-toolchain.rustc-version;outcome=success;conclusion=success;duration_ms=874]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.6360742Z ##[start-action display=Disable incremental compilation;id=__dtolnay_rust-toolchain.__run_6]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.6501941Z ##[group]Run if [ -z "${CARGO_INCREMENTAL+set}" ]; then
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.6502582Z ^[[36;1mif [ -z "${CARGO_INCREMENTAL+set}" ]; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.6503127Z ^[[36;1m  echo CARGO_INCREMENTAL=0 >> $GITHUB_ENV^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.6503602Z ^[[36;1mfi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.6528439Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.6529110Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.6529414Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.6529832Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.6915077Z ##[end-action id=__dtolnay_rust-toolchain.__run_6;outcome=success;conclusion=success;duration_ms=55]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.6917756Z ##[start-action display=Enable colors in Cargo output;id=__dtolnay_rust-toolchain.__run_7]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7045681Z ##[group]Run if [ -z "${CARGO_TERM_COLOR+set}" ]; then
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7046023Z ^[[36;1mif [ -z "${CARGO_TERM_COLOR+set}" ]; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7046345Z ^[[36;1m  echo CARGO_TERM_COLOR=always >> $GITHUB_ENV^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7046609Z ^[[36;1mfi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7060918Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7061308Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7061491Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7061748Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7061936Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7443772Z ##[end-action id=__dtolnay_rust-toolchain.__run_7;outcome=success;conclusion=success;duration_ms=52]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7446997Z ##[start-action display=Enable Cargo sparse registry;id=__dtolnay_rust-toolchain.__run_8]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7578931Z ##[group]Run # implemented in 1.66, stabilized in 1.68, made default in 1.70
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7579429Z ^[[36;1m# implemented in 1.66, stabilized in 1.68, made default in 1.70^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7580064Z ^[[36;1mif [ -z "${CARGO_REGISTRIES_CRATES_IO_PROTOCOL+set}" -o -f "D:\a\_temp"/.implicit_cargo_registries_crates_io_protocol ]; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7580733Z ^[[36;1m  if rustc +"$toolchain" --version --verbose | grep -q '^release: 1\.6[89]\.'; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7581411Z ^[[36;1m    touch "D:\a\_temp"/.implicit_cargo_registries_crates_io_protocol || true^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7582503Z ^[[36;1m    echo CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse >> $GITHUB_ENV^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7582998Z ^[[36;1m  elif rustc +"$toolchain" --version --verbose | grep -q '^release: 1\.6[67]\.'; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7583507Z ^[[36;1m    touch "D:\a\_temp"/.implicit_cargo_registries_crates_io_protocol || true^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7583958Z ^[[36;1m    echo CARGO_REGISTRIES_CRATES_IO_PROTOCOL=git >> $GITHUB_ENV^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7584469Z ^[[36;1m  fi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7584780Z ^[[36;1mfi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7600127Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7600619Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7600896Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7601250Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7601535Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7601816Z   toolchain: 1.97.1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.7602099Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.9685247Z ##[end-action id=__dtolnay_rust-toolchain.__run_8;outcome=success;conclusion=success;duration_ms=223]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.9689829Z ##[start-action display=Work around spurious network errors in curl 8.0;id=__dtolnay_rust-toolchain.__run_9]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.9818670Z ##[group]Run # https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/timeout.20investigation
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.9819408Z ^[[36;1m# https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/timeout.20investigation^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.9820049Z ^[[36;1mif rustc +"$toolchain" --version --verbose | grep -q '^release: 1\.7[01]\.'; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.9820511Z ^[[36;1m  echo CARGO_HTTP_MULTIPLEXING=false >> $GITHUB_ENV^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.9820799Z ^[[36;1mfi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.9844723Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.9845415Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.9845733Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.9846202Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.9846541Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.9846892Z   toolchain: 1.97.1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:50.9847206Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.0976094Z ##[end-action id=__dtolnay_rust-toolchain.__run_9;outcome=success;conclusion=success;duration_ms=128]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.0980416Z ##[start-action display=rustc +1.97.1 --version --verbose;id=__dtolnay_rust-toolchain.__run_10]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.1107300Z ##[group]Run rustc +"$toolchain" --version --verbose
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.1107650Z ^[[36;1mrustc +"$toolchain" --version --verbose^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.1121495Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.1121876Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.1122065Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.1122320Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.1122510Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.1122717Z   toolchain: 1.97.1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.1122891Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.1951773Z rustc 1.97.1 (8bab26f4f 2026-07-14)
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.1952283Z binary: rustc
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.1952550Z commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.1952861Z commit-date: 2026-07-14
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.1953083Z host: x86_64-pc-windows-msvc
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.1953301Z release: 1.97.1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.1954430Z LLVM version: 22.1.6
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T05:24:51.2063932Z ##[end-action id=__dtolnay_rust-toolchain.__run_10;outcome=success;conclusion=success;duration_ms=108]
+check (windows-latest)	Record source and toolchain	﻿2026-10-18T05:24:51.2233143Z ##[group]Run git rev-parse HEAD
+check (windows-latest)	Record source and toolchain	2026-10-18T05:24:51.2233498Z ^[[36;1mgit rev-parse HEAD^[[0m
+check (windows-latest)	Record source and toolchain	2026-10-18T05:24:51.2233754Z ^[[36;1mrustc --version --verbose^[[0m
+check (windows-latest)	Record source and toolchain	2026-10-18T05:24:51.3071350Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+check (windows-latest)	Record source and toolchain	2026-10-18T05:24:51.3071802Z env:
+check (windows-latest)	Record source and toolchain	2026-10-18T05:24:51.3072562Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Record source and toolchain	2026-10-18T05:24:51.3072943Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Record source and toolchain	2026-10-18T05:24:51.3073205Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Record source and toolchain	2026-10-18T05:24:51.3073735Z ##[endgroup]
+check (windows-latest)	Record source and toolchain	2026-10-18T05:24:51.6859368Z 91720eb4f10923ee7d8a747058a6f5a3b416e506
+check (windows-latest)	Record source and toolchain	2026-10-18T05:24:51.7984248Z rustc 1.97.1 (8bab26f4f 2026-07-14)
+check (windows-latest)	Record source and toolchain	2026-10-18T05:24:51.7984834Z binary: rustc
+check (windows-latest)	Record source and toolchain	2026-10-18T05:24:51.7985320Z commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+check (windows-latest)	Record source and toolchain	2026-10-18T05:24:51.7985828Z commit-date: 2026-07-14
+check (windows-latest)	Record source and toolchain	2026-10-18T05:24:51.7986172Z host: x86_64-pc-windows-msvc
+check (windows-latest)	Record source and toolchain	2026-10-18T05:24:51.7986517Z release: 1.97.1
+check (windows-latest)	Record source and toolchain	2026-10-18T05:24:51.7987388Z LLVM version: 22.1.6
+check (windows-latest)	Run cargo fmt --all -- --check	﻿2026-10-18T05:24:51.9382324Z ##[group]Run cargo fmt --all -- --check
+check (windows-latest)	Run cargo fmt --all -- --check	2026-10-18T05:24:51.9382715Z ^[[36;1mcargo fmt --all -- --check^[[0m
+check (windows-latest)	Run cargo fmt --all -- --check	2026-10-18T05:24:51.9449211Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+check (windows-latest)	Run cargo fmt --all -- --check	2026-10-18T05:24:51.9449572Z env:
+check (windows-latest)	Run cargo fmt --all -- --check	2026-10-18T05:24:51.9449762Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run cargo fmt --all -- --check	2026-10-18T05:24:51.9450022Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Run cargo fmt --all -- --check	2026-10-18T05:24:51.9450223Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Run cargo fmt --all -- --check	2026-10-18T05:24:51.9450423Z ##[endgroup]
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	﻿2026-10-18T05:24:53.8786355Z ##[group]Run cargo clippy --all-targets --locked -- -D warnings
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:53.8787191Z ^[[36;1mcargo clippy --all-targets --locked -- -D warnings^[[0m
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:53.8887076Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:53.8887417Z env:
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:53.8887609Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:53.8887861Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:53.8888063Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:53.8888264Z ##[endgroup]
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:54.8672139Z ^[[1m^[[92m    Updating^[[0m crates.io index
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:55.4055596Z ^[[1m^[[92m Downloading^[[0m crates ...
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:55.5464382Z ^[[1m^[[92m  Downloaded^[[0m dirs v5.0.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:55.6010758Z ^[[1m^[[92m  Downloaded^[[0m generic-array v0.14.7
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:55.6260884Z ^[[1m^[[92m  Downloaded^[[0m option-ext v0.2.0
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:55.6445373Z ^[[1m^[[92m  Downloaded^[[0m async-trait v0.1.92
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:55.7329673Z ^[[1m^[[92m  Downloaded^[[0m cpufeatures v0.2.17
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:55.7557599Z ^[[1m^[[92m  Downloaded^[[0m tokio-macros v2.7.2
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:55.7714379Z ^[[1m^[[92m  Downloaded^[[0m crypto-common v0.1.7
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:55.7853989Z ^[[1m^[[92m  Downloaded^[[0m version_check v0.9.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:55.8037315Z ^[[1m^[[92m  Downloaded^[[0m dirs-sys v0.4.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:55.8220570Z ^[[1m^[[92m  Downloaded^[[0m cfg-if v1.0.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:55.8421853Z ^[[1m^[[92m  Downloaded^[[0m block-buffer v0.10.4
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:55.8586680Z ^[[1m^[[92m  Downloaded^[[0m quote v1.0.47
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:55.9046963Z ^[[1m^[[92m  Downloaded^[[0m windows-targets v0.48.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:55.9176293Z ^[[1m^[[92m  Downloaded^[[0m pin-project-lite v0.2.17
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.0184173Z ^[[1m^[[92m  Downloaded^[[0m sha2 v0.10.9
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.0588535Z ^[[1m^[[92m  Downloaded^[[0m windows-link v0.2.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.0711263Z ^[[1m^[[92m  Downloaded^[[0m zmij v1.0.23
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.0934523Z ^[[1m^[[92m  Downloaded^[[0m fastrand v2.5.0
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.1139041Z ^[[1m^[[92m  Downloaded^[[0m itoa v1.0.18
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.1336402Z ^[[1m^[[92m  Downloaded^[[0m digest v0.10.7
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.1580169Z ^[[1m^[[92m  Downloaded^[[0m anyhow v1.0.104
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.2213296Z ^[[1m^[[92m  Downloaded^[[0m once_cell v1.21.4
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.2534951Z ^[[1m^[[92m  Downloaded^[[0m tracing-attributes v0.1.31
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.2915324Z ^[[1m^[[92m  Downloaded^[[0m tempfile v3.27.0
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.3204568Z ^[[1m^[[92m  Downloaded^[[0m getrandom v0.4.3
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.3710355Z ^[[1m^[[92m  Downloaded^[[0m tracing-core v0.1.36
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.4015897Z ^[[1m^[[92m  Downloaded^[[0m unicode-ident v1.0.27
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.4385388Z ^[[1m^[[92m  Downloaded^[[0m socket2 v0.6.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.4585634Z ^[[1m^[[92m  Downloaded^[[0m bytes v1.12.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.5037246Z ^[[1m^[[92m  Downloaded^[[0m serde_derive v1.0.229
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.5479735Z ^[[1m^[[92m  Downloaded^[[0m proc-macro2 v1.0.107
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.5896399Z ^[[1m^[[92m  Downloaded^[[0m serde_core v1.0.229
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.6204261Z ^[[1m^[[92m  Downloaded^[[0m base64 v0.21.7
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.6769261Z ^[[1m^[[92m  Downloaded^[[0m memchr v2.8.3
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.8107617Z ^[[1m^[[92m  Downloaded^[[0m serde v1.0.229
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:56.8814665Z ^[[1m^[[92m  Downloaded^[[0m typenum v1.20.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:57.6245525Z ^[[1m^[[92m  Downloaded^[[0m mio v1.2.4
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:57.7605228Z ^[[1m^[[92m  Downloaded^[[0m serde_json v1.0.154
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:57.8989514Z ^[[1m^[[92m  Downloaded^[[0m syn v2.0.119
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:58.0254475Z ^[[1m^[[92m  Downloaded^[[0m syn v3.0.9
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:58.1705324Z ^[[1m^[[92m  Downloaded^[[0m tracing v0.1.44
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:58.8352666Z ^[[1m^[[92m  Downloaded^[[0m windows_x86_64_msvc v0.48.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:58.8597990Z ^[[1m^[[92m  Downloaded^[[0m tokio v1.53.3
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:24:59.5080935Z ^[[1m^[[92m  Downloaded^[[0m windows-sys v0.48.0
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:00.8195961Z ^[[1m^[[92m  Downloaded^[[0m windows-sys v0.61.2
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:01.9310137Z ^[[1m^[[92m   Compiling^[[0m proc-macro2 v1.0.107
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:01.9311193Z ^[[1m^[[92m   Compiling^[[0m quote v1.0.47
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:01.9317870Z ^[[1m^[[92m   Compiling^[[0m unicode-ident v1.0.27
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:01.9318678Z ^[[1m^[[92m   Compiling^[[0m version_check v0.9.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:02.0651797Z ^[[1m^[[92m   Compiling^[[0m windows_x86_64_msvc v0.48.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:02.2982829Z ^[[1m^[[92m   Compiling^[[0m generic-array v0.14.7
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:04.1225508Z ^[[1m^[[92m    Checking^[[0m windows-link v0.2.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:04.1391158Z ^[[1m^[[92m    Checking^[[0m typenum v1.20.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:04.1952053Z ^[[1m^[[92m    Checking^[[0m windows-sys v0.61.2
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:04.2099491Z ^[[1m^[[92m   Compiling^[[0m serde_core v1.0.229
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:04.7235774Z ^[[1m^[[92m    Checking^[[0m windows-targets v0.48.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:04.8902383Z ^[[1m^[[92m   Compiling^[[0m zmij v1.0.23
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:05.4714607Z ^[[1m^[[92m   Compiling^[[0m getrandom v0.4.3
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:05.6855593Z ^[[1m^[[92m   Compiling^[[0m syn v3.0.9
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:05.7567712Z ^[[1m^[[92m    Checking^[[0m once_cell v1.21.4
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:05.9530964Z ^[[1m^[[92m    Checking^[[0m cfg-if v1.0.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:06.0200501Z ^[[1m^[[92m   Compiling^[[0m syn v2.0.119
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:06.1718915Z ^[[1m^[[92m    Checking^[[0m crypto-common v0.1.7
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:06.2715820Z ^[[1m^[[92m    Checking^[[0m block-buffer v0.10.4
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:06.4684378Z ^[[1m^[[92m    Checking^[[0m windows-sys v0.48.0
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:11.2611084Z ^[[1m^[[92m    Checking^[[0m pin-project-lite v0.2.17
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:11.3659352Z ^[[1m^[[92m   Compiling^[[0m serde_json v1.0.154
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:11.5467746Z ^[[1m^[[92m    Checking^[[0m option-ext v0.2.0
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:11.6040879Z ^[[1m^[[92m   Compiling^[[0m serde v1.0.229
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:11.6133752Z ^[[1m^[[92m   Compiling^[[0m anyhow v1.0.104
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:12.0384284Z ^[[1m^[[92m    Checking^[[0m dirs-sys v0.4.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:12.1265183Z ^[[1m^[[92m    Checking^[[0m socket2 v0.6.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:12.1385281Z ^[[1m^[[92m    Checking^[[0m mio v1.2.4
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:12.3915794Z ^[[1m^[[92m   Compiling^[[0m serde_derive v1.0.229
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:12.4766460Z ^[[1m^[[92m   Compiling^[[0m tokio-macros v2.7.2
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:12.9392302Z ^[[1m^[[92m    Checking^[[0m digest v0.10.7
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:13.2954139Z ^[[1m^[[92m    Checking^[[0m tracing-core v0.1.36
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:13.5667336Z ^[[1m^[[92m    Checking^[[0m fastrand v2.5.0
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:13.7560899Z ^[[1m^[[92m    Checking^[[0m cpufeatures v0.2.17
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:13.7651245Z ^[[1m^[[92m    Checking^[[0m memchr v2.8.3
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:13.8076082Z ^[[1m^[[92m    Checking^[[0m bytes v1.12.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:13.8498625Z ^[[1m^[[92m   Compiling^[[0m tracing-attributes v0.1.31
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:14.3580384Z ^[[1m^[[92m    Checking^[[0m itoa v1.0.18
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:14.4586142Z ^[[1m^[[92m    Checking^[[0m tokio v1.53.3
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:15.5523270Z ^[[1m^[[92m    Checking^[[0m sha2 v0.10.9
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:15.9099429Z ^[[1m^[[92m    Checking^[[0m tempfile v3.27.0
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:15.9643458Z ^[[1m^[[92m    Checking^[[0m tracing v0.1.44
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:16.1680277Z ^[[1m^[[92m   Compiling^[[0m async-trait v0.1.92
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:16.1860708Z ^[[1m^[[92m    Checking^[[0m dirs v5.0.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:16.5392447Z ^[[1m^[[92m    Checking^[[0m base64 v0.21.7
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:18.7781118Z ^[[1m^[[92m    Checking^[[0m a3s-sandbox v0.3.0 (D:\a\Sandbox\Sandbox)
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T05:25:22.0147511Z ^[[1m^[[92m    Finished^[[0m `dev` profile [unoptimized + debuginfo] target(s) in 27.21s
+check (windows-latest)	Build bins for mediation relay tests	﻿2026-10-18T05:25:22.1662274Z ##[group]Run cargo build --bins --locked
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:22.1662672Z ^[[36;1mcargo build --bins --locked^[[0m
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:22.1730119Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:22.1730467Z env:
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:22.1730664Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:22.1730914Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:22.1731117Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:22.1731318Z ##[endgroup]
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:22.6348241Z ^[[1m^[[92m   Compiling^[[0m typenum v1.20.1
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:22.6350725Z ^[[1m^[[92m   Compiling^[[0m windows-link v0.2.1
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:22.6351705Z ^[[1m^[[92m   Compiling^[[0m windows_x86_64_msvc v0.48.5
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:22.6355062Z ^[[1m^[[92m   Compiling^[[0m cfg-if v1.0.5
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:22.7074706Z ^[[1m^[[92m   Compiling^[[0m windows-sys v0.61.2
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:22.7115775Z ^[[1m^[[92m   Compiling^[[0m windows-targets v0.48.5
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:22.7318221Z ^[[1m^[[92m   Compiling^[[0m once_cell v1.21.4
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:22.7735127Z ^[[1m^[[92m   Compiling^[[0m windows-sys v0.48.0
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:23.0002839Z ^[[1m^[[92m   Compiling^[[0m serde_core v1.0.229
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:23.7990440Z ^[[1m^[[92m   Compiling^[[0m generic-array v0.14.7
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:24.6684883Z ^[[1m^[[92m   Compiling^[[0m crypto-common v0.1.7
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:24.7847154Z ^[[1m^[[92m   Compiling^[[0m block-buffer v0.10.4
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:24.9233894Z ^[[1m^[[92m   Compiling^[[0m option-ext v0.2.0
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:24.9961375Z ^[[1m^[[92m   Compiling^[[0m pin-project-lite v0.2.17
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:25.0156848Z ^[[1m^[[92m   Compiling^[[0m dirs-sys v0.4.1
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:25.0985370Z ^[[1m^[[92m   Compiling^[[0m digest v0.10.7
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:25.1824910Z ^[[1m^[[92m   Compiling^[[0m tracing-core v0.1.36
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:25.3369573Z ^[[1m^[[92m   Compiling^[[0m zmij v1.0.23
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:25.8089358Z ^[[1m^[[92m   Compiling^[[0m getrandom v0.4.3
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:25.9563032Z ^[[1m^[[92m   Compiling^[[0m fastrand v2.5.0
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:26.2554526Z ^[[1m^[[92m   Compiling^[[0m bytes v1.12.1
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:26.3602112Z ^[[1m^[[92m   Compiling^[[0m itoa v1.0.18
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:26.5342492Z ^[[1m^[[92m   Compiling^[[0m memchr v2.8.3
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:26.5937178Z ^[[1m^[[92m   Compiling^[[0m cpufeatures v0.2.17
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:26.6584736Z ^[[1m^[[92m   Compiling^[[0m sha2 v0.10.9
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:27.3331629Z ^[[1m^[[92m   Compiling^[[0m serde_json v1.0.154
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:27.4147727Z ^[[1m^[[92m   Compiling^[[0m serde v1.0.229
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:27.8909126Z ^[[1m^[[92m   Compiling^[[0m tracing v0.1.44
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:28.2145943Z ^[[1m^[[92m   Compiling^[[0m dirs v5.0.1
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:28.3201424Z ^[[1m^[[92m   Compiling^[[0m anyhow v1.0.104
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:28.3386798Z ^[[1m^[[92m   Compiling^[[0m base64 v0.21.7
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:29.5510961Z ^[[1m^[[92m   Compiling^[[0m mio v1.2.4
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:29.5512138Z ^[[1m^[[92m   Compiling^[[0m socket2 v0.6.5
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:29.5512783Z ^[[1m^[[92m   Compiling^[[0m tempfile v3.27.0
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:30.3439377Z ^[[1m^[[92m   Compiling^[[0m tokio v1.53.3
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:34.1137399Z ^[[1m^[[92m   Compiling^[[0m a3s-sandbox v0.3.0 (D:\a\Sandbox\Sandbox)
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T05:25:41.8058297Z ^[[1m^[[92m    Finished^[[0m `dev` profile [unoptimized + debuginfo] target(s) in 19.32s
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	﻿2026-10-18T05:25:41.9291533Z ##[group]Run cargo test --lib --locked platform::windows::workspace_ownership_tests::an_active_owner_pins_the_root_but_allows_child_updates -- --exact --nocapture 2>&1 | Tee-Object root-pin.log
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:41.9293315Z ^[[36;1mcargo test --lib --locked platform::windows::workspace_ownership_tests::an_active_owner_pins_the_root_but_allows_child_updates -- --exact --nocapture 2>&1 | Tee-Object root-pin.log^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:41.9294917Z ^[[36;1mif ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:41.9295654Z ^[[36;1mcargo test --lib --locked tests::native_backend_cannot_remove_or_rename_protected_workspace_entries -- --exact --nocapture 2>&1 | Tee-Object ordinary-updates.log^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:41.9296334Z ^[[36;1mexit $LASTEXITCODE^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:41.9362276Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:41.9362615Z env:
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:41.9362807Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:41.9363064Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:41.9363304Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:41.9363510Z ##[endgroup]
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:42.5173001Z ^[[31;1m^[[1m^[[92m   Compiling^[[0m a3s-sandbox v0.3.0 (D:\a\Sandbox\Sandbox)^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:52.1317491Z ^[[31;1m^[[1m^[[92m    Finished^[[0m `test` profile [unoptimized + debuginfo] target(s) in 9.80s^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:52.1351137Z ^[[31;1m^[[1m^[[92m     Running^[[0m unittests src\lib.rs (target\debug\deps\a3s_sandbox-24d3fa0df622f44d.exe)^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:52.1548899Z
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:52.1552604Z running 1 test
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:52.1687507Z test platform::windows::workspace_ownership_tests::an_active_owner_pins_the_root_but_allows_child_updates ... ok
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:52.1689277Z
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:52.1689728Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 210 filtered out; finished in 0.01s
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:52.1690324Z
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:52.3633547Z ^[[31;1m^[[1m^[[92m    Finished^[[0m `test` profile [unoptimized + debuginfo] target(s) in 0.08s^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:52.3643586Z ^[[31;1m^[[1m^[[92m     Running^[[0m unittests src\lib.rs (target\debug\deps\a3s_sandbox-24d3fa0df622f44d.exe)^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:52.3678514Z
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:25:52.3681562Z running 1 test
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:26:52.3769206Z test tests::native_backend_cannot_remove_or_rename_protected_workspace_entries has been running for over 60 seconds
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:27:59.2714296Z ^[[31;1m^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:27:59.2722192Z ^[[31;1mthread 'tests::native_backend_cannot_remove_or_rename_protected_workspace_entries' (8940) panicked at src\tests.rs:483:10:^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:27:59.2728321Z ^[[31;1mcalled `Result::unwrap()` on an `Err` value: Windows ACL target is a reparse point: \\?\C:\Program Files (x86)\pipx_bin\yamllint.exe^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:27:59.2735114Z ^[[31;1mnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:27:59.2764701Z test tests::native_backend_cannot_remove_or_rename_protected_workspace_entries ... FAILED
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:27:59.2765510Z
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:27:59.2768190Z failures:
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:27:59.2769967Z
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:27:59.2771725Z failures:
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:27:59.2773967Z     tests::native_backend_cannot_remove_or_rename_protected_workspace_entries
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:27:59.2774807Z
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:27:59.2777508Z test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 210 filtered out; finished in 126.91s
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:27:59.2780680Z
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:27:59.2807345Z ^[[31;1m^[[1m^[[91merror^[[0m: test failed, to rerun pass `--lib`^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T05:27:59.3138038Z ##[error]Process completed with exit code 1.
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	﻿2026-10-18T05:27:59.3429040Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.3429555Z with:
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.3429897Z   name: sandbox-Windows-91720eb4f10923ee7d8a747058a6f5a3b416e506
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.3430336Z   path: *.log
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	dist/*.tar.gz
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.3430657Z   if-no-files-found: error
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.3430948Z   compression-level: 6
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.3431209Z   overwrite: false
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.3431471Z   include-hidden-files: false
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.3431731Z env:
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.3431996Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.3432298Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.3432559Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.3432818Z ##[endgroup]
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.5519789Z (node:8144) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.5521348Z (Use `node --trace-deprecation ...` to show where the warning was created)
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.5608853Z With the provided path, there will be 2 files uploaded
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.5614410Z Artifact name is valid!
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.5616698Z Root directory input is valid!
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.8737397Z Beginning upload of artifact content to blob storage
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:27:59.8968114Z (node:8144) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:28:00.0464204Z Uploaded bytes 1086
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:28:00.0931703Z Finished uploading artifact content to blob storage!
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:28:00.0933638Z SHA256 digest of uploaded artifact zip is 40df7cb63c306a60adccb3534504670ef787fd7491fe2c31db66e6e22e6a1644
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:28:00.0935952Z Finalizing artifact upload
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:28:00.3204122Z Artifact sandbox-Windows-91720eb4f10923ee7d8a747058a6f5a3b416e506.zip successfully finalized. Artifact ID 12126392535
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:28:00.3205972Z Artifact sandbox-Windows-91720eb4f10923ee7d8a747058a6f5a3b416e506 has been successfully uploaded! Final size is 1086 bytes. Artifact ID is 12126392535
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:28:00.3216137Z Artifact download URL: https://github.com/A3S-Lab/Sandbox/actions/runs/39100432917/artifacts/12126392535
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	﻿2026-10-18T05:28:00.3564903Z Post job cleanup.
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:28:00.5468688Z [command]"C:\Program Files\Git\bin\git.exe" version
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:28:00.5820404Z git version 2.56.0.windows.2
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:28:00.5891462Z Temporarily overriding HOME='D:\a\_temp\7987f5c4-de07-4256-9dc3-fd17211a27f0' before making global git config changes
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:28:00.5892596Z Adding repository directory to the temporary git global config as a safe directory
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:28:00.5903187Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\Sandbox\Sandbox
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:28:00.6305698Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:28:00.6695960Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:28:01.2636010Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:28:01.2972447Z http.https://github.com/.extraheader
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:28:01.3020422Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:28:01.3415330Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:28:01.9163457Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:28:01.9570007Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+check (windows-latest)	Complete job	﻿2026-10-18T05:28:02.5764573Z Cleaning up orphan processes
+check (windows-latest)	Complete job	2026-10-18T05:28:02.6209038Z Terminate orphan process: pid (6448) (vctip)
+check (windows-latest)	Complete job	2026-10-18T05:28:02.6465837Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11d5960a326750d5838078e36cf38b85af677262, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

@@ -194,6 +194,7 @@ pub(super) struct ExecutionAcls {
     paths: Vec<AclRestoration>,
     modified: HashSet<PathBuf>,
     journal: Option<RecoveryJournal>,
+    pending: Option<Vec<PlannedAclChange>>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -235,6 +236,12 @@ struct AclChange {
     protection: DaclProtection,
 }
 
+struct PlannedAclChange {
+    target: File,
+    index: usize,
+    change: AclChange,
+}
+
 fn system_tree_prefixes() -> Vec<PathBuf> {
     let mut prefixes = [
         "WINDIR",
@@ -258,6 +265,9 @@ fn system_tree_prefixes() -> Vec<PathBuf> {
         }
     }
     prefixes
+        .into_iter()
+        .map(|path| path.canonicalize().unwrap_or(path))
+        .collect()
 }
 
 fn is_toolchain_binary(path: &Path) -> bool {
@@ -301,7 +311,11 @@ impl ExecutionAcls {
                 .collect(),
             paths: state.paths,
             journal: Some(journal),
+            pending: None,
         };
+        if guard.paths.is_empty() {
+            return guard.persist();
+        }
         guard
             .restore()
             .context("recover abandoned Windows authorization")
@@ -312,6 +326,7 @@ impl ExecutionAcls {
         sid: &SidBuffer,
         lease: &WorkspaceLease,
     ) -> Result<Self> {
+        let _mutation = lock_acl_mutation(5_000)?;
         let journal = RecoveryJournal::open(&lease.journal_name)?;
         if journal.read()?.is_some() {
             bail!("Windows authorization recovery is incomplete");
@@ -321,6 +336,7 @@ impl ExecutionAcls {
             paths: Vec::new(),
             modified: HashSet::new(),
             journal: Some(journal),
+            pending: Some(Vec::new()),
         };
         guard.grant_ancestor_traversal(&policy.workspace)?;
         guard.grant_ancestor_traversal(&policy.scratch)?;
@@ -392,7 +408,24 @@ impl ExecutionAcls {
                 )?;
             }
         }
+        guard.persist()?;
+        let pending = guard.pending.take().context("Windows ACL plan is absent")?;
+        for operation in pending {
+            let record = &mut guard.paths[operation.index];
+            modify_path_acl(
+                &operation.target,
+                &record.path,
+                &guard.sid,
+                operation.change,
+                &mut record.protection,
+                |_| Ok(()),
+            )?;
+        }
         Ok(guard)
+    }
+
+    fn persist(&self) -> Result<()> {
+        write_acl_journal(self.journal.as_ref(), &self.sid, &self.paths)
     }
 
     fn grant_ancestor_traversal(&mut self, path: &Path) -> Result<()> {
@@ -528,23 +561,35 @@ impl ExecutionAcls {
             bail!("Windows ACL target identity changed: {}", path.display());
         }
         self.paths[index].local_only &= local_only;
-        let mut pending = self.paths.clone();
-        let original_protection = &mut self.paths[index].protection;
         let protection = if protect_dacl {
             DaclProtection::Restrict
         } else {
             DaclProtection::Preserve
         };
+        let change = AclChange {
+            permissions,
+            access_mode,
+            inheritance,
+            protection,
+        };
+        if let Some(pending) = self.pending.as_mut() {
+            if protect_dacl && self.paths[index].protection.is_none() {
+                self.paths[index].protection = Some(capture_dacl_restoration(&target, path)?);
+            }
+            pending.push(PlannedAclChange {
+                target,
+                index,
+                change,
+            });
+            return Ok(());
+        }
+        let mut pending = self.paths.clone();
+        let original_protection = &mut self.paths[index].protection;
         if let Err(error) = modify_path_acl(
             &target,
             path,
             &self.sid,
-            AclChange {
-                permissions,
-                access_mode,
-                inheritance,
-                protection,
-            },
+            change,
             original_protection,
             |protection| {
                 pending[index].protection = protection.clone();
@@ -564,6 +609,10 @@ impl ExecutionAcls {
     }
 
     pub(super) fn restore(&mut self) -> Result<()> {
+        if self.pending.is_some() || self.paths.is_empty() {
+            return Ok(());
+        }
+        let _mutation = lock_acl_mutation(5_000)?;
         let mut failure = None;
         for index in (0..self.paths.len()).rev() {
             let record = &mut self.paths[index];
@@ -598,7 +647,6 @@ impl ExecutionAcls {
                 Ok(()) => {
                     self.modified.remove(&record.path);
                     self.paths.remove(index);
-                    write_acl_journal(self.journal.as_ref(), &self.sid, &self.paths)?;
                 }
                 Err(error) => {
                     if failure.is_none() {
@@ -610,6 +658,7 @@ impl ExecutionAcls {
                 }
             }
         }
+        self.persist()?;
         match failure {
             Some(error) => Err(error),
             None => Ok(()),
@@ -658,7 +707,7 @@ fn open_acl_target(path: &Path) -> Result<File> {
             }
         })?;
     if file.metadata()?.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0 {
-        bail!("Windows ACL target is a reparse point: {}", path.display());
+        return Err(acl_denied(path));
     }
     Ok(file)
 }
@@ -794,6 +843,40 @@ pub(super) fn open_host_mutex(name: &str) -> Result<OwnedHandle> {
     Ok(unsafe { OwnedHandle::from_raw_handle(raw) })
 }
 
+fn capture_dacl_restoration(target: &File, path: &Path) -> Result<DaclRestoration> {
+    let (acl, descriptor) = query_handle_dacl(target, path)?;
+    let mut control = 0;
+    let mut revision = 0;
+    if unsafe { GetSecurityDescriptorControl(descriptor.0, &mut control, &mut revision) } == 0 {
+        return Err(last_windows_error(
+            "inspect original Windows DACL protection",
+        ));
+    }
+    let protected = control & SE_DACL_PROTECTED != 0;
+    let mut converted_inherited = Vec::new();
+    if !protected && !acl.is_null() {
+        for index in 0..u32::from(unsafe { (*acl).AceCount }) {
+            let mut entry = null_mut();
+            if unsafe { GetAce(acl, index, &mut entry) } == 0 {
+                return Err(last_windows_error("inspect an inherited Windows ACE"));
+            }
+            let header = unsafe { &*entry.cast::<ACE_HEADER>() };
+            if header.AceFlags & INHERITED_ACE as u8 != 0 {
+                let mut bytes = unsafe {
+                    std::slice::from_raw_parts(entry.cast::<u8>(), usize::from(header.AceSize))
+                }
+                .to_vec();
+                bytes[1] &= !(INHERITED_ACE as u8);
+                converted_inherited.push(bytes);
+            }
+        }
+    }
+    Ok(DaclRestoration {
+        protected,
+        converted_inherited,
+    })
+}
+
 fn modify_path_acl(
     target: &File,
     path: &Path,
@@ -819,29 +902,7 @@ fn modify_path_acl(
     }
 
     if protection == DaclProtection::Restrict && original_protection.is_none() {
-        let protected = control & SE_DACL_PROTECTED != 0;
-        let mut converted_inherited = Vec::new();
-        if !protected && !old_acl.is_null() {
-            for index in 0..u32::from(unsafe { (*old_acl).AceCount }) {
-                let mut entry = null_mut();
-                if unsafe { GetAce(old_acl, index, &mut entry) } == 0 {
-                    return Err(last_windows_error("inspect an inherited Windows ACE"));
-                }
-                let header = unsafe { &*entry.cast::<ACE_HEADER>() };
-                if header.AceFlags & INHERITED_ACE as u8 != 0 {
-                    let mut bytes = unsafe {
-                        std::slice::from_raw_parts(entry.cast::<u8>(), usize::from(header.AceSize))
-                    }
-                    .to_vec();
-                    bytes[1] &= !(INHERITED_ACE as u8);
-                    converted_inherited.push(bytes);
-                }
-            }
-        }
-        *original_protection = Some(DaclRestoration {
-            protected,
-            converted_inherited,
-        });
+        *original_protection = Some(capture_dacl_restoration(target, path)?);
     }
     if protection != DaclProtection::Restore {
         before_change(original_protection)?;

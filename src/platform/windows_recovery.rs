@@ -146,7 +146,6 @@ impl RecoveryJournal {
             "write recovery journal",
         )?;
         // The ACL must not become durable before its recovery intent does.
-        // shortcut: per-change hive flushes; batch only after crash-cutpoint qualification.
         check(
             unsafe { RegFlushKey(self.key.0 as HKEY) },
             "flush recovery journal",

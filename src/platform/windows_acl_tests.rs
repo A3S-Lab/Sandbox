@@ -7,6 +7,10 @@ use windows_sys::Win32::Security::Authorization::{
 use windows_sys::Win32::Storage::FileSystem::FILE_WRITE_DATA;
 
 fn write_rights(path: &Path, sid: &SidBuffer) -> u32 {
+    file_rights(path, sid) & FILE_WRITE_DATA
+}
+
+fn file_rights(path: &Path, sid: &SidBuffer) -> u32 {
     let wide = wide_null(path.as_os_str());
     let (acl, _descriptor) = query_path_dacl(path, &wide).unwrap();
     assert!(!acl.is_null());
@@ -21,7 +25,7 @@ fn write_rights(path: &Path, sid: &SidBuffer) -> u32 {
         unsafe { GetEffectiveRightsFromAclW(acl, &trustee, &mut rights) },
         0
     );
-    rights & FILE_WRITE_DATA
+    rights
 }
 
 fn lease(sid: &SidBuffer) -> ExecutionAcls {
@@ -30,6 +34,7 @@ fn lease(sid: &SidBuffer) -> ExecutionAcls {
         paths: Vec::new(),
         modified: HashSet::new(),
         journal: None,
+        pending: None,
     }
 }
 
@@ -507,4 +512,78 @@ async fn appcontainer_cannot_write_host_recovery_journal() {
         stored.is_none(),
         "untrusted guest wrote host recovery intent"
     );
+}
+
+#[test]
+fn canonical_system_toolchains_do_not_receive_temporary_grants() {
+    const CHILD: &str = "A3S_SANDBOX_TEST_SYSTEM_TOOLCHAIN";
+    if let Some(root) = std::env::var_os(CHILD) {
+        let root = PathBuf::from(root);
+        let system = root.join("system").canonicalize().unwrap();
+        let binary = system.join("tool.exe");
+        let original = [acl_state(&system), acl_state(&binary)];
+        let profile = AppContainerProfile::create().unwrap();
+        let mut permissions = lease(&profile.sid);
+        permissions
+            .grant_user_toolchain_binaries(
+                std::slice::from_ref(&system),
+                &root.join("workspace"),
+                &root.join("scratch"),
+            )
+            .unwrap();
+        assert_eq!(
+            acl_state(&system),
+            original[0],
+            "a canonical system root received a grant"
+        );
+        assert_eq!(
+            acl_state(&binary),
+            original[1],
+            "a system binary received a grant"
+        );
+        return;
+    }
+    let root = tempfile::tempdir().unwrap();
+    for name in ["system", "workspace", "scratch"] {
+        std::fs::create_dir(root.path().join(name)).unwrap();
+    }
+    std::fs::write(root.path().join("system/tool.exe"), b"fixture").unwrap();
+    let status = std::process::Command::new(std::env::current_exe().unwrap())
+        .args(["--exact", "platform::windows_security::acl_tests::canonical_system_toolchains_do_not_receive_temporary_grants", "--nocapture"])
+        .env(CHILD, root.path())
+        .env("PROGRAMFILES", root.path().join("system"))
+        .status().unwrap();
+    assert!(status.success(), "canonical system-tree exclusion failed");
+}
+
+#[test]
+fn optional_toolchain_aliases_do_not_authorize_targets_or_abort_other_tools() {
+    use windows_sys::Win32::Storage::FileSystem::FILE_READ_DATA;
+    let root = tempfile::tempdir().unwrap();
+    let tools = root.path().join("tools");
+    let outside = root.path().join("outside.exe");
+    let ordinary = tools.join("ordinary.exe");
+    std::fs::create_dir(&tools).unwrap();
+    std::fs::write(&outside, b"outside").unwrap();
+    std::fs::write(&ordinary, b"ordinary").unwrap();
+    std::os::windows::fs::symlink_file(&outside, tools.join("alias.exe")).unwrap();
+    let original = acl_state(&outside);
+    let profile = AppContainerProfile::create().unwrap();
+    let mut permissions = lease(&profile.sid);
+    permissions
+        .grant_user_toolchain_binaries(
+            &[tools],
+            &root.path().join("workspace"),
+            &root.path().join("scratch"),
+        )
+        .unwrap();
+    assert_ne!(file_rights(&ordinary, &profile.sid) & FILE_READ_DATA, 0);
+    assert_eq!(write_rights(&ordinary, &profile.sid), 0);
+    assert_eq!(
+        acl_state(&outside),
+        original,
+        "a tool alias authorized its external target"
+    );
+    permissions.restore().unwrap();
+    assert_eq!(file_rights(&ordinary, &profile.sid) & FILE_READ_DATA, 0);
 }
