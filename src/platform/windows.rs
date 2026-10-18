@@ -188,6 +188,9 @@ impl PlatformSandbox {
     }
 }
 
+#[cfg(test)]
+mod workspace_ownership_tests;
+
 fn workspace_execution_gate(workspace: &Path) -> std::sync::Arc<tokio::sync::Mutex<()>> {
     use std::sync::Arc;
     static GATES: OnceLock<Mutex<HashMap<PathBuf, Arc<tokio::sync::Mutex<()>>>>> = OnceLock::new();
