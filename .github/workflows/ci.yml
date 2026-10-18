@@ -58,6 +58,9 @@ jobs:
       - name: Verify Windows ACL restoration
         if: runner.os == 'Windows'
         run: cargo test --lib --locked platform::windows_security::acl_tests::cleanup_ -- --test-threads=1 --nocapture
+      - name: Verify Windows crash restart recovery in isolation
+        if: runner.os == 'Windows'
+        run: cargo test --lib --locked platform::windows_security::acl_tests::restarting_after_host_death_restores_workspace_authorization -- --exact --nocapture
       - name: Run tests
         id: unix-suite
         if: runner.os != 'Windows'
@@ -139,6 +142,25 @@ jobs:
             [IO.File]::WriteAllText($path, $original)
           }
           git diff --exit-code -- src/platform/windows.rs
+          exit $LASTEXITCODE
+      - name: Verify the Windows durable authorization oracle
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $path = Join-Path $PWD 'src/platform/windows_security.rs'
+          $original = [IO.File]::ReadAllText($path)
+          try {
+            $mutated = $original.Replace('before_change(original_protection)?;', 'let _ = &mut before_change;')
+            if ($mutated -eq $original) { throw 'authorization journal mutation did not apply' }
+            [IO.File]::WriteAllText($path, $mutated)
+            $PSNativeCommandUseErrorActionPreference = $false
+            cargo test --lib --locked platform::windows_security::acl_tests::restarting_after_host_death_restores_workspace_authorization -- --exact --nocapture 2>&1 | Tee-Object recovery-mutation.log
+            if ($LASTEXITCODE -eq 0) { throw 'recovery oracle accepted missing durable intent' }
+            if (-not (Select-String -Path recovery-mutation.log -SimpleMatch 'restarting left stale workspace authorization' -Quiet)) { throw 'recovery mutation failed for an unrelated reason' }
+          } finally {
+            [IO.File]::WriteAllText($path, $original)
+          }
+          git diff --exit-code -- src/platform/windows_security.rs
           exit $LASTEXITCODE
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
         with:

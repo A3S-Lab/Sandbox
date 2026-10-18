@@ -1,0 +1,327 @@
+   Compiling typenum v1.20.1
+   Compiling cfg-if v1.0.5
+   Compiling option-ext v0.2.0
+   Compiling bitflags v2.13.2
+   Compiling itoa v1.0.18
+   Compiling fastrand v2.5.0
+   Compiling once_cell v1.21.4
+   Compiling libc v0.2.191
+   Compiling memchr v2.8.3
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling bytes v1.12.1
+   Compiling pin-project-lite v0.2.17
+   Compiling anyhow v1.0.104
+   Compiling generic-array v0.14.7
+   Compiling errno v0.3.14
+   Compiling dirs-sys v0.4.1
+   Compiling getrandom v0.4.3
+   Compiling cpufeatures v0.2.17
+   Compiling mio v1.2.4
+   Compiling socket2 v0.6.5
+   Compiling dirs v5.0.1
+   Compiling signal-hook-registry v1.4.8
+   Compiling rustix v1.1.5
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling tokio v1.53.3
+   Compiling digest v0.10.7
+   Compiling sha2 v0.10.9
+   Compiling tempfile v3.27.0
+   Compiling serde_json v1.0.154
+   Compiling a3s-sandbox v0.3.0 (/Users/roylin/code/a3s/.claude/worktrees/sandbox-publish)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.99s
+     Running unittests src/lib.rs (target/debug/deps/a3s_sandbox-7be57e061c0a1a92)
+
+running 215 tests
+test network::relay::tests::posix_shell_single_quote_escapes_apostrophes ... ok
+test network::relay::tests::default_guest_relay_port_is_stable ... ok
+test network::relay::tests::wrap_command_with_guest_relay_embeds_relay_and_socket ... ok
+test network::socks::tests::path_prefixed_rule_does_not_authorize_socks ... ok
+test network::relay::tests::stage_relay_into_scratch_copies_executable ... ok
+test network::connect::tests::path_prefixed_rule_does_not_authorize_connect ... ok
+test network::connect::tests::connect_allow_tunnels_bytes_to_upstream ... ok
+test network::connect::tests::absolute_form_http_injects_secret_header_upstream ... ok
+test network::connect::tests::absolute_form_without_matching_injection_forwards_no_authorization ... ok
+test network::connect::tests::client_supplied_authorization_is_replaced_by_injection ... ok
+test network::socks::tests::socks_allow_tunnels_bytes_to_upstream ... ok
+test network::socks::tests::unix_socks_allow_tunnels_bytes_to_upstream ... ok
+test network::connect::tests::unix_connect_allow_tunnels_bytes_to_upstream ... ok
+test observability::tests::audit_event_replay_key_stable_for_same_decision ... ok
+test observability::tests::buffer_drops_oldest_under_backpressure ... ok
+test observability::tests::monitoring_failure_does_not_grant_access_semantics ... ok
+test platform::bwrap_candidate_tests::defaults_then_an_authoritative_override ... ok
+test platform::macos::tests::escaped_path_quotes_special_characters ... ok
+test platform::macos::tests::escaped_path_rejects_non_utf8_values ... ok
+test platform::macos::tests::escaped_path_rejects_nul_and_oversized_values ... ok
+test network::relay::tests::tcp_unix_relay_forwards_socks5_to_unix_mediator ... ok
+test policy::capabilities::tests::gate13_matrix_rows_match_this_platforms_capabilities ... ok
+test policy::capabilities::tests::gate2_backend_enforces_optional_memory_and_process_limits ... ok
+test policy::capabilities::tests::gate4_mediated_http_capability_matches_platform_fence ... ok
+test policy::capabilities::tests::gate5_mediated_socks_capability_matches_platform_fence ... ok
+test policy::capabilities::tests::memory_limit_without_backend_support_fails_closed ... ok
+test policy::capabilities::tests::policy_exceeding_backend_capabilities_fails_closed ... ok
+test policy::decide::tests::deny_read_wins_over_allow_read ... ok
+test policy::capabilities::tests::gate13_threat_model_embeds_the_generated_capability_matrix ... ok
+test policy::decide::tests::fixture_decisions_are_separator_agnostic ... ok
+test policy::decide::tests::glob_rules_match_single_segment_wildcards ... ok
+test policy::decide::tests::network_default_is_deny_all ... ok
+test policy::decide::tests::unmatched_paths_fail_closed ... ok
+test network::relay::tests::tcp_unix_relay_forwards_connect_to_unix_mediator ... ok
+test policy::decide::tests::write_exception_carves_out_denied_ancestor ... ok
+test policy::digest::tests::baseline_digest_is_hex_sha256_length ... ok
+test policy::digest::tests::digest_changes_when_rules_change ... ok
+test policy::digest::tests::digest_is_stable_under_rule_reordering ... ok
+test observability::gate2_resources::gate2_unix_process_limit_fails_closed_at_policy ... ok
+test observability::gate2_resources::gate2_macos_memory_limit_fails_closed_at_policy ... ok
+test policy::enforced::tests::child_environment_mediator_pipe_sets_named_pipe_not_http_proxy ... ok
+test policy::enforced::tests::child_environment_mediator_overwrites_explicit_proxy_bypass ... ok
+test policy::enforced::tests::child_environment_removes_case_insensitive_bootstrap_variables ... ok
+test policy::enforced::tests::child_environment_socks_mediator_sets_all_proxy_only ... ok
+test policy::enforced::tests::child_environment_removes_runtime_injection_and_rehomes_state ... ok
+test policy::enforced::tests::executable_resolution_rejects_workspace_tools ... ok
+test policy::enforced::tests::cached_internal_hardlink_is_rechecked_when_the_twin_moves_outside ... ok
+test policy::enforced::tests::git_worktree_pointer_is_resolved_for_case_variant_gitfiles ... ok
+test platform::macos::tests::profile_denies_network_and_reasserts_workspace_secrets ... ok
+test policy::enforced::tests::nested_environment_files_and_hardlinks_enter_the_deny_set ... ok
+test policy::enforced::tests::path_ancestors_exclude_the_filesystem_root ... ok
+test policy::enforced::tests::hardlink_scan_skips_build_and_package_stores ... ok
+test policy::enforced::tests::protected_path_matching_is_case_insensitive_and_traversal_safe ... ok
+test policy::enforced::tests::credential_hardlink_aliases_inside_package_stores_enter_the_deny_set ... ok
+test policy::enforced::tests::scan_directory_filter_handles_case_variants ... ok
+test policy::enforced::tests::nested_secret_scan_matches_case_variant_environment_files ... ok
+test policy::enforced::tests::nested_secret_scan_skips_control_and_build_stores ... ok
+test policy::enforced::tests::protected_workspace_symlinks_fail_closed ... ok
+test policy::gate1_integration::gate1_fixture_decisions_match_expected_table ... ok
+test policy::gate1_integration::gate1_fixture_digest_is_replay_stable ... ok
+test policy::enforced::tests::policy_discovers_case_variant_control_metadata ... ok
+test policy::gate1_integration::gate1_compile_refuses_allow_overlays_outside_workspace_or_scratch ... ok
+test policy::gate3_integration::gate3_document_decisions_treat_readonly_mount_as_readable ... ok
+test policy::gate1_integration::gate1_native_sandbox_rejects_unenforcible_policy ... ok
+test policy::enforced::tests::in_workspace_hardlinks_are_not_outside_aliases ... ok
+test policy::gate3_integration::gate3_ephemeral_session_fails_closed_without_overlay_capability ... ok
+test policy::gate3_integration::gate3_ephemeral_rejected_by_native_sandbox_constructor ... ok
+test policy::gate1_integration::gate1_compile_applies_exact_deny_overlays_without_globs ... ok
+test policy::gate1_integration::gate1_compile_requires_sandbox_policy_and_rejects_broadening ... ok
+test policy::gate4_integration::gate4_claiming_platforms_accept_mediated_network_capability ... ok
+test policy::gate4_integration::gate4_connect_mediator_allow_and_deny_integration ... ok
+test policy::gate4_integration::gate4_does_not_weaken_default_deny_all ... ok
+test policy::gate3_integration::gate3_readonly_mount_outside_workspace_compiles_for_read_not_write ... ok
+test policy::gate4_integration::gate4_mediated_http_capability_is_platform_scoped ... ok
+test policy::gate3_integration::gate3_readonly_mount_under_workspace_denies_writes ... ok
+test policy::gate4_integration::gate4_rejects_path_prefix_with_dotdot ... ok
+test policy::gate5_integration::gate5_macos_accepts_exact_unix_socket_allow_rules ... ok
+test policy::gate5_integration::gate5_macos_accepts_mediated_socks_capability ... ok
+test policy::gate3_integration::gate3_readwrite_mount_outside_workspace_fails_closed ... ok
+test policy::gate5_integration::gate5_mediated_socks_capability_is_platform_scoped ... ok
+test policy::gate5_integration::gate5_socks_mediator_allow_and_deny_integration ... ok
+test policy::gate5_integration::gate5_unix_socket_allowlist_capability_is_platform_scoped ... ok
+test policy::gate5_linux_bridge::gate5_linux_bridge_foundation_apis_are_present ... ok
+test policy::gate5_linux_bridge::gate5_linux_bridge_residual_checklist_is_documented ... ok
+test policy::gate5_linux_bridge::gate5_linux_mediated_http_and_socks_are_claimed_unix_allowlists_are_not ... ok
+test policy::gate5_linux_bridge::gate5_linux_mediated_http_policy_compiles_on_linux_capabilities ... ok
+test policy::gate5_windows_bridge::gate5_windows_bridge_acceptance_checklist_is_documented ... ok
+test policy::gate5_windows_bridge::gate5_windows_guest_contract_rejects_http_proxy_as_bridge ... ok
+test policy::gate5_windows_bridge::gate5_windows_mediated_http_is_claimed_socks_remain_unclaimed ... ok
+test policy::gate5_windows_bridge::gate5_windows_mediated_http_policy_compiles_on_windows_capabilities ... ok
+test policy::gate6_integration::gate6_capability_report_lists_unavailable_surfaces ... ok
+test policy::gate6_integration::gate6_replace_policy_allows_narrowing_without_opt_in ... ok
+test observability::gate2_integration::gate2_execute_records_attributable_audit_events ... ok
+test policy::gate7_fuzz::gate7_fuzz_ipv6_literal_parses_but_requires_exact_allowlist ... ok
+test policy::gate6_integration::gate6_replace_policy_refuses_silent_broadening ... ok
+test policy::gate7_fuzz::gate7_fuzz_mediator_still_allows_well_formed_connect_after_garbage ... ok
+test policy::gate7_fuzz::gate7_fuzz_parse_connect_target_accepts_canonical_shapes ... ok
+test policy::gate7_fuzz::gate7_fuzz_parse_connect_target_rejects_malformed_corpus ... ok
+test policy::enforced::tests::nested_secret_scan_fails_closed_at_depth_limit ... ok
+test observability::gate2_resources::gate2_policy_output_ceiling_truncates_capture ... ok
+test policy::gate7_integration::gate7_capability_report_never_hides_unavailable_mediation ... ok
+test policy::gate7_integration::gate7_connect_does_not_alias_localhost_to_loopback_ip ... ok
+test policy::gate7_integration::gate7_connect_mediator_rejects_non_connect_method ... ok
+test policy::gate7_integration::gate7_benchmark_connect_mediator_allow_p50_under_budget ... ok
+test policy::gate7_integration::gate7_direct_symlink_to_outside_file_does_not_leak_on_read ... ok
+test policy::gate1_integration::gate1_native_sandbox_integration_still_executes ... ok
+test policy::gate7_integration::gate7_narrowing_then_rebroadening_requires_opt_in_each_time ... ok
+test policy::gate7_integration::gate7_path_prefix_never_authorizes_opaque_tunnels ... ok
+test policy::gate7_integration::gate7_policy_validate_rejects_malformed_network_hosts ... ok
+test policy::gate7_integration::gate7_policy_validate_rejects_zero_resource_ceilings ... ok
+test policy::gate7_integration::gate7_replace_policy_still_refuses_mediation_enablement ... ok
+test policy::gate3_integration::gate3_native_sandbox_reads_readonly_mount_and_blocks_writes ... ok
+test policy::gate5_integration::gate5_macos_allows_listed_unix_socket_and_denies_others ... ok
+test policy::gate4_integration::gate4_macos_sandbox_mediator_tunnels_allowed_connect ... ok
+test policy::gate7_integration::gate7_socks_does_not_authorize_literal_ip_when_hostname_allowlisted ... ok
+test policy::gate5_integration::gate5_macos_sandbox_socks_tunnels_allowed_connect ... ok
+test policy::gate7_integration::gate7_socks_mediator_rejects_bind_command ... ok
+test policy::gate7_release_invariants::gate7_release_capability_probe_lists_unavailable_surfaces ... ok
+test policy::gate7_release_invariants::gate7_release_claims_match_capability_matrix ... ok
+test policy::gate7_release_invariants::gate7_release_default_profile_keeps_mediation_off ... ok
+test policy::gate7_integration::gate7_soak_same_workspace_concurrent_sessions_keep_outputs_distinct ... ok
+test policy::gate8_integration::gate8_invalid_secret_entries_refuse ... ok
+test policy::gate8_integration::gate8_reserved_secret_names_refuse ... ok
+test policy::gate7_integration::gate7_macos_explicit_no_proxy_cannot_bypass_mediator_fence ... ok
+test policy::gate8_integration::gate8_secret_bytes_absent_from_audit_and_digest_stable ... ok
+test policy::gate8_integration::gate8_secret_colliding_with_explicit_env_refuses ... ok
+test policy::gate7_integration::gate7_tocu_symlink_planted_between_executes_does_not_leak_outside_secret ... ok
+test policy::gate8_integration::gate8_secret_env_without_mediation_fails_closed ... ok
+test policy::grant::tests::apply_appends_to_existing_mediated_policy_without_clobbering ... ok
+test policy::grant::tests::apply_is_idempotent_for_identical_subject ... ok
+test policy::grant::tests::apply_refuses_invalid_or_wildcard_hosts ... ok
+test policy::grant::tests::apply_to_deny_all_baseline_activates_mediation_for_exactly_that_origin ... ok
+test policy::grant::tests::grant_cannot_alias_localhost_to_loopback_ip ... ok
+test policy::grant::tests::port_pinned_grant_widens_only_that_port ... ok
+test policy::grant_integration::applied_grant_is_auditable_with_new_digest_and_updates_the_session ... ok
+test policy::grant_integration::baseline_policy_fixture_matches_default ... ok
+test policy::gate8_integration::gate8_secret_bytes_never_appear_in_child_environment_dump ... ok
+test policy::grant_integration::granted_policy_authorizes_only_the_granted_subject ... ok
+test policy::grant_integration::hand_built_broadening_still_refuses_without_the_explicit_opt_in ... ok
+test policy::grant_integration::idempotent_regrant_changes_nothing_and_records_no_new_allow_rule ... ok
+test policy::grant_integration::stale_base_digest_refuses_and_leaves_policy_unchanged ... ok
+test policy::mediate::tests::allow_exact_origin_and_path_prefix ... ok
+test policy::mediate::tests::connect_requires_pathless_allow_rule ... ok
+test policy::mediate::tests::deny_when_mediation_flag_off ... ok
+test policy::mediate::tests::injection_host_match_is_case_insensitive_without_aliasing ... ok
+test policy::mediate::tests::injections_apply_only_on_matching_origin_and_path ... ok
+test policy::mediate::tests::injections_without_allow_rule_authorize_nothing ... ok
+test policy::mediate::tests::missing_path_prefix_allows_any_path_on_origin ... ok
+test policy::mediate::tests::socks_requires_mediated_socks_flag_and_pathless_rule ... ok
+test policy::model::tests::baseline_policy_validates ... ok
+test policy::model::tests::mediated_network_document_validates_shape_but_backend_fails_closed ... ok
+test policy::model::tests::rejects_dotdot_in_path_rules ... ok
+test policy::model::tests::rejects_mediated_network_flag_without_allowlist ... ok
+test policy::model::tests::rejects_network_allow_without_mediation_flag ... ok
+test policy::model::tests::rejects_recursive_glob ... ok
+test policy::model::tests::rejects_wrong_version ... ok
+test policy::model::tests::rejects_zero_timeout ... ok
+test policy::normalize::tests::absolute_unix_style_paths_keep_root ... ok
+test policy::normalize::tests::collapses_dot_and_rejects_escape ... ok
+test policy::normalize::tests::identical_relative_shapes_compare_equal ... ok
+test policy::normalize::tests::normalizes_separators ... ok
+test policy::resource_quota_integration::platforms_without_quota_enforcement_refuse_at_construction ... ok
+test policy::resource_quota_integration::zero_cpu_quota_refuses_at_resolve ... ok
+test policy::resources::tests::gate2_capabilities_can_enforce_optional_process_and_memory ... ok
+test policy::resources::tests::resolve_caps_request_timeout_by_policy ... ok
+test policy::resources::tests::resolve_rejects_call_depth_as_unenforcible ... ok
+test policy::resources::tests::resolve_rejects_zero_process_or_memory_limits ... ok
+test policy::resources::tests::resolve_uses_policy_output_ceiling ... ok
+test policy::update::tests::adding_unix_socket_allow_is_broadening ... ok
+test policy::update::tests::enabling_socks_is_broadening ... ok
+test policy::update::tests::narrowing_mediation_is_allowed ... ok
+test policy::update::tests::raising_timeout_is_broadening ... ok
+test policy::update::tests::removing_process_quota_is_broadening ... ok
+test policy::gate8_integration::gate8_secret_env_delivers_sentinel_not_secret_to_child ... ok
+test network::socks::tests::socks_deny_never_reaches_upstream ... ok
+test network::connect::tests::connect_deny_never_reaches_upstream ... ok
+test network::connect::tests::unix_connect_deny_never_reaches_upstream ... ok
+test process::tests::bounded_capture_at_exact_limit_is_not_marked_truncated ... ok
+test process::tests::bounded_capture_keeps_head_and_tail_with_exact_accounting ... ok
+test process::tests::bounded_capture_replaces_invalid_utf8_per_stream ... ok
+test observability::gate2_resources::gate2_policy_timeout_ceiling_caps_request ... ok
+test process::tests::bounded_capture_preserves_stream_identity_under_one_global_limit ... ok
+test process::lifecycle_tests::root_exit_stops_background_work_before_waiting_for_pipe_eof ... ok
+test policy::gate8_integration::gate8_egress_reinjection_delivers_secret_without_landing_it ... ok
+test tests::native_backend_blocks_credential_hardlinks_inside_writable_dependency_trees ... ok
+test policy::gate7_integration::gate7_benchmark_baseline_exec_p50_under_budget ... ok
+test network::connect::tests::absolute_form_denied_origin_never_reaches_upstream ... ok
+test network::connect::tests::absolute_form_https_target_refused_fail_closed ... ok
+test network::socks::tests::unix_socks_deny_never_reaches_upstream ... ok
+test tests::native_backend_handles_workspace_paths_with_spaces ... ok
+test tests::native_backend_keeps_concurrent_workspaces_isolated ... ok
+test tests::native_backend_enforces_the_global_output_limit ... ok
+test tests::native_backend_notifies_observer_and_accounts_each_stream ... ok
+test tests::native_backend_preserves_exit_code_and_stream_identity ... ok
+test tests::native_backend_rejects_invalid_explicit_environment_entries ... ok
+test tests::native_backend_cannot_remove_or_rename_protected_workspace_entries ... ok
+test tests::native_sandbox_canonicalizes_workspace_and_reports_backend ... ok
+test tests::native_sandbox_rejects_invalid_workspaces_and_requests ... ok
+test tests::native_backend_blocks_symlink_hardlink_and_credential_escape ... ok
+test tests::native_backend_protects_case_variant_control_metadata ... ok
+test policy::grant_integration::grant_loop_unblocks_a_denied_command_end_to_end ... ok
+test policy::gate7_integration::gate7_same_workspace_overlapping_executes_stay_isolated ... ok
+test tests::native_backend_blocks_ip_and_host_unix_socket_communication ... ok
+test policy::gate7_fuzz::gate7_fuzz_mediator_survives_malformed_tcp_payloads_without_upstream ... ok
+test tests::native_backend_starts_and_writes_only_ordinary_workspace_content ... ok
+test policy::gate7_integration::gate7_in_command_symlink_swap_during_sleep_does_not_leak ... ok
+test process::tests::process_deadline_includes_wait_after_both_streams_close ... ok
+test process::lifecycle_tests::completion_observer_cannot_hold_a_finished_command_forever ... ok
+test tests::native_backend_sanitizes_environment_and_kills_timed_out_descendants ... ok
+test policy::gate7_integration::gate7_soak_repeated_baseline_executes_stay_stable ... ok
+test process::lifecycle_tests::cancellation_before_the_owner_is_polled_stops_the_process_group ... ok
+test process::tests::successful_root_exit_does_not_leave_detached_descendants ... ok
+test policy::enforced::tests::monorepo_workspace_scan_stays_under_entry_limit ... ok
+test platform::macos::tests::monorepo_seatbelt_profile_fits_compiled_data_limit ... ok
+test process::tests::dropping_capture_kills_descendants_in_the_process_group ... ok
+
+test result: ok. 215 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.27s
+
+     Running unittests src/bin/a3s_sandbox.rs (target/debug/deps/a3s_sandbox-5917b8053b2985e3)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/a3s_sandbox_bridge.rs (target/debug/deps/a3s_sandbox_bridge-4b6156fe7f5cf83b)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/a3s_sandbox_relay.rs (target/debug/deps/a3s_sandbox_relay-c82d989396cea43a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/availability.rs (target/debug/deps/availability-319cd8788e73ff48)
+
+running 2 tests
+test unavailability_reasons_are_stable_and_unknown_values_refuse ... ok
+test launch_probe_does_not_grant_missing_lifetime_guarantees ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/bridge_protocol.rs (target/debug/deps/bridge_protocol-636506f452ddbdbd)
+
+running 2 tests
+test unknown_method_fails_without_killing_the_bridge ... ok
+test handshake_probe_exec_and_shutdown ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.59s
+
+     Running tests/cli_gate6.rs (target/debug/deps/cli_gate6-84cbd5e8ac9aff4c)
+
+running 4 tests
+test cli_digest_prints_stable_hex ... ok
+test cli_capabilities_emits_backend_and_unavailable ... ok
+test cli_exec_runs_command_in_sandbox ... ok
+test cli_exec_does_not_report_a_signaled_command_as_success ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.54s
+
+     Running tests/lifecycle.rs (target/debug/deps/lifecycle-e22bbfe73b5f135e)
+
+running 4 tests
+test execution_failure_codes_are_closed_and_stable ... ok
+test command_deadline_bounds_a_delta_observer_that_never_returns ... ok
+test completed_command_preserves_observer_failure_as_a_typed_non_replayable_error ... ok
+test dropping_the_caller_still_stops_a_command_blocked_in_its_observer ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.02s
+
+     Running tests/linux_lifetime.rs (target/debug/deps/linux_lifetime-d4190a2ae658db31)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/sbom_gate7.rs (target/debug/deps/sbom_gate7-f19551d7a15bfb38)
+
+running 1 test
+wrote /var/folders/3d/0pn3wn612t7cs79b5ml89x440000gn/T/.tmp2RP2Us components=65 sha256=589501a56069adbd788687cb0bbe08433b65f466e27ca486e5086b8dd726dccd
+test gate7_sbom_script_emits_cyclonedx_with_a3s_sandbox ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/windows_lifetime.rs (target/debug/deps/windows_lifetime-a70dce18192f9992)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

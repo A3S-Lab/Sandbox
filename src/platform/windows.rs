@@ -72,7 +72,13 @@ impl PlatformSandbox {
     }
 
     pub(crate) async fn acquire_workspace_lease(&self) -> Result<WorkspaceLease> {
-        self.workspace.acquire().await
+        let lease = self.workspace.acquire().await?;
+        tokio::task::spawn_blocking(move || {
+            ExecutionAcls::recover(&lease)?;
+            Ok(lease)
+        })
+        .await
+        .context("Windows authorization recovery worker failed")?
     }
 
     /// Factory that recreates the same pipe name with the session AppContainer SID.
@@ -137,7 +143,7 @@ impl PlatformSandbox {
         let pins = WorkspacePins::acquire(policy)?;
         let budget = ResolvedResourceBudget::resolve(&policy.resources, request.timeout_ms)?;
         budget.validate_for_backend(crate::policy::BackendCapabilities::native_gate2())?;
-        let mut acls = ExecutionAcls::apply(policy, &self.profile.sid)?;
+        let mut acls = ExecutionAcls::apply(policy, &self.profile.sid, &workspace_lease)?;
         let child = policy
             .child_environment(request.env.as_deref())
             .and_then(|mut environment| {

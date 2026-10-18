@@ -17,8 +17,9 @@ use windows_sys::Win32::Storage::FileSystem::{
 };
 use windows_sys::Win32::System::Threading::{ReleaseMutex, WaitForSingleObject};
 
-#[derive(Debug, Eq, PartialEq)]
-struct DirectoryIdentity {
+#[derive(Debug, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FileIdentity {
     volume: u64,
     file: [u8; 16],
 }
@@ -26,7 +27,7 @@ struct DirectoryIdentity {
 #[derive(Debug)]
 pub(super) struct WorkspaceDirectory {
     path: PathBuf,
-    identity: DirectoryIdentity,
+    identity: FileIdentity,
     _identity_pin: File,
     local_owner: Arc<Mutex<()>>,
 }
@@ -34,6 +35,7 @@ pub(super) struct WorkspaceDirectory {
 pub(crate) struct WorkspaceLease {
     _handle: File,
     _release: oneshot::Sender<()>,
+    pub(super) journal_name: String,
 }
 
 impl WorkspaceDirectory {
@@ -46,7 +48,7 @@ impl WorkspaceDirectory {
         .context("open Windows workspace identity handle")?;
         Ok(Self {
             path: path.to_owned(),
-            identity: identity(&pin)?,
+            identity: file_identity(&pin)?,
             _identity_pin: pin,
             local_owner: Arc::new(Mutex::new(())),
         })
@@ -60,10 +62,8 @@ impl WorkspaceDirectory {
             .iter()
             .map(|byte| format!("{byte:02x}"))
             .collect::<String>();
-        let name = format!(
-            r"Global\A3S.Sandbox.Workspace.{:016x}.{file}",
-            self.identity.volume
-        );
+        let journal_name = format!("{:016x}.{file}", self.identity.volume);
+        let name = format!(r"Global\A3S.Sandbox.Workspace.{journal_name}");
         let mutex = open_host_mutex(&name)?;
         let (ready, acquired) = oneshot::channel();
         let (release, released) = oneshot::channel();
@@ -83,12 +83,13 @@ impl WorkspaceDirectory {
             FILE_SHARE_READ | FILE_SHARE_WRITE,
         )
         .context("pin Windows workspace root during execution")?;
-        if identity(&handle)? != self.identity {
+        if file_identity(&handle)? != self.identity {
             bail!("Windows workspace identity changed before execution");
         }
         Ok(WorkspaceLease {
             _handle: handle,
             _release: release,
+            journal_name,
         })
     }
 }
@@ -130,21 +131,22 @@ fn own_until_released(
 }
 
 fn open_directory(path: &Path, access: u32, sharing: u32) -> std::io::Result<File> {
-    OpenOptions::new()
+    let file = OpenOptions::new()
         .read(true)
         .access_mode(access)
         .share_mode(sharing)
         .custom_flags(FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT)
-        .open(path)
+        .open(path)?;
+    let metadata = file.metadata()?;
+    if !metadata.is_dir() || metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0 {
+        return Err(std::io::Error::other(
+            "Windows workspace root must be a directory without a reparse point",
+        ));
+    }
+    Ok(file)
 }
 
-fn identity(file: &File) -> Result<DirectoryIdentity> {
-    let metadata = file
-        .metadata()
-        .context("inspect Windows workspace directory")?;
-    if !metadata.is_dir() || metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0 {
-        bail!("Windows workspace root must be a directory without a reparse point");
-    }
+pub(super) fn file_identity(file: &File) -> Result<FileIdentity> {
     let mut information = FILE_ID_INFO::default();
     if unsafe {
         GetFileInformationByHandleEx(
@@ -158,7 +160,7 @@ fn identity(file: &File) -> Result<DirectoryIdentity> {
         return Err(std::io::Error::last_os_error())
             .context("read Windows workspace file identity");
     }
-    Ok(DirectoryIdentity {
+    Ok(FileIdentity {
         volume: information.VolumeSerialNumber,
         file: information.FileId.Identifier,
     })

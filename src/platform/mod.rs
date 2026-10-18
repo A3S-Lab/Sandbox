@@ -32,6 +32,8 @@ mod unsupported;
 #[cfg(windows)]
 mod windows;
 #[cfg(windows)]
+mod windows_recovery;
+#[cfg(windows)]
 mod windows_security;
 #[cfg(windows)]
 mod windows_shell;

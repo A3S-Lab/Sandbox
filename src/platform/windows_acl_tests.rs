@@ -1,7 +1,9 @@
 #![cfg(test)]
 
 use super::*;
-use windows_sys::Win32::Security::Authorization::{GetEffectiveRightsFromAclW, TRUSTEE_W};
+use windows_sys::Win32::Security::Authorization::{
+    GetEffectiveRightsFromAclW, SetNamedSecurityInfoW, TRUSTEE_W,
+};
 use windows_sys::Win32::Storage::FileSystem::FILE_WRITE_DATA;
 
 fn write_rights(path: &Path, sid: &SidBuffer) -> u32 {
@@ -27,6 +29,7 @@ fn lease(sid: &SidBuffer) -> ExecutionAcls {
         sid: sid.clone(),
         paths: Vec::new(),
         modified: HashSet::new(),
+        journal: None,
     }
 }
 
@@ -376,4 +379,132 @@ async fn appcontainer_cannot_open_the_host_acl_mutation_mutex() {
     assert_eq!(output.exit_code, 0, "{output:?}");
     assert_eq!(output.stdout, "mutex-denied");
     drop(retained_object);
+}
+
+#[test]
+fn failed_recovery_intent_does_not_change_authorization() {
+    let workspace = tempfile::tempdir().unwrap();
+    let original = acl_state(workspace.path());
+    let profile = AppContainerProfile::create().unwrap();
+    let target = open_acl_target(workspace.path()).unwrap();
+    let mut protection = None;
+    let error = modify_path_acl(
+        &target,
+        workspace.path(),
+        &profile.sid,
+        AclChange {
+            permissions: FILE_GENERIC_READ,
+            access_mode: SET_ACCESS,
+            inheritance: SUB_CONTAINERS_AND_OBJECTS_INHERIT,
+            protection: DaclProtection::Restrict,
+        },
+        &mut protection,
+        |_| {
+            assert_eq!(acl_state(workspace.path()), original);
+            bail!("recovery intent storage unavailable")
+        },
+    )
+    .unwrap_err();
+    assert!(error
+        .to_string()
+        .contains("recovery intent storage unavailable"));
+    assert_eq!(acl_state(workspace.path()), original);
+}
+
+#[tokio::test]
+async fn persisted_recovery_refuses_replaced_objects_and_preserves_other_authority() {
+    let workspace = tempfile::tempdir().unwrap();
+    let directory =
+        super::super::windows_workspace::WorkspaceDirectory::capture(workspace.path()).unwrap();
+    let owner = directory.acquire().await.unwrap();
+    let target = workspace.path().join("target");
+    let moved = workspace.path().join("original-target");
+    std::fs::write(&target, b"original").unwrap();
+    let original = acl_state(&target);
+    let profile = AppContainerProfile::create().unwrap();
+    let other = AppContainerProfile::create().unwrap();
+    let mut permissions = lease(&profile.sid);
+    permissions.journal = Some(RecoveryJournal::open(&owner.journal_name).unwrap());
+    permissions
+        .modify(&target, FILE_GENERIC_WRITE, GRANT_ACCESS)
+        .unwrap();
+    permissions.restrict(&target, FILE_GENERIC_READ).unwrap();
+    let mut concurrent = lease(&other.sid);
+    concurrent
+        .modify(&target, FILE_GENERIC_WRITE, GRANT_ACCESS)
+        .unwrap();
+    let journal = permissions.journal.take().unwrap();
+    permissions.paths.clear();
+    drop(permissions);
+
+    std::fs::rename(&target, &moved).unwrap();
+    std::fs::write(&target, b"replacement").unwrap();
+    let replacement_acl = acl_state(&target);
+    let error = ExecutionAcls::recover(&owner).unwrap_err();
+    assert!(format!("{error:#}").contains("target identity changed"));
+    assert_eq!(
+        acl_state(&target),
+        replacement_acl,
+        "recovery changed an unrelated replacement"
+    );
+    assert!(
+        journal.read().unwrap().is_some(),
+        "failed recovery discarded its obligations"
+    );
+    assert_eq!(std::fs::read(&target).unwrap(), b"replacement");
+
+    std::fs::remove_file(&target).unwrap();
+    std::fs::rename(&moved, &target).unwrap();
+    ExecutionAcls::recover(&owner).unwrap();
+    assert!(journal.read().unwrap().is_none());
+    assert_eq!(write_rights(&target, &profile.sid), 0);
+    assert_ne!(
+        write_rights(&target, &other.sid),
+        0,
+        "recovery removed another live authority"
+    );
+    concurrent.restore().unwrap();
+    assert_eq!(acl_state(&target), original);
+}
+
+#[tokio::test]
+async fn invalid_journal_prevents_command_start_and_is_retained() {
+    let workspace = tempfile::tempdir().unwrap();
+    let directory =
+        super::super::windows_workspace::WorkspaceDirectory::capture(workspace.path()).unwrap();
+    let owner = directory.acquire().await.unwrap();
+    let journal = RecoveryJournal::open(&owner.journal_name).unwrap();
+    journal.write(b"not a recovery record").unwrap();
+    drop(owner);
+    let sandbox = crate::NativeSandbox::new(workspace.path()).unwrap();
+    let result = sandbox
+        .exec_command("[IO.File]::WriteAllText('command-started', 'unsafe')")
+        .await;
+    let retained = journal.read().unwrap();
+    journal.clear().unwrap();
+    assert!(format!("{:#}", result.unwrap_err())
+        .contains("decode Windows authorization recovery journal"));
+    assert!(!workspace.path().join("command-started").exists());
+    assert_eq!(retained.unwrap(), b"not a recovery record");
+}
+
+#[tokio::test]
+async fn appcontainer_cannot_write_host_recovery_journal() {
+    let workspace = tempfile::tempdir().unwrap();
+    let marker = format!("guest-marker-{}", appcontainer_profile_name());
+    let journal = RecoveryJournal::open(&marker).unwrap();
+    let sandbox = crate::NativeSandbox::new(workspace.path()).unwrap();
+    let command = format!(
+        "try {{ $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('{}', $true); if ($null -eq $key) {{ throw [Security.SecurityException]::new('inaccessible') }}; $key.SetValue('{marker}', [byte[]](1,2,3), [Microsoft.Win32.RegistryValueKind]::Binary); $key.Dispose() }} catch [Security.SecurityException] {{ [Console]::Out.Write('journal-denied'); exit 0 }} catch [UnauthorizedAccessException] {{ [Console]::Out.Write('journal-denied'); exit 0 }}; throw 'guest wrote host recovery journal'",
+        super::super::windows_recovery::RECOVERY_KEY,
+    );
+    let output = sandbox.exec_command(command).await.unwrap();
+    let stored = journal.read().unwrap();
+    journal.clear().unwrap();
+    assert_eq!(output.exit_code, 0, "{output:?}");
+    assert_eq!(output.stdout, "journal-denied");
+    assert!(
+        stored.is_none(),
+        "untrusted guest wrote host recovery intent"
+    );
 }

@@ -1,10 +1,11 @@
-# Windows crash/restart ACL regression preparation
+# Windows crash/restart ACL regression
 
 ## Result
 
-A real-process crash/restart contract is prepared for the next S4 obligation.
-Native execution of this new contract is pending; no observed red result or
-durable recovery implementation is claimed.
+The real-process crash/restart contract fails on native Windows, both in the
+full suite and alone. The memory-only ACL cleanup leaves the terminated host's
+AppContainer grant on the workspace. Linux and macOS jobs succeed. No recovery
+implementation was present in this failing source.
 
 Preparation base: `fa883b32ad78811b91ec490c5931424289c9e007`.
 Toolchain: Rust 1.97.1. Preparation host: macOS ARM64.
@@ -35,7 +36,23 @@ Readiness and command-result assertions prevent a pre-spawn failure or an unused
 fixture from masquerading as a crash/recovery proof. Timeouts bound test protocol
 waits; they are not measured performance guarantees.
 
-## Local checks
+## Observed native red
+
+[CI 39098909932](https://github.com/A3S-Lab/Sandbox/actions/runs/39098909932)
+ran exact source `71337f23c931d3b76c3734b023ae413e3ce9db70`.
+The Windows library suite recorded 206 passed / 1 failed / 0 ignored. Its only
+failure was this crash/restart contract, at the final ACL equality assertion:
+`restarting left stale workspace authorization`. The old package SID's explicit
+workspace grant remained. The newly started command itself returned exit 0 and
+`recovered`, so this was not a launcher or restart availability failure.
+
+The automatic solo rerun reproduced the same ACL assertion: 0 passed / 1 failed /
+0 ignored. [The complete Windows job log](native-windows.log) retains both runs,
+including exact source and toolchain. Trailing whitespace and extra EOF blank
+lines are normalized; the linked CI run retains the original logs. Integration
+suites after the failing library suite did not execute on Windows in this run.
+
+## Local preparation checks
 
 - Strict Windows all-target cross-target Clippy succeeds;
   [output](windows-clippy.log). This does not execute the Windows contract.
@@ -46,7 +63,7 @@ waits; they are not measured performance guarantees.
 
 ## Explicitly not claimed
 
-- No observed native crash/restart red or green result yet.
+- No native crash/restart green result on this failing source.
 - No durable journal, ACL recovery, DOS-device/profile recovery, or S4 completion.
 - No change to `host_exit_cleanup=false`, task quotas or performance claims.
 - No public-main merge, release, Code deployment or installed-application E2E.

@@ -1,0 +1,819 @@
+check (windows-latest)	Set up job	﻿2026-10-18T04:58:11.1660887Z Current runner version: '2.337.0'
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1737564Z ##[group]Runner Image Provisioner
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1738058Z Hosted Compute Agent
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1738397Z Version: 20261002.596
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1738749Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1739149Z Build Date: 2026-10-02T22:28:27Z
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1739508Z Worker ID: {eaedf952-7b64-45be-9acf-bd7230cdae7a}
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1739935Z Region: westus2
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1740292Z Cloud: Azure
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1740578Z ##[endgroup]
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1741276Z ##[group]Operating System
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1741619Z Microsoft Windows Server 2025
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1742016Z 10.0.26100
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1742287Z Datacenter
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1742556Z ##[endgroup]
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1742888Z ##[group]Runner Image
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1743187Z Image: windows-2025-vs2026
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1743558Z Version: 20261007.264.1
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1744173Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20261007.264/images/windows/Windows2025-VS2026-Readme.md
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1745316Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20261007.264
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1745819Z ##[endgroup]
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1746467Z ##[group]GITHUB_TOKEN Permissions
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1747531Z Attestations: write
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1747851Z Contents: read
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1748140Z Metadata: read
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1748444Z ##[endgroup]
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1749698Z Secret source: Actions
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1750208Z Cache mode: write
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1750595Z Prepare workflow directory
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1958614Z Prepare all required actions
+check (windows-latest)	Set up job	2026-10-18T04:58:11.1990193Z Getting action download info
+check (windows-latest)	Set up job	2026-10-18T04:58:11.5203491Z Download action repository 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+check (windows-latest)	Set up job	2026-10-18T04:58:11.5936553Z Download action repository 'dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8' (SHA:683b588c487a69d01f6c6ddf40f036ff682cc2c8)
+check (windows-latest)	Set up job	2026-10-18T04:58:11.7243368Z Download action repository 'actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e' (SHA:b7ad1dad31e06c5925ef5d2fc7ad053ef454303e)
+check (windows-latest)	Set up job	2026-10-18T04:58:11.9350314Z Download action repository 'actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6' (SHA:1e69f48acb82d1966a394da916b4c1698aa569d6)
+check (windows-latest)	Set up job	2026-10-18T04:58:12.5234837Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+check (windows-latest)	Set up job	2026-10-18T04:58:12.7584964Z Complete job name: check (windows-latest)
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	﻿2026-10-18T04:58:12.8744933Z ##[group]Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.8746051Z with:
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.8746445Z   repository: A3S-Lab/Sandbox
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.8749619Z   token: ***
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.8749998Z   ssh-strict: true
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.8750385Z   ssh-user: git
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.8750795Z   persist-credentials: true
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.8751226Z   clean: true
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.8751625Z   sparse-checkout-cone-mode: true
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.8752092Z   fetch-depth: 1
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.8752459Z   fetch-tags: false
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.8752849Z   show-progress: true
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.8753264Z   lfs: false
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.8753649Z   submodules: false
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.8754040Z   set-safe-directory: true
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.8754498Z   allow-unsafe-pr-checkout: false
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.8755049Z ##[endgroup]
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.9665519Z Syncing repository: A3S-Lab/Sandbox
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.9666931Z ##[group]Getting Git version info
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:12.9667533Z Working directory is 'D:\a\Sandbox\Sandbox'
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:13.0054487Z [command]"C:\Program Files\Git\bin\git.exe" version
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:13.2577763Z git version 2.56.0.windows.2
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:13.2612564Z ##[endgroup]
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:13.2626113Z Temporarily overriding HOME='D:\a\_temp\054ea3ce-114a-404a-ae2b-dcfd5abcf00a' before making global git config changes
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:13.2630453Z Adding repository directory to the temporary git global config as a safe directory
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:13.2635562Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\Sandbox\Sandbox
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:13.3170510Z Deleting the contents of 'D:\a\Sandbox\Sandbox'
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:13.3174431Z ##[group]Initializing the repository
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:13.3180315Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\Sandbox\Sandbox
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:13.3891052Z Initialized empty Git repository in D:/a/Sandbox/Sandbox/.git/
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:13.3949396Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/A3S-Lab/Sandbox
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:13.4476592Z ##[endgroup]
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:13.4477429Z ##[group]Disabling automatic garbage collection
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:13.4483348Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:13.4733730Z ##[endgroup]
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:13.4734507Z ##[group]Setting up auth
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:13.4743420Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:13.5026218Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:14.6888091Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:14.7144643Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:15.1201662Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:15.1526348Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:15.5749094Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:15.6077223Z ##[endgroup]
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:15.6077737Z ##[group]Fetching the repository
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:15.6087977Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +71337f23c931d3b76c3734b023ae413e3ce9db70:refs/remotes/origin/codex/sandbox-s4-20261018
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:16.5546711Z From https://github.com/A3S-Lab/Sandbox
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:16.5547701Z  * [new ref]         71337f23c931d3b76c3734b023ae413e3ce9db70 -> origin/codex/sandbox-s4-20261018
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:16.5576093Z ##[endgroup]
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:16.5576572Z ##[group]Determining the checkout info
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:16.5579351Z ##[endgroup]
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:16.5586222Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:16.5969134Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:16.6244859Z ##[group]Checking out the ref
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:16.6252981Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B codex/sandbox-s4-20261018 refs/remotes/origin/codex/sandbox-s4-20261018
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:16.6896673Z Switched to a new branch 'codex/sandbox-s4-20261018'
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:16.6948819Z branch 'codex/sandbox-s4-20261018' set up to track 'origin/codex/sandbox-s4-20261018'.
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:16.6990505Z ##[endgroup]
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:16.7371262Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+check (windows-latest)	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T04:58:16.7613996Z 71337f23c931d3b76c3734b023ae413e3ce9db70
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	﻿2026-10-18T04:58:16.8009682Z ##[group]Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8010004Z with:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8010645Z   toolchain: 1.97.1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8010762Z   components: rustfmt, clippy
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8010910Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8056936Z ##[start-action display=Parse toolchain version;id=__dtolnay_rust-toolchain.parse]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8176931Z ##[group]Run if [[ -z $toolchain ]]; then
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8177226Z ^[[36;1mif [[ -z $toolchain ]]; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8177549Z ^[[36;1m  # GitHub does not enforce `required: true` inputs itself. https://github.com/actions/runner/issues/1070^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8177844Z ^[[36;1m  echo "'toolchain' is a required input" >&2^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8178008Z ^[[36;1m  exit 1^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8178187Z ^[[36;1melif [[ $toolchain =~ ^stable' '[0-9]+' '(year|month|week|day)s?' 'ago$ ]]; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8178407Z ^[[36;1m  if [[ Windows == macOS ]]; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8178744Z ^[[36;1m    echo "toolchain=1.$((($(date -v-$(sed 's/stable \([0-9]*\) \(.\).*/\1\2/' <<< $toolchain) +%s)/60/60/24-16569)/7/6))" >> $GITHUB_OUTPUT^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8179351Z ^[[36;1m  else^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8179562Z ^[[36;1m    echo "toolchain=1.$((($(date --date "${toolchain#stable }" +%s)/60/60/24-16569)/7/6))" >> $GITHUB_OUTPUT^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8179789Z ^[[36;1m  fi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8179946Z ^[[36;1melif [[ $toolchain =~ ^stable' 'minus' '[0-9]+' 'releases?$ ]]; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8180225Z ^[[36;1m  echo "toolchain=1.$((($(date +%s)/60/60/24-16569)/7/6-${toolchain//[^0-9]/}))" >> $GITHUB_OUTPUT^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8180476Z ^[[36;1melif [[ $toolchain =~ ^1\.[0-9]+$ ]]; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8180761Z ^[[36;1m  echo "toolchain=1.$((i=${toolchain#1.}, c=($(date +%s)/60/60/24-16569)/7/6, i+9*i*(10*i<=c)+90*i*(100*i<=c)))" >> $GITHUB_OUTPUT^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8181013Z ^[[36;1melse^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8181124Z ^[[36;1m  delimiter=EOF^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8181294Z ^[[36;1m  while [[ $toolchain == *$delimiter* ]]; do delimiter+=_; done^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8181556Z ^[[36;1m  printf 'toolchain<<%s\n%s\n%s\n' "$delimiter" "$toolchain" "$delimiter" >> $GITHUB_OUTPUT^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8181765Z ^[[36;1mfi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8192999Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8193241Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8193430Z   toolchain: 1.97.1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.8193567Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.9710805Z ##[end-action id=__dtolnay_rust-toolchain.parse;outcome=success;conclusion=success;duration_ms=165]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:16.9714346Z ##[start-action display=Set $CARGO_HOME;id=__dtolnay_rust-toolchain.__run]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0025083Z ##[group]Run echo CARGO_HOME=${CARGO_HOME:-"$USERPROFILE\.cargo"} >> $GITHUB_ENV
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0025426Z ^[[36;1mecho CARGO_HOME=${CARGO_HOME:-"$USERPROFILE\.cargo"} >> $GITHUB_ENV^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0043123Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0044774Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0456757Z ##[end-action id=__dtolnay_rust-toolchain.__run;outcome=success;conclusion=success;duration_ms=74]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0458914Z ##[start-action display=Install rustup if needed;id=__dtolnay_rust-toolchain.__run_2]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0467347Z ##[end-action id=__dtolnay_rust-toolchain.__run_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0468841Z ##[start-action display=Install rustup if needed on windows;id=__dtolnay_rust-toolchain.__run_3]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0593844Z ##[group]Run if ! command -v rustup &>/dev/null; then
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0594114Z ^[[36;1mif ! command -v rustup &>/dev/null; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0594525Z ^[[36;1m  curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused --location --silent --show-error --fail https://win.rustup.rs/x86_64 --output 'D:\a\_temp\rustup-init.exe'^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0594981Z ^[[36;1m  'D:\a\_temp\rustup-init.exe' --default-toolchain none --no-modify-path -y^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0596985Z ^[[36;1m  echo "$CARGO_HOME\bin" >> $GITHUB_PATH^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0597295Z ^[[36;1mfi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0605847Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0606074Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0606200Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0606344Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.0990020Z ##[end-action id=__dtolnay_rust-toolchain.__run_3;outcome=success;conclusion=success;duration_ms=52]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1003858Z ##[start-action display=rustup toolchain install 1.97.1;id=__dtolnay_rust-toolchain.__run_4]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1094215Z ##[group]Run set -f  # split targets and components on commas and whitespace, without glob expansion
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1094618Z ^[[36;1mset -f  # split targets and components on commas and whitespace, without glob expansion^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1094846Z ^[[36;1mflags=()^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1095006Z ^[[36;1mfor t in ${targets//,/ }; do flags+=(--target "$t"); done^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1095234Z ^[[36;1mfor c in ${components//,/ }; do flags+=(--component "$c"); done^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1095493Z ^[[36;1mif [[ $toolchain == nightly && -n $components ]]; then flags+=(--allow-downgrade); fi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1095711Z ^[[36;1mlog=$(mktemp)^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1095834Z ^[[36;1mtrap 'rm -f "$log"' EXIT^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1095971Z ^[[36;1mfor attempt in 1 2 3 4 5; do^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1096266Z ^[[36;1m  if rustup toolchain install "$toolchain" "${flags[@]}" --profile minimal --no-self-update --force-non-host 2>&1 | tee "$log"; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1096560Z ^[[36;1m    break^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1096665Z ^[[36;1m  else^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1096762Z ^[[36;1m    status=$?^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1096869Z ^[[36;1m  fi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1097021Z ^[[36;1m  if [[ $attempt == 5 ]] || ! grep -Fq 'checksum failed for ' "$log" \^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1097320Z ^[[36;1m      || ! grep -Fq 'this is likely due to an ongoing update of the official release server' "$log"; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1097565Z ^[[36;1m    exit "$status"^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1097686Z ^[[36;1m  fi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1097874Z ^[[36;1m  echo "Retrying rustup toolchain install in 30 seconds (retry $attempt of 4)" >&2^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1098093Z ^[[36;1m  sleep 30^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1098199Z ^[[36;1mdone^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1105611Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1105828Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1105941Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1106084Z   toolchain: 1.97.1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1106229Z   targets:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1106395Z   components: rustfmt, clippy
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1106587Z   RUSTUP_PERMIT_COPY_RENAME: 1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:17.1106713Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:18.5173946Z info: syncing channel updates for 1.97.1-x86_64-pc-windows-msvc
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:18.9608503Z info: latest update on 2026-07-16 for version 1.97.1 (8bab26f4f 2026-07-14)
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:18.9725929Z info: downloading 5 components
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.1547162Z
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.1863058Z   1.97.1-x86_64-pc-windows-msvc installed - rustc 1.97.1 (8bab26f4f 2026-07-14)
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.1863383Z
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.2248633Z ##[end-action id=__dtolnay_rust-toolchain.__run_4;outcome=success;conclusion=success;duration_ms=11124]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.2254142Z ##[start-action display=rustup default 1.97.1;id=__dtolnay_rust-toolchain.__run_5]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.2338514Z ##[group]Run rustup default "$toolchain" --force-non-host
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.2338736Z ^[[36;1mrustup default "$toolchain" --force-non-host^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.2345988Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.2346193Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.2346304Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.2346446Z   toolchain: 1.97.1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.2347156Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.2790529Z info: using existing install for 1.97.1-x86_64-pc-windows-msvc
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.2835793Z info: default toolchain set to 1.97.1-x86_64-pc-windows-msvc
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.2839125Z
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.2986782Z   1.97.1-x86_64-pc-windows-msvc unchanged - rustc 1.97.1 (8bab26f4f 2026-07-14)
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.2987016Z
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.2989480Z info: note that the toolchain '1.97.1-x86_64-pc-windows-msvc' is currently in use (overridden by 'D:\a\Sandbox\Sandbox\rust-toolchain.toml')
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.3041422Z ##[end-action id=__dtolnay_rust-toolchain.__run_5;outcome=success;conclusion=success;duration_ms=78]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.3044371Z ##[start-action display=Create cachekey;id=__dtolnay_rust-toolchain.rustc-version]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.3121816Z ##[group]Run DATE=$(rustc +"$toolchain" --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.3122303Z ^[[36;1mDATE=$(rustc +"$toolchain" --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.3122682Z ^[[36;1mHASH=$(rustc +"$toolchain" --version --verbose | sed -ne 's/^commit-hash: //p')^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.3122951Z ^[[36;1mecho "cachekey=$(echo $DATE$HASH | head -c12)" >> $GITHUB_OUTPUT^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.3130870Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.3131075Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.3131186Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.3131324Z   toolchain: 1.97.1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.3131430Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9277704Z ##[end-action id=__dtolnay_rust-toolchain.rustc-version;outcome=success;conclusion=success;duration_ms=623]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9280160Z ##[start-action display=Disable incremental compilation;id=__dtolnay_rust-toolchain.__run_6]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9371298Z ##[group]Run if [ -z "${CARGO_INCREMENTAL+set}" ]; then
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9371669Z ^[[36;1mif [ -z "${CARGO_INCREMENTAL+set}" ]; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9371921Z ^[[36;1m  echo CARGO_INCREMENTAL=0 >> $GITHUB_ENV^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9372193Z ^[[36;1mfi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9383720Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9384058Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9384233Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9384450Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9677427Z ##[end-action id=__dtolnay_rust-toolchain.__run_6;outcome=success;conclusion=success;duration_ms=39]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9679324Z ##[start-action display=Enable colors in Cargo output;id=__dtolnay_rust-toolchain.__run_7]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9762247Z ##[group]Run if [ -z "${CARGO_TERM_COLOR+set}" ]; then
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9762526Z ^[[36;1mif [ -z "${CARGO_TERM_COLOR+set}" ]; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9762722Z ^[[36;1m  echo CARGO_TERM_COLOR=always >> $GITHUB_ENV^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9762888Z ^[[36;1mfi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9770606Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9770855Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9770974Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9771127Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:28.9771243Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0058417Z ##[end-action id=__dtolnay_rust-toolchain.__run_7;outcome=success;conclusion=success;duration_ms=37]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0061289Z ##[start-action display=Enable Cargo sparse registry;id=__dtolnay_rust-toolchain.__run_8]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0148254Z ##[group]Run # implemented in 1.66, stabilized in 1.68, made default in 1.70
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0148575Z ^[[36;1m# implemented in 1.66, stabilized in 1.68, made default in 1.70^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0148931Z ^[[36;1mif [ -z "${CARGO_REGISTRIES_CRATES_IO_PROTOCOL+set}" -o -f "D:\a\_temp"/.implicit_cargo_registries_crates_io_protocol ]; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0149297Z ^[[36;1m  if rustc +"$toolchain" --version --verbose | grep -q '^release: 1\.6[89]\.'; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0149717Z ^[[36;1m    touch "D:\a\_temp"/.implicit_cargo_registries_crates_io_protocol || true^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0150650Z ^[[36;1m    echo CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse >> $GITHUB_ENV^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0150937Z ^[[36;1m  elif rustc +"$toolchain" --version --verbose | grep -q '^release: 1\.6[67]\.'; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0151200Z ^[[36;1m    touch "D:\a\_temp"/.implicit_cargo_registries_crates_io_protocol || true^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0151442Z ^[[36;1m    echo CARGO_REGISTRIES_CRATES_IO_PROTOCOL=git >> $GITHUB_ENV^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0151615Z ^[[36;1m  fi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0151710Z ^[[36;1mfi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0159366Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0159575Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0159695Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0159842Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0160054Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0160258Z   toolchain: 1.97.1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.0160417Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.1650269Z ##[end-action id=__dtolnay_rust-toolchain.__run_8;outcome=success;conclusion=success;duration_ms=158]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.1653481Z ##[start-action display=Work around spurious network errors in curl 8.0;id=__dtolnay_rust-toolchain.__run_9]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.1735082Z ##[group]Run # https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/timeout.20investigation
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.1735489Z ^[[36;1m# https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/timeout.20investigation^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.1735812Z ^[[36;1mif rustc +"$toolchain" --version --verbose | grep -q '^release: 1\.7[01]\.'; then^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.1736054Z ^[[36;1m  echo CARGO_HTTP_MULTIPLEXING=false >> $GITHUB_ENV^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.1736210Z ^[[36;1mfi^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.1743233Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.1743452Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.1743560Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.1743704Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.1743825Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.1743938Z   toolchain: 1.97.1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.1744040Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.2447770Z ##[end-action id=__dtolnay_rust-toolchain.__run_9;outcome=success;conclusion=success;duration_ms=79]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.2451152Z ##[start-action display=rustc +1.97.1 --version --verbose;id=__dtolnay_rust-toolchain.__run_10]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.2544319Z ##[group]Run rustc +"$toolchain" --version --verbose
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.2544529Z ^[[36;1mrustc +"$toolchain" --version --verbose^[[0m
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.2551850Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.2552061Z env:
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.2552170Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.2552310Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.2552423Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.2552549Z   toolchain: 1.97.1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.2552651Z ##[endgroup]
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.3123430Z rustc 1.97.1 (8bab26f4f 2026-07-14)
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.3123706Z binary: rustc
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.3123849Z commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.3124027Z commit-date: 2026-07-14
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.3124158Z host: x86_64-pc-windows-msvc
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.3124288Z release: 1.97.1
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.3124927Z LLVM version: 22.1.6
+check (windows-latest)	Run dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8	2026-10-18T04:58:29.3212259Z ##[end-action id=__dtolnay_rust-toolchain.__run_10;outcome=success;conclusion=success;duration_ms=76]
+check (windows-latest)	Record source and toolchain	﻿2026-10-18T04:58:29.3325246Z ##[group]Run git rev-parse HEAD
+check (windows-latest)	Record source and toolchain	2026-10-18T04:58:29.3325472Z ^[[36;1mgit rev-parse HEAD^[[0m
+check (windows-latest)	Record source and toolchain	2026-10-18T04:58:29.3325649Z ^[[36;1mrustc --version --verbose^[[0m
+check (windows-latest)	Record source and toolchain	2026-10-18T04:58:29.3973897Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+check (windows-latest)	Record source and toolchain	2026-10-18T04:58:29.3974126Z env:
+check (windows-latest)	Record source and toolchain	2026-10-18T04:58:29.3974252Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Record source and toolchain	2026-10-18T04:58:29.3974396Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Record source and toolchain	2026-10-18T04:58:29.3974511Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Record source and toolchain	2026-10-18T04:58:29.3974856Z ##[endgroup]
+check (windows-latest)	Record source and toolchain	2026-10-18T04:58:29.6570094Z 71337f23c931d3b76c3734b023ae413e3ce9db70
+check (windows-latest)	Record source and toolchain	2026-10-18T04:58:29.7327719Z rustc 1.97.1 (8bab26f4f 2026-07-14)
+check (windows-latest)	Record source and toolchain	2026-10-18T04:58:29.7328018Z binary: rustc
+check (windows-latest)	Record source and toolchain	2026-10-18T04:58:29.7328168Z commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+check (windows-latest)	Record source and toolchain	2026-10-18T04:58:29.7328858Z commit-date: 2026-07-14
+check (windows-latest)	Record source and toolchain	2026-10-18T04:58:29.7329119Z host: x86_64-pc-windows-msvc
+check (windows-latest)	Record source and toolchain	2026-10-18T04:58:29.7329304Z release: 1.97.1
+check (windows-latest)	Record source and toolchain	2026-10-18T04:58:29.7329972Z LLVM version: 22.1.6
+check (windows-latest)	Run cargo fmt --all -- --check	﻿2026-10-18T04:58:29.8327624Z ##[group]Run cargo fmt --all -- --check
+check (windows-latest)	Run cargo fmt --all -- --check	2026-10-18T04:58:29.8327899Z ^[[36;1mcargo fmt --all -- --check^[[0m
+check (windows-latest)	Run cargo fmt --all -- --check	2026-10-18T04:58:29.8376657Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+check (windows-latest)	Run cargo fmt --all -- --check	2026-10-18T04:58:29.8376881Z env:
+check (windows-latest)	Run cargo fmt --all -- --check	2026-10-18T04:58:29.8377006Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run cargo fmt --all -- --check	2026-10-18T04:58:29.8377163Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Run cargo fmt --all -- --check	2026-10-18T04:58:29.8377289Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Run cargo fmt --all -- --check	2026-10-18T04:58:29.8377415Z ##[endgroup]
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	﻿2026-10-18T04:58:31.3063238Z ##[group]Run cargo clippy --all-targets --locked -- -D warnings
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:31.3063647Z ^[[36;1mcargo clippy --all-targets --locked -- -D warnings^[[0m
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:31.3112632Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:31.3112853Z env:
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:31.3112979Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:31.3113135Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:31.3113260Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:31.3113385Z ##[endgroup]
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:32.0702405Z ^[[1m^[[92m    Updating^[[0m crates.io index
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:32.5812810Z ^[[1m^[[92m Downloading^[[0m crates ...
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:32.8601108Z ^[[1m^[[92m  Downloaded^[[0m dirs v5.0.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:32.8749035Z ^[[1m^[[92m  Downloaded^[[0m option-ext v0.2.0
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:32.8873842Z ^[[1m^[[92m  Downloaded^[[0m itoa v1.0.18
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:32.9083375Z ^[[1m^[[92m  Downloaded^[[0m tempfile v3.27.0
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:32.9342525Z ^[[1m^[[92m  Downloaded^[[0m version_check v0.9.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:32.9488829Z ^[[1m^[[92m  Downloaded^[[0m zmij v1.0.23
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:32.9654110Z ^[[1m^[[92m  Downloaded^[[0m fastrand v2.5.0
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:32.9776270Z ^[[1m^[[92m  Downloaded^[[0m windows-link v0.2.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:32.9864775Z ^[[1m^[[92m  Downloaded^[[0m block-buffer v0.10.4
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:32.9962549Z ^[[1m^[[92m  Downloaded^[[0m tracing-core v0.1.36
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.0207357Z ^[[1m^[[92m  Downloaded^[[0m typenum v1.20.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.0467188Z ^[[1m^[[92m  Downloaded^[[0m cfg-if v1.0.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.0591006Z ^[[1m^[[92m  Downloaded^[[0m crypto-common v0.1.7
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.0732937Z ^[[1m^[[92m  Downloaded^[[0m dirs-sys v0.4.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.0867193Z ^[[1m^[[92m  Downloaded^[[0m async-trait v0.1.92
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.1241874Z ^[[1m^[[92m  Downloaded^[[0m unicode-ident v1.0.27
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.1603848Z ^[[1m^[[92m  Downloaded^[[0m tokio-macros v2.7.2
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.1735835Z ^[[1m^[[92m  Downloaded^[[0m anyhow v1.0.104
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.2121893Z ^[[1m^[[92m  Downloaded^[[0m cpufeatures v0.2.17
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.2248992Z ^[[1m^[[92m  Downloaded^[[0m getrandom v0.4.3
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.2579051Z ^[[1m^[[92m  Downloaded^[[0m windows-targets v0.48.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.2677909Z ^[[1m^[[92m  Downloaded^[[0m digest v0.10.7
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.2827426Z ^[[1m^[[92m  Downloaded^[[0m once_cell v1.21.4
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.3026147Z ^[[1m^[[92m  Downloaded^[[0m quote v1.0.47
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.3274064Z ^[[1m^[[92m  Downloaded^[[0m tracing-attributes v0.1.31
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.3510379Z ^[[1m^[[92m  Downloaded^[[0m socket2 v0.6.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.3603862Z ^[[1m^[[92m  Downloaded^[[0m sha2 v0.10.9
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.3870281Z ^[[1m^[[92m  Downloaded^[[0m proc-macro2 v1.0.107
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.4162529Z ^[[1m^[[92m  Downloaded^[[0m serde_core v1.0.229
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.4388182Z ^[[1m^[[92m  Downloaded^[[0m pin-project-lite v0.2.17
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.5022946Z ^[[1m^[[92m  Downloaded^[[0m base64 v0.21.7
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.5301980Z ^[[1m^[[92m  Downloaded^[[0m memchr v2.8.3
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.5923830Z ^[[1m^[[92m  Downloaded^[[0m generic-array v0.14.7
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:33.6165121Z ^[[1m^[[92m  Downloaded^[[0m serde_json v1.0.154
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:34.9880490Z ^[[1m^[[92m  Downloaded^[[0m windows_x86_64_msvc v0.48.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:35.0153044Z ^[[1m^[[92m  Downloaded^[[0m bytes v1.12.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:35.0708410Z ^[[1m^[[92m  Downloaded^[[0m syn v3.0.9
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:35.1800009Z ^[[1m^[[92m  Downloaded^[[0m syn v2.0.119
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:35.2704168Z ^[[1m^[[92m  Downloaded^[[0m tokio v1.53.3
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:36.7274680Z ^[[1m^[[92m  Downloaded^[[0m tracing v0.1.44
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:36.7969534Z ^[[1m^[[92m  Downloaded^[[0m mio v1.2.4
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:36.8448814Z ^[[1m^[[92m  Downloaded^[[0m windows-sys v0.48.0
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:38.8348386Z ^[[1m^[[92m  Downloaded^[[0m windows-sys v0.61.2
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:40.6640661Z ^[[1m^[[92m   Compiling^[[0m proc-macro2 v1.0.107
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:40.6641776Z ^[[1m^[[92m   Compiling^[[0m quote v1.0.47
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:40.6642231Z ^[[1m^[[92m   Compiling^[[0m unicode-ident v1.0.27
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:40.6644297Z ^[[1m^[[92m   Compiling^[[0m version_check v0.9.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:40.7576126Z ^[[1m^[[92m   Compiling^[[0m windows_x86_64_msvc v0.48.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:40.9210983Z ^[[1m^[[92m   Compiling^[[0m generic-array v0.14.7
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:42.3609684Z ^[[1m^[[92m    Checking^[[0m windows-link v0.2.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:42.3856066Z ^[[1m^[[92m    Checking^[[0m typenum v1.20.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:42.3974946Z ^[[1m^[[92m    Checking^[[0m windows-sys v0.61.2
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:42.4278149Z ^[[1m^[[92m    Checking^[[0m windows-targets v0.48.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:42.4706389Z ^[[1m^[[92m   Compiling^[[0m zmij v1.0.23
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:43.1772389Z ^[[1m^[[92m   Compiling^[[0m syn v3.0.9
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:43.2700510Z ^[[1m^[[92m    Checking^[[0m once_cell v1.21.4
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:43.4431581Z ^[[1m^[[92m    Checking^[[0m cfg-if v1.0.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:43.5287520Z ^[[1m^[[92m   Compiling^[[0m getrandom v0.4.3
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:43.7920637Z ^[[1m^[[92m   Compiling^[[0m serde_core v1.0.229
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:43.9004039Z ^[[1m^[[92m    Checking^[[0m crypto-common v0.1.7
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:43.9863152Z ^[[1m^[[92m    Checking^[[0m block-buffer v0.10.4
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:44.0663729Z ^[[1m^[[92m   Compiling^[[0m syn v2.0.119
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:44.2873933Z ^[[1m^[[92m    Checking^[[0m windows-sys v0.48.0
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:45.1294204Z ^[[1m^[[92m   Compiling^[[0m serde_json v1.0.154
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:45.4020876Z ^[[1m^[[92m    Checking^[[0m pin-project-lite v0.2.17
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:45.4621799Z ^[[1m^[[92m   Compiling^[[0m anyhow v1.0.104
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:45.7717163Z ^[[1m^[[92m    Checking^[[0m option-ext v0.2.0
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:45.8164785Z ^[[1m^[[92m    Checking^[[0m dirs-sys v0.4.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:45.8997384Z ^[[1m^[[92m    Checking^[[0m socket2 v0.6.5
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:45.9647955Z ^[[1m^[[92m    Checking^[[0m mio v1.2.4
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:46.3438482Z ^[[1m^[[92m    Checking^[[0m digest v0.10.7
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:46.5632850Z ^[[1m^[[92m    Checking^[[0m tracing-core v0.1.36
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:46.8602071Z ^[[1m^[[92m    Checking^[[0m itoa v1.0.18
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:46.9756564Z ^[[1m^[[92m    Checking^[[0m fastrand v2.5.0
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:47.1242884Z ^[[1m^[[92m    Checking^[[0m cpufeatures v0.2.17
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:47.1663585Z ^[[1m^[[92m    Checking^[[0m bytes v1.12.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:47.2480991Z ^[[1m^[[92m   Compiling^[[0m tokio-macros v2.7.2
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:47.6156840Z ^[[1m^[[92m    Checking^[[0m memchr v2.8.3
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:47.9996285Z ^[[1m^[[92m   Compiling^[[0m async-trait v0.1.92
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:48.1208967Z ^[[1m^[[92m    Checking^[[0m tokio v1.53.3
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:48.6725083Z ^[[1m^[[92m   Compiling^[[0m tracing-attributes v0.1.31
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:48.8153969Z ^[[1m^[[92m    Checking^[[0m sha2 v0.10.9
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:48.9958214Z ^[[1m^[[92m    Checking^[[0m tempfile v3.27.0
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:49.1390456Z ^[[1m^[[92m    Checking^[[0m dirs v5.0.1
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:49.2095283Z ^[[1m^[[92m    Checking^[[0m base64 v0.21.7
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:49.5881818Z ^[[1m^[[92m    Checking^[[0m tracing v0.1.44
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:50.5925485Z ^[[1m^[[92m    Checking^[[0m a3s-sandbox v0.3.0 (D:\a\Sandbox\Sandbox)
+check (windows-latest)	Run cargo clippy --all-targets --locked -- -D warnings	2026-10-18T04:58:52.3905477Z ^[[1m^[[92m    Finished^[[0m `dev` profile [unoptimized + debuginfo] target(s) in 20.36s
+check (windows-latest)	Build bins for mediation relay tests	﻿2026-10-18T04:58:52.5005041Z ##[group]Run cargo build --bins --locked
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:52.5005294Z ^[[36;1mcargo build --bins --locked^[[0m
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:52.5049885Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:52.5050080Z env:
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:52.5050197Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:52.5050346Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:52.5050469Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:52.5050590Z ##[endgroup]
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:52.7898800Z ^[[1m^[[92m   Compiling^[[0m windows-link v0.2.1
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:52.7899162Z ^[[1m^[[92m   Compiling^[[0m typenum v1.20.1
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:52.7899475Z ^[[1m^[[92m   Compiling^[[0m windows_x86_64_msvc v0.48.5
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:52.7905335Z ^[[1m^[[92m   Compiling^[[0m once_cell v1.21.4
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:52.8495326Z ^[[1m^[[92m   Compiling^[[0m windows-sys v0.61.2
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:52.8510063Z ^[[1m^[[92m   Compiling^[[0m windows-targets v0.48.5
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:52.8984082Z ^[[1m^[[92m   Compiling^[[0m cfg-if v1.0.5
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:52.9401806Z ^[[1m^[[92m   Compiling^[[0m windows-sys v0.48.0
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:52.9690586Z ^[[1m^[[92m   Compiling^[[0m option-ext v0.2.0
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:53.0523126Z ^[[1m^[[92m   Compiling^[[0m pin-project-lite v0.2.17
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:53.1227513Z ^[[1m^[[92m   Compiling^[[0m serde_core v1.0.229
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:53.5973021Z ^[[1m^[[92m   Compiling^[[0m generic-array v0.14.7
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:54.0538512Z ^[[1m^[[92m   Compiling^[[0m crypto-common v0.1.7
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:54.1677691Z ^[[1m^[[92m   Compiling^[[0m block-buffer v0.10.4
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:54.2834597Z ^[[1m^[[92m   Compiling^[[0m dirs-sys v0.4.1
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:54.4090756Z ^[[1m^[[92m   Compiling^[[0m digest v0.10.7
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:54.4504054Z ^[[1m^[[92m   Compiling^[[0m getrandom v0.4.3
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:54.5587016Z ^[[1m^[[92m   Compiling^[[0m zmij v1.0.23
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:54.5602422Z ^[[1m^[[92m   Compiling^[[0m tracing-core v0.1.36
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:54.8545726Z ^[[1m^[[92m   Compiling^[[0m memchr v2.8.3
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:55.2750686Z ^[[1m^[[92m   Compiling^[[0m bytes v1.12.1
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:55.3009399Z ^[[1m^[[92m   Compiling^[[0m cpufeatures v0.2.17
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:55.3585785Z ^[[1m^[[92m   Compiling^[[0m fastrand v2.5.0
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:55.5442483Z ^[[1m^[[92m   Compiling^[[0m socket2 v0.6.5
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:55.6419945Z ^[[1m^[[92m   Compiling^[[0m mio v1.2.4
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:55.9669761Z ^[[1m^[[92m   Compiling^[[0m itoa v1.0.18
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:56.1630581Z ^[[1m^[[92m   Compiling^[[0m serde_json v1.0.154
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:56.1718948Z ^[[1m^[[92m   Compiling^[[0m tokio v1.53.3
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:56.3562469Z ^[[1m^[[92m   Compiling^[[0m tempfile v3.27.0
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:56.6086069Z ^[[1m^[[92m   Compiling^[[0m sha2 v0.10.9
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:56.8347904Z ^[[1m^[[92m   Compiling^[[0m tracing v0.1.44
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:56.9538554Z ^[[1m^[[92m   Compiling^[[0m dirs v5.0.1
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:57.0239710Z ^[[1m^[[92m   Compiling^[[0m anyhow v1.0.104
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:57.0436470Z ^[[1m^[[92m   Compiling^[[0m base64 v0.21.7
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:58:58.8916206Z ^[[1m^[[92m   Compiling^[[0m a3s-sandbox v0.3.0 (D:\a\Sandbox\Sandbox)
+check (windows-latest)	Build bins for mediation relay tests	2026-10-18T04:59:03.3045911Z ^[[1m^[[92m    Finished^[[0m `dev` profile [unoptimized + debuginfo] target(s) in 10.60s
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	﻿2026-10-18T04:59:03.4019717Z ##[group]Run cargo test --lib --locked platform::windows::workspace_ownership_tests::an_active_owner_pins_the_root_but_allows_child_updates -- --exact --nocapture 2>&1 | Tee-Object root-pin.log
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:03.4020467Z ^[[36;1mcargo test --lib --locked platform::windows::workspace_ownership_tests::an_active_owner_pins_the_root_but_allows_child_updates -- --exact --nocapture 2>&1 | Tee-Object root-pin.log^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:03.4020884Z ^[[36;1mif ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:03.4021256Z ^[[36;1mcargo test --lib --locked tests::native_backend_cannot_remove_or_rename_protected_workspace_entries -- --exact --nocapture 2>&1 | Tee-Object ordinary-updates.log^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:03.4021607Z ^[[36;1mexit $LASTEXITCODE^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:03.4065566Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:03.4066263Z env:
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:03.4066375Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:03.4066518Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:03.4066651Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:03.4066766Z ##[endgroup]
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:03.7585241Z ^[[31;1m^[[1m^[[92m   Compiling^[[0m a3s-sandbox v0.3.0 (D:\a\Sandbox\Sandbox)^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:08.9232502Z ^[[31;1m^[[1m^[[92m    Finished^[[0m `test` profile [unoptimized + debuginfo] target(s) in 5.28s^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:08.9256601Z ^[[31;1m^[[1m^[[92m     Running^[[0m unittests src\lib.rs (target\debug\deps\a3s_sandbox-7bc0e0ed13c01596.exe)^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:08.9362039Z
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:08.9363938Z running 1 test
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:08.9402592Z test platform::windows::workspace_ownership_tests::an_active_owner_pins_the_root_but_allows_child_updates ... ok
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:08.9402974Z
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:08.9403176Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 206 filtered out; finished in 0.00s
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:08.9403485Z
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:09.0482281Z ^[[31;1m^[[1m^[[92m    Finished^[[0m `test` profile [unoptimized + debuginfo] target(s) in 0.04s^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:09.0485749Z ^[[31;1m^[[1m^[[92m     Running^[[0m unittests src\lib.rs (target\debug\deps\a3s_sandbox-7bc0e0ed13c01596.exe)^[[0m
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:09.0501472Z
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:09.0502375Z running 1 test
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:15.0557458Z test tests::native_backend_cannot_remove_or_rename_protected_workspace_entries ... ok
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:15.0557996Z
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:15.0559704Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 206 filtered out; finished in 6.00s
+check (windows-latest)	Verify Windows root pin and ordinary updates in isolation	2026-10-18T04:59:15.0560499Z
+check (windows-latest)	Verify Windows ACL restoration	﻿2026-10-18T04:59:15.1128403Z ##[group]Run cargo test --lib --locked platform::windows_security::acl_tests::cleanup_ -- --test-threads=1 --nocapture
+check (windows-latest)	Verify Windows ACL restoration	2026-10-18T04:59:15.1128884Z ^[[36;1mcargo test --lib --locked platform::windows_security::acl_tests::cleanup_ -- --test-threads=1 --nocapture^[[0m
+check (windows-latest)	Verify Windows ACL restoration	2026-10-18T04:59:15.1172226Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+check (windows-latest)	Verify Windows ACL restoration	2026-10-18T04:59:15.1172419Z env:
+check (windows-latest)	Verify Windows ACL restoration	2026-10-18T04:59:15.1172536Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Verify Windows ACL restoration	2026-10-18T04:59:15.1172695Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Verify Windows ACL restoration	2026-10-18T04:59:15.1172816Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Verify Windows ACL restoration	2026-10-18T04:59:15.1172937Z ##[endgroup]
+check (windows-latest)	Verify Windows ACL restoration	2026-10-18T04:59:15.4190141Z ^[[1m^[[92m    Finished^[[0m `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+check (windows-latest)	Verify Windows ACL restoration	2026-10-18T04:59:15.4212191Z ^[[1m^[[92m     Running^[[0m unittests src\lib.rs (target\debug\deps\a3s_sandbox-7bc0e0ed13c01596.exe)
+check (windows-latest)	Verify Windows ACL restoration	2026-10-18T04:59:15.4287726Z
+check (windows-latest)	Verify Windows ACL restoration	2026-10-18T04:59:15.4287854Z running 2 tests
+check (windows-latest)	Verify Windows ACL restoration	2026-10-18T04:59:16.1549329Z test platform::windows_security::acl_tests::cleanup_preserves_acl_edits_made_while_a_directory_is_protected ... ok
+check (windows-latest)	Verify Windows ACL restoration	2026-10-18T04:59:16.1723772Z test platform::windows_security::acl_tests::cleanup_preserves_host_acl_entries_and_inheritance ... ok
+check (windows-latest)	Verify Windows ACL restoration	2026-10-18T04:59:16.1724042Z
+check (windows-latest)	Verify Windows ACL restoration	2026-10-18T04:59:16.1724182Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 205 filtered out; finished in 0.74s
+check (windows-latest)	Verify Windows ACL restoration	2026-10-18T04:59:16.1724395Z
+check (windows-latest)	Run Windows tests with bounded diagnostics	﻿2026-10-18T04:59:16.2542084Z ##[group]Run cargo test --all-targets --locked -- --test-threads=1 --nocapture 2>&1 | Tee-Object suite.log
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:16.2542547Z ^[[36;1mcargo test --all-targets --locked -- --test-threads=1 --nocapture 2>&1 | Tee-Object suite.log^[[0m
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:16.2542798Z ^[[36;1mexit $LASTEXITCODE^[[0m
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:16.2585495Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:16.2585689Z env:
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:16.2585805Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:16.2585948Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:16.2586067Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:16.2586186Z   GATE7_SOAK_ROUNDS: 64
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:16.2586297Z ##[endgroup]
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:16.6488133Z ^[[31;1m^[[1m^[[92m   Compiling^[[0m a3s-sandbox v0.3.0 (D:\a\Sandbox\Sandbox)^[[0m
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:19.7978254Z ^[[31;1m^[[1m^[[92m    Finished^[[0m `test` profile [unoptimized + debuginfo] target(s) in 3.31s^[[0m
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:19.8013863Z ^[[31;1m^[[1m^[[92m     Running^[[0m unittests src\lib.rs (target\debug\deps\a3s_sandbox-7bc0e0ed13c01596.exe)^[[0m
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:19.8083111Z
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:19.8084842Z running 207 tests
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:20.1132067Z test network::connect::tests::absolute_form_denied_origin_never_reaches_upstream ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:20.1143756Z test network::connect::tests::absolute_form_http_injects_secret_header_upstream ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:20.4177339Z test network::connect::tests::absolute_form_https_target_refused_fail_closed ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:20.4209334Z test network::connect::tests::absolute_form_without_matching_injection_forwards_no_authorization ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:20.4210070Z test network::connect::tests::client_supplied_authorization_is_replaced_by_injection ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:20.4226012Z test network::connect::tests::connect_allow_tunnels_bytes_to_upstream ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:20.6362922Z test network::connect::tests::connect_deny_never_reaches_upstream ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:20.6372087Z test network::connect::tests::named_pipe_connect_allow_tunnels_bytes_to_upstream ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:20.6379246Z test network::connect::tests::path_prefixed_rule_does_not_authorize_connect ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:20.6386362Z test network::socks::tests::path_prefixed_rule_does_not_authorize_socks ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:20.6397220Z test network::socks::tests::socks_allow_tunnels_bytes_to_upstream ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:20.8438573Z test network::socks::tests::socks_deny_never_reaches_upstream ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:23.0849078Z test observability::gate2_integration::gate2_execute_records_attributable_audit_events ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:24.9918990Z test observability::gate2_resources::gate2_memory_ceiling_stops_overallocation ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:28.3728904Z test observability::gate2_resources::gate2_policy_output_ceiling_truncates_capture ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:29.6170987Z test observability::gate2_resources::gate2_policy_timeout_ceiling_caps_request ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:32.2904025Z test observability::gate2_resources::gate2_windows_process_limit_blocks_extra_children ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:32.2904677Z test observability::tests::audit_event_replay_key_stable_for_same_decision ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:32.2905089Z test observability::tests::buffer_drops_oldest_under_backpressure ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:32.2905489Z test observability::tests::monitoring_failure_does_not_grant_access_semantics ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:32.2905930Z test platform::bwrap_candidate_tests::defaults_then_an_authoritative_override ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:34.6446260Z test platform::windows::lifecycle_tests::create_process_returns_already_contained_before_resume ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:34.6464994Z test platform::windows::tests::process_paths_drop_verbatim_prefixes ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:41.8964827Z test platform::windows::tests::windows_appcontainer_named_pipe_connect_allow_deny_and_blocks_raw_egress ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:41.8966019Z test platform::windows::tests::windows_argument_quoting_preserves_spaces_quotes_and_trailing_slashes ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:41.8992463Z test platform::windows::workspace_ownership_tests::an_active_owner_pins_the_root_but_allows_child_updates ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:42.0113211Z test platform::windows::workspace_ownership_tests::case_aliases_share_one_workspace_owner ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:42.0130785Z test platform::windows::workspace_ownership_tests::different_workspaces_keep_independent_owners ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:42.0144516Z test platform::windows::workspace_ownership_tests::directory_ownership_can_be_released_from_another_thread ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:42.0225951Z test platform::windows::workspace_ownership_tests::replacing_the_bound_root_is_refused_before_policy_initialization ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:42.2976714Z test platform::windows::workspace_ownership_tests::same_physical_workspace_is_serialized_across_hosts ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:42.3110669Z test platform::windows_security::acl_tests::abandoned_acl_mutation_ownership_is_recovered_without_rust_cleanup ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:44.9357350Z test platform::windows_security::acl_tests::appcontainer_cannot_open_the_host_acl_mutation_mutex ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:44.9832608Z test platform::windows_security::acl_tests::cleanup_preserves_acl_edits_made_while_a_directory_is_protected ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:44.9993884Z test platform::windows_security::acl_tests::cleanup_preserves_host_acl_entries_and_inheritance ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:45.0192335Z test platform::windows_security::acl_tests::cross_host_acl_mutations_wait_for_the_current_owner ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:45.1159827Z test platform::windows_security::acl_tests::independent_sandboxes_do_not_share_an_appcontainer_identity ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:45.2613138Z test platform::windows_security::acl_tests::releasing_one_acl_lease_preserves_another_live_lease ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1773938Z ^[[31;1m^[[0m
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1780261Z ^[[31;1mthread 'platform::windows_security::acl_tests::restarting_after_host_death_restores_workspace_authorization' (7876) panicked at src\platform\windows_acl_tests.rs:171:9:^[[0m
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1784686Z ^[[31;1massertion `left == right` failed: restarting left stale workspace authorization on C:\Users\RUNNER~1\AppData\Local\Temp\.tmp9GdAWs^[[0m
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1788150Z ^[[31;1m  left: (false, [[0, 3, 48, 0, 191, 1, 19, 0, 1, 8, 0, 0, 0, 0, 0, 15, 2, 0, 0, 0, 39, 176, 19, 80, 156, 152, 121, 113, 240, 166, 214, 9, 104, 69, 88, 121, 85, 20, 88, 149, 194, 87, 126, 34, 12, 203, 34, 221], [0, 19, 20, 0, 255, 1, 31, 0, 1, 1, 0, 0, 0, 0, 0, 5, 18, 0, 0, 0], [0, 19, 24, 0, 255, 1, 31, 0, 1, 2, 0, 0, 0, 0, 0, 5, 32, 0, 0, 0, 32, 2, 0, 0], [0, 19, 36, 0, 255, 1, 31, 0, 1, 5, 0, 0, 0, 0, 0, 5, 21, 0, 0, 0, 80, 234, 178, 252, 189, 171, 209, 15, 135, 67, 220, 78, 244, 1, 0, 0]])^[[0m
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1790210Z ^[[31;1m right: (false, [[0, 19, 20, 0, 255, 1, 31, 0, 1, 1, 0, 0, 0, 0, 0, 5, 18, 0, 0, 0], [0, 19, 24, 0, 255, 1, 31, 0, 1, 2, 0, 0, 0, 0, 0, 5, 32, 0, 0, 0, 32, 2, 0, 0], [0, 19, 36, 0, 255, 1, 31, 0, 1, 5, 0, 0, 0, 0, 0, 5, 21, 0, 0, 0, 80, 234, 178, 252, 189, 171, 209, 15, 135, 67, 220, 78, 244, 1, 0, 0]])^[[0m
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1793137Z ^[[31;1mnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace^[[0m
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1844257Z test platform::windows_security::acl_tests::restarting_after_host_death_restores_workspace_authorization ... FAILED
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1938352Z test platform::windows_security::tests::appcontainer_named_pipe_dacl_denies_host_client_open ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1939416Z test platform::windows_security::tests::windows_apps_execution_aliases_are_not_acl_targets ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1941317Z test platform::windows_shell::tests::encoded_commands_round_trip_utf16 ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1944578Z test platform::windows_shell::tests::normalizes_scalars_and_nested_json_like_values ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1946157Z test platform::windows_shell::tests::preserves_valid_json_escaping_and_rejects_malformed_literals ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1948473Z test platform::windows_shell::tests::rewrites_curl_json_payloads_without_touching_unrelated_arguments ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1950151Z test policy::capabilities::tests::gate13_matrix_rows_match_this_platforms_capabilities ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1952528Z test policy::capabilities::tests::gate13_threat_model_embeds_the_generated_capability_matrix ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1954045Z test policy::capabilities::tests::gate2_backend_enforces_optional_memory_and_process_limits ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1955160Z test policy::capabilities::tests::gate4_mediated_http_capability_matches_platform_fence ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1956854Z test policy::capabilities::tests::gate5_mediated_socks_capability_matches_platform_fence ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1957979Z test policy::capabilities::tests::memory_limit_without_backend_support_fails_closed ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1959360Z test policy::capabilities::tests::policy_exceeding_backend_capabilities_fails_closed ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1976459Z test policy::decide::tests::deny_read_wins_over_allow_read ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1978737Z test policy::decide::tests::fixture_decisions_are_separator_agnostic ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1979236Z test policy::decide::tests::glob_rules_match_single_segment_wildcards ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1979648Z test policy::decide::tests::network_default_is_deny_all ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1980179Z test policy::decide::tests::unmatched_paths_fail_closed ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1980943Z test policy::decide::tests::write_exception_carves_out_denied_ancestor ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1981755Z test policy::digest::tests::baseline_digest_is_hex_sha256_length ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1982258Z test policy::digest::tests::digest_changes_when_rules_change ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.1982727Z test policy::digest::tests::digest_is_stable_under_rule_reordering ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.2042541Z test policy::enforced::tests::cached_internal_hardlink_is_rechecked_when_the_twin_moves_outside ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.2049704Z test policy::enforced::tests::child_environment_mediator_overwrites_explicit_proxy_bypass ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.2056701Z test policy::enforced::tests::child_environment_mediator_pipe_sets_named_pipe_not_http_proxy ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.2064491Z test policy::enforced::tests::child_environment_removes_case_insensitive_bootstrap_variables ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.2072102Z test policy::enforced::tests::child_environment_removes_runtime_injection_and_rehomes_state ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.2079071Z test policy::enforced::tests::child_environment_socks_mediator_sets_all_proxy_only ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.2285822Z test policy::enforced::tests::credential_hardlink_aliases_inside_package_stores_enter_the_deny_set ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.2319411Z test policy::enforced::tests::executable_resolution_rejects_workspace_tools ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.2435593Z test policy::enforced::tests::git_worktree_pointer_is_resolved_for_case_variant_gitfiles ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.2576363Z test policy::enforced::tests::hardlink_scan_skips_build_and_package_stores ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.2844458Z test policy::enforced::tests::in_workspace_hardlinks_are_not_outside_aliases ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.3095131Z ^[[31;1mmonorepo_scan_ok elapsed_ms=23^[[0m
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.3096224Z test policy::enforced::tests::monorepo_workspace_scan_stays_under_entry_limit ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.3241317Z test policy::enforced::tests::nested_environment_files_and_hardlinks_enter_the_deny_set ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.3281157Z test policy::enforced::tests::nested_secret_scan_matches_case_variant_environment_files ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.3391079Z test policy::enforced::tests::nested_secret_scan_skips_control_and_build_stores ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.3393483Z test policy::enforced::tests::only_protected_workspace_roots_require_directory_placeholders ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.3538212Z test policy::enforced::tests::policy_discovers_case_variant_control_metadata ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.3540051Z test policy::enforced::tests::protected_path_matching_is_case_insensitive_and_traversal_safe ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.3541978Z test policy::enforced::tests::scan_directory_filter_handles_case_variants ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.3690269Z test policy::gate1_integration::gate1_compile_applies_exact_deny_overlays_without_globs ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.3751458Z test policy::gate1_integration::gate1_compile_refuses_allow_overlays_outside_workspace_or_scratch ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.3890108Z test policy::gate1_integration::gate1_compile_requires_sandbox_policy_and_rejects_broadening ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.3891702Z test policy::gate1_integration::gate1_fixture_decisions_match_expected_table ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:54.3908092Z test policy::gate1_integration::gate1_fixture_digest_is_replay_stable ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:58.0663558Z test policy::gate1_integration::gate1_native_sandbox_integration_still_executes ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:58.0834327Z test policy::gate1_integration::gate1_native_sandbox_rejects_unenforcible_policy ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:58.0835336Z test policy::gate3_integration::gate3_document_decisions_treat_readonly_mount_as_readable ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:58.0923067Z test policy::gate3_integration::gate3_ephemeral_rejected_by_native_sandbox_constructor ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T04:59:58.0927786Z test policy::gate3_integration::gate3_ephemeral_session_fails_closed_without_overlay_capability ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3472560Z test policy::gate3_integration::gate3_native_sandbox_reads_readonly_mount_and_blocks_writes ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3544762Z test policy::gate3_integration::gate3_readonly_mount_outside_workspace_compiles_for_read_not_write ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3615470Z test policy::gate3_integration::gate3_readonly_mount_under_workspace_denies_writes ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3689463Z test policy::gate3_integration::gate3_readwrite_mount_outside_workspace_fails_closed ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3692067Z test policy::gate4_integration::gate4_claiming_platforms_accept_mediated_network_capability ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3706115Z test policy::gate4_integration::gate4_connect_mediator_allow_and_deny_integration ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3706831Z test policy::gate4_integration::gate4_does_not_weaken_default_deny_all ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3707925Z test policy::gate4_integration::gate4_mediated_http_capability_is_platform_scoped ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3709840Z test policy::gate4_integration::gate4_rejects_path_prefix_with_dotdot ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3711188Z test policy::gate5_integration::gate5_mediated_socks_capability_is_platform_scoped ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3712136Z test policy::gate5_integration::gate5_non_macos_refuses_mediated_socks ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3713122Z test policy::gate5_integration::gate5_non_macos_refuses_unix_socket_allow_rules ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3723875Z test policy::gate5_integration::gate5_socks_mediator_allow_and_deny_integration ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3724936Z test policy::gate5_integration::gate5_unix_socket_allowlist_capability_is_platform_scoped ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3726126Z test policy::gate5_linux_bridge::gate5_linux_bridge_foundation_apis_are_present ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3726830Z test policy::gate5_linux_bridge::gate5_linux_bridge_residual_checklist_is_documented ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3728479Z test policy::gate5_linux_bridge::gate5_linux_mediated_http_and_socks_are_claimed_unix_allowlists_are_not ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3729355Z test policy::gate5_linux_bridge::gate5_linux_mediated_http_policy_compiles_on_linux_capabilities ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3730124Z test policy::gate5_windows_bridge::gate5_windows_bridge_acceptance_checklist_is_documented ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3731911Z test policy::gate5_windows_bridge::gate5_windows_guest_contract_rejects_http_proxy_as_bridge ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3733397Z test policy::gate5_windows_bridge::gate5_windows_mediated_http_is_claimed_socks_remain_unclaimed ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3734064Z test policy::gate5_windows_bridge::gate5_windows_mediated_http_policy_compiles_on_windows_capabilities ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.3936208Z test policy::gate6_integration::gate6_capability_report_lists_unavailable_surfaces ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.4023139Z test policy::gate6_integration::gate6_replace_policy_allows_narrowing_without_opt_in ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.4106118Z test policy::gate6_integration::gate6_replace_policy_refuses_silent_broadening ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.4107760Z test policy::gate7_fuzz::gate7_fuzz_ipv6_literal_parses_but_requires_exact_allowlist ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.4123976Z test policy::gate7_fuzz::gate7_fuzz_mediator_still_allows_well_formed_connect_after_garbage ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.8275801Z test policy::gate7_fuzz::gate7_fuzz_mediator_survives_malformed_tcp_payloads_without_upstream ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.8276881Z test policy::gate7_fuzz::gate7_fuzz_parse_connect_target_accepts_canonical_shapes ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:02.8278341Z test policy::gate7_fuzz::gate7_fuzz_parse_connect_target_rejects_malformed_corpus ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:32.1191931Z test policy::gate7_integration::gate7_benchmark_baseline_exec_p50_under_budget ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:32.1398897Z test policy::gate7_integration::gate7_benchmark_connect_mediator_allow_p50_under_budget ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:32.1474109Z test policy::gate7_integration::gate7_capability_report_never_hides_unavailable_mediation ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:32.1474756Z test policy::gate7_integration::gate7_connect_does_not_alias_localhost_to_loopback_ip ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:32.6516910Z test policy::gate7_integration::gate7_connect_mediator_rejects_non_connect_method ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:32.6517617Z test policy::gate7_integration::gate7_narrowing_then_rebroadening_requires_opt_in_each_time ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:32.6518954Z test policy::gate7_integration::gate7_path_prefix_never_authorizes_opaque_tunnels ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:32.6520992Z test policy::gate7_integration::gate7_policy_validate_rejects_malformed_network_hosts ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:32.6522459Z test policy::gate7_integration::gate7_policy_validate_rejects_zero_resource_ceilings ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:32.9234962Z test policy::gate7_integration::gate7_replace_policy_still_refuses_mediation_enablement ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:00:36.8077814Z test policy::gate7_integration::gate7_same_workspace_overlapping_executes_stay_isolated ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:41.3840405Z test policy::gate7_integration::gate7_soak_repeated_baseline_executes_stay_stable ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:51.3060959Z test policy::gate7_integration::gate7_soak_same_workspace_concurrent_sessions_keep_outputs_distinct ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:51.3061706Z test policy::gate7_integration::gate7_socks_does_not_authorize_literal_ip_when_hostname_allowlisted ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:51.3069814Z test policy::gate7_integration::gate7_socks_mediator_rejects_bind_command ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:51.3298363Z test policy::gate7_release_invariants::gate7_release_capability_probe_lists_unavailable_surfaces ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:51.3300478Z test policy::gate7_release_invariants::gate7_release_claims_match_capability_matrix ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:51.3301036Z test policy::gate7_release_invariants::gate7_release_default_profile_keeps_mediation_off ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:51.3386209Z test policy::gate8_integration::gate8_invalid_secret_entries_refuse ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:51.4748854Z test policy::gate8_integration::gate8_reserved_secret_names_refuse ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:54.4235810Z test policy::gate8_integration::gate8_secret_bytes_absent_from_audit_and_digest_stable ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:58.1562416Z test policy::gate8_integration::gate8_secret_bytes_never_appear_in_child_environment_dump ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:58.1641906Z test policy::gate8_integration::gate8_secret_colliding_with_explicit_env_refuses ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.4658576Z test policy::gate8_integration::gate8_secret_env_delivers_sentinel_not_secret_to_child ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.4736357Z test policy::gate8_integration::gate8_secret_env_without_mediation_fails_closed ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.4737445Z test policy::grant::tests::apply_appends_to_existing_mediated_policy_without_clobbering ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.4739755Z test policy::grant::tests::apply_is_idempotent_for_identical_subject ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.4741484Z test policy::grant::tests::apply_refuses_invalid_or_wildcard_hosts ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.4742337Z test policy::grant::tests::apply_to_deny_all_baseline_activates_mediation_for_exactly_that_origin ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.4743352Z test policy::grant::tests::grant_cannot_alias_localhost_to_loopback_ip ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.4745701Z test policy::grant::tests::port_pinned_grant_widens_only_that_port ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.4817695Z test policy::grant_integration::applied_grant_is_auditable_with_new_digest_and_updates_the_session ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.4818635Z test policy::grant_integration::baseline_policy_fixture_matches_default ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.4890464Z test policy::grant_integration::granted_policy_authorizes_only_the_granted_subject ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.4953376Z test policy::grant_integration::hand_built_broadening_still_refuses_without_the_explicit_opt_in ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5016738Z test policy::grant_integration::idempotent_regrant_changes_nothing_and_records_no_new_allow_rule ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5075260Z test policy::grant_integration::stale_base_digest_refuses_and_leaves_policy_unchanged ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5076774Z test policy::mediate::tests::allow_exact_origin_and_path_prefix ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5078713Z test policy::mediate::tests::connect_requires_pathless_allow_rule ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5079658Z test policy::mediate::tests::deny_when_mediation_flag_off ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5081809Z test policy::mediate::tests::injection_host_match_is_case_insensitive_without_aliasing ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5082899Z test policy::mediate::tests::injections_apply_only_on_matching_origin_and_path ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5083474Z test policy::mediate::tests::injections_without_allow_rule_authorize_nothing ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5084976Z test policy::mediate::tests::missing_path_prefix_allows_any_path_on_origin ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5086470Z test policy::mediate::tests::socks_requires_mediated_socks_flag_and_pathless_rule ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5087206Z test policy::model::tests::baseline_policy_validates ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5089308Z test policy::model::tests::mediated_network_document_validates_shape_but_backend_fails_closed ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5090383Z test policy::model::tests::rejects_dotdot_in_path_rules ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5091890Z test policy::model::tests::rejects_mediated_network_flag_without_allowlist ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5093377Z test policy::model::tests::rejects_network_allow_without_mediation_flag ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5094769Z test policy::model::tests::rejects_recursive_glob ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5095736Z test policy::model::tests::rejects_wrong_version ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5097055Z test policy::model::tests::rejects_zero_timeout ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5098562Z test policy::normalize::tests::absolute_unix_style_paths_keep_root ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5099906Z test policy::normalize::tests::collapses_dot_and_rejects_escape ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5101276Z test policy::normalize::tests::identical_relative_shapes_compare_equal ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5102409Z test policy::normalize::tests::normalizes_separators ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5103984Z test policy::resources::tests::gate2_capabilities_can_enforce_optional_process_and_memory ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5105641Z test policy::resources::tests::resolve_caps_request_timeout_by_policy ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5106622Z test policy::resources::tests::resolve_rejects_call_depth_as_unenforcible ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5107900Z test policy::resources::tests::resolve_rejects_zero_process_or_memory_limits ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5108633Z test policy::resources::tests::resolve_uses_policy_output_ceiling ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5109245Z test policy::update::tests::adding_unix_socket_allow_is_broadening ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5110601Z test policy::update::tests::enabling_socks_is_broadening ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5112159Z test policy::update::tests::narrowing_mediation_is_allowed ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5114049Z test policy::update::tests::raising_timeout_is_broadening ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5114646Z test policy::update::tests::removing_process_quota_is_broadening ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5209456Z test process::tests::bounded_capture_at_exact_limit_is_not_marked_truncated ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5287214Z test process::tests::bounded_capture_keeps_head_and_tail_with_exact_accounting ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5355624Z test process::tests::bounded_capture_preserves_stream_identity_under_one_global_limit ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:02:59.5357497Z test process::tests::bounded_capture_replaces_invalid_utf8_per_stream ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:02.7165875Z test tests::native_backend_blocks_credential_hardlinks_inside_writable_dependency_trees ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:06.0925013Z test tests::native_backend_blocks_ip_and_host_unix_socket_communication ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:11.0130319Z test tests::native_backend_cannot_remove_or_rename_protected_workspace_entries ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:14.0063557Z test tests::native_backend_enforces_the_global_output_limit ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:15.4476616Z test tests::native_backend_handles_workspace_paths_with_spaces ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:19.8517479Z test tests::native_backend_keeps_concurrent_workspaces_isolated ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:22.8668920Z test tests::native_backend_notifies_observer_and_accounts_each_stream ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:24.7650537Z test tests::native_backend_preserves_exit_code_and_stream_identity ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:28.0430235Z test tests::native_backend_protects_case_variant_control_metadata ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:31.2660412Z test tests::native_backend_rejects_invalid_explicit_environment_entries ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:34.6536429Z test tests::native_backend_sanitizes_environment_and_kills_timed_out_descendants ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:44.9092714Z test tests::native_backend_starts_and_writes_only_ordinary_workspace_content ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:44.9182198Z test tests::native_sandbox_canonicalizes_workspace_and_reports_backend ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:44.9247104Z test tests::native_sandbox_rejects_invalid_workspaces_and_requests ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:47.4704755Z test tests::windows_backend_blocks_preexisting_hardlink_escape ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:49.9925577Z test tests::windows_backend_suppresses_powershell_startup_progress ... ok
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:49.9937883Z
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:49.9938314Z failures:
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:49.9938434Z
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:49.9938634Z failures:
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:49.9939697Z     platform::windows_security::acl_tests::restarting_after_host_death_restores_workspace_authorization
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:49.9940078Z
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:49.9940326Z test result: FAILED. 206 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 270.18s
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:49.9940707Z
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:50.0000831Z ^[[31;1m^[[1m^[[91merror^[[0m: test failed, to rerun pass `--lib`^[[0m
+check (windows-latest)	Run Windows tests with bounded diagnostics	2026-10-18T05:03:50.0237684Z ##[error]Process completed with exit code 1.
+check (windows-latest)	Re-run failed Windows contracts individually	﻿2026-10-18T05:03:50.0357294Z ##[group]Run $PSNativeCommandUseErrorActionPreference = $false
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.0357664Z ^[[36;1m$PSNativeCommandUseErrorActionPreference = $false^[[0m
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.0357929Z ^[[36;1m$failed = Select-String -Path suite.log -Pattern '^test (\S+) \.\.\. FAILED$'^[[0m
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.0358228Z ^[[36;1mif (-not $failed) { throw 'suite failed without an individually runnable test' }^[[0m
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.0358443Z ^[[36;1m$index = 0^[[0m
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.0358568Z ^[[36;1mforeach ($failure in $failed) {^[[0m
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.0358734Z ^[[36;1m  $test = $failure.Matches[0].Groups[1].Value^[[0m
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.0359029Z ^[[36;1m  cargo test --all-targets --locked $test -- --exact --test-threads=1 --nocapture 2>&1 | Tee-Object "solo-$index.log"^[[0m
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.0359313Z ^[[36;1m  $index++^[[0m
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.0359419Z ^[[36;1m}^[[0m
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.0359517Z ^[[36;1mexit 0^[[0m
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.0422845Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.0423100Z env:
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.0423216Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.0423357Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.0423479Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.0423599Z ##[endgroup]
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.6490268Z ^[[31;1m^[[1m^[[92m    Finished^[[0m `test` profile [unoptimized + debuginfo] target(s) in 0.22s^[[0m
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.6496231Z ^[[31;1m^[[1m^[[92m     Running^[[0m unittests src\lib.rs (target\debug\deps\a3s_sandbox-7bc0e0ed13c01596.exe)^[[0m
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.6497793Z
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:50.6498767Z running 1 test
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:55.1102606Z ^[[31;1m^[[0m
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:55.1113468Z ^[[31;1mthread 'platform::windows_security::acl_tests::restarting_after_host_death_restores_workspace_authorization' (9172) panicked at src\platform\windows_acl_tests.rs:171:9:^[[0m
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:55.1117825Z ^[[31;1massertion `left == right` failed: restarting left stale workspace authorization on C:\Users\RUNNER~1\AppData\Local\Temp\.tmpgEwCLq^[[0m
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:55.1130184Z ^[[31;1m  left: (false, [[0, 3, 48, 0, 191, 1, 19, 0, 1, 8, 0, 0, 0, 0, 0, 15, 2, 0, 0, 0, 135, 145, 131, 40, 84, 115, 21, 57, 27, 2, 154, 245, 94, 227, 219, 21, 200, 67, 222, 245, 174, 205, 10, 107, 91, 167, 243, 199], [0, 19, 20, 0, 255, 1, 31, 0, 1, 1, 0, 0, 0, 0, 0, 5, 18, 0, 0, 0], [0, 19, 24, 0, 255, 1, 31, 0, 1, 2, 0, 0, 0, 0, 0, 5, 32, 0, 0, 0, 32, 2, 0, 0], [0, 19, 36, 0, 255, 1, 31, 0, 1, 5, 0, 0, 0, 0, 0, 5, 21, 0, 0, 0, 80, 234, 178, 252, 189, 171, 209, 15, 135, 67, 220, 78, 244, 1, 0, 0]])^[[0m
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:55.1134453Z ^[[31;1m right: (false, [[0, 19, 20, 0, 255, 1, 31, 0, 1, 1, 0, 0, 0, 0, 0, 5, 18, 0, 0, 0], [0, 19, 24, 0, 255, 1, 31, 0, 1, 2, 0, 0, 0, 0, 0, 5, 32, 0, 0, 0, 32, 2, 0, 0], [0, 19, 36, 0, 255, 1, 31, 0, 1, 5, 0, 0, 0, 0, 0, 5, 21, 0, 0, 0, 80, 234, 178, 252, 189, 171, 209, 15, 135, 67, 220, 78, 244, 1, 0, 0]])^[[0m
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:55.1138421Z ^[[31;1mnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace^[[0m
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:55.1139713Z test platform::windows_security::acl_tests::restarting_after_host_death_restores_workspace_authorization ... FAILED
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:55.1140921Z
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:55.1142242Z failures:
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:55.1143203Z
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:55.1144674Z failures:
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:55.1165347Z     platform::windows_security::acl_tests::restarting_after_host_death_restores_workspace_authorization
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:55.1165704Z
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:55.1165929Z test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 206 filtered out; finished in 4.53s
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:55.1166231Z
+check (windows-latest)	Re-run failed Windows contracts individually	2026-10-18T05:03:55.1166466Z ^[[31;1m^[[1m^[[91merror^[[0m: test failed, to rerun pass `--lib`^[[0m
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	﻿2026-10-18T05:03:55.2107568Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.2107861Z with:
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.2108021Z   name: sandbox-Windows-71337f23c931d3b76c3734b023ae413e3ce9db70
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.2108237Z   path: *.log
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	dist/*.tar.gz
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.2108377Z   if-no-files-found: error
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.2108507Z   compression-level: 6
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.2108641Z   overwrite: false
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.2108758Z   include-hidden-files: false
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.2108880Z env:
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.2108998Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.2109142Z   CARGO_INCREMENTAL: 0
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.2109257Z   CARGO_TERM_COLOR: always
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.2109375Z ##[endgroup]
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.3423305Z (node:6356) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.3423750Z (Use `node --trace-deprecation ...` to show where the warning was created)
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.3474685Z With the provided path, there will be 4 files uploaded
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.3478777Z Artifact name is valid!
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.3479651Z Root directory input is valid!
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.7301125Z Beginning upload of artifact content to blob storage
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:55.7451157Z (node:6356) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:56.0300196Z Uploaded bytes 6635
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:56.1065999Z Finished uploading artifact content to blob storage!
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:56.1066573Z SHA256 digest of uploaded artifact zip is fd6942715ffdcc6f9a9cf5f4b1f41414c56c15697f11c3384d0584ccf13d04c1
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:56.1067916Z Finalizing artifact upload
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:56.3918282Z Artifact sandbox-Windows-71337f23c931d3b76c3734b023ae413e3ce9db70.zip successfully finalized. Artifact ID 12126056614
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:56.3919493Z Artifact sandbox-Windows-71337f23c931d3b76c3734b023ae413e3ce9db70 has been successfully uploaded! Final size is 6635 bytes. Artifact ID is 12126056614
+check (windows-latest)	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T05:03:56.3925803Z Artifact download URL: https://github.com/A3S-Lab/Sandbox/actions/runs/39098909932/artifacts/12126056614
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	﻿2026-10-18T05:03:56.4181237Z Post job cleanup.
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:03:56.5170683Z [command]"C:\Program Files\Git\bin\git.exe" version
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:03:56.5407539Z git version 2.56.0.windows.2
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:03:56.5453157Z Temporarily overriding HOME='D:\a\_temp\f02582fe-d8c9-4946-a9fd-e6ce4b4ba181' before making global git config changes
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:03:56.5453787Z Adding repository directory to the temporary git global config as a safe directory
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:03:56.5460111Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\Sandbox\Sandbox
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:03:56.5721338Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:03:56.5972269Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:03:58.9127337Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:03:58.9355864Z http.https://github.com/.extraheader
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:03:58.9386093Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:03:58.9632737Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:03:59.5515223Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+check (windows-latest)	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-10-18T05:03:59.5772736Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+check (windows-latest)	Complete job	﻿2026-10-18T05:04:00.3439637Z Cleaning up orphan processes
+check (windows-latest)	Complete job	2026-10-18T05:04:00.3684295Z Terminate orphan process: pid (5948) (vctip)
+check (windows-latest)	Complete job	2026-10-18T05:04:00.4013230Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11d5960a326750d5838078e36cf38b85af677262, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
