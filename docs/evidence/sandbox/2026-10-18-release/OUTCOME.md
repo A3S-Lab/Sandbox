@@ -14,6 +14,13 @@ integration cases also pass with the race detector on macOS. The imported
 Linux quota tests initially exposed two stale assertions; both reproduced
 individually before their report/error-chain assertions were corrected.
 
+The first public run is
+https://github.com/A3S-Lab/Sandbox/actions/runs/39086253089 . Linux completes
+the full native/Go/build/provenance pipeline. The macOS job reports one
+mediated-CONNECT failure (Python connect returns EPERM); Windows is still
+running its 64-round native campaign. Failed Unix cases now receive the same
+individual rerun treatment as Windows before diagnosis.
+
 ## What landed
 
 The public workflow pins Rust 1.97.1 and action identities, records its source

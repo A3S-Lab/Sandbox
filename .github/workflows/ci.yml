@@ -45,11 +45,24 @@ jobs:
       - name: Build bins for mediation relay tests
         run: cargo build --bins --locked
       - name: Run tests
+        id: unix-suite
         if: runner.os != 'Windows'
         shell: bash
         run: |
           set -o pipefail
           cargo test --all-targets --locked 2>&1 | tee suite.log
+      - name: Re-run failed Unix contracts individually
+        if: failure() && steps.unix-suite.outcome == 'failure'
+        shell: bash
+        run: |
+          set +e
+          index=0
+          while IFS= read -r test; do
+            cargo test --all-targets --locked "$test" -- --exact --nocapture 2>&1 | tee "solo-$index.log"
+            index=$((index + 1))
+          done < <(awk '/^test .* \.\.\. FAILED$/ { print $2 }' suite.log)
+          if [[ "$index" == 0 ]]; then exit 1; fi
+          exit 0
       - name: Run Windows tests with bounded diagnostics
         id: windows-suite
         if: runner.os == 'Windows'
