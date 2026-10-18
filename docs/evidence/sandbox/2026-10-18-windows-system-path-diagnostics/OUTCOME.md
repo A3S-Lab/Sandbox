@@ -32,6 +32,18 @@ individual results do not qualify the entire source or establish a performance S
   whether the caller can change the object. Production mutation still requires
   WRITE_DAC, retains no-follow handles and physical identity checks.
 
+## Subsequent diagnostic result
+
+The early tests on source `16c83c1714e1eecb4ddb23bd79ea60ab8be1a127`
+show that PROGRAMFILES still equals the real `C:\Program Files` before and after
+profile creation, instead of the child fixture's claimed temporary system root.
+The fixture setup did not establish its premise; production correctly grants
+that otherwise ordinary user toolchain root. The replacement WindowsApps ACL
+nonmutation contract passes in the same native run. The
+[profile red certificate](../2026-10-18-windows-profile-red/OUTCOME.md) retains
+that run's complete Windows output. The fixture will set and verify the value
+inside its isolated child before invoking authorization.
+
 ## Local checks
 
 Strict Windows all-target Clippy succeeds; [output](windows-clippy.log).

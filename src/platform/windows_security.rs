@@ -24,9 +24,7 @@ use windows_sys::Win32::Security::Authorization::{
     SetSecurityInfo, EXPLICIT_ACCESS_W, GRANT_ACCESS, REVOKE_ACCESS, SDDL_REVISION_1, SET_ACCESS,
     SE_FILE_OBJECT, TRUSTEE_IS_SID, TRUSTEE_IS_UNKNOWN,
 };
-use windows_sys::Win32::Security::Isolation::{
-    CreateAppContainerProfile, DeriveAppContainerSidFromAppContainerName,
-};
+use windows_sys::Win32::Security::Isolation::DeriveAppContainerSidFromAppContainerName;
 use windows_sys::Win32::Security::{
     DeleteAce, FreeSid, GetAce, GetLengthSid, GetSecurityDescriptorControl,
     InitializeSecurityDescriptor, IsValidSid, SetKernelObjectSecurity, SetSecurityDescriptorDacl,
@@ -45,7 +43,6 @@ use windows_sys::Win32::System::Threading::{
     SYNCHRONIZATION_SYNCHRONIZE,
 };
 
-const HRESULT_ALREADY_EXISTS: u32 = 0x8007_00b7;
 const READ_CONTROL: u32 = 0x0002_0000;
 const WRITE_DAC: u32 = 0x0004_0000;
 /// WindowsApps execution aliases and other reparse stubs often return this
@@ -130,34 +127,12 @@ impl AppContainerProfile {
     pub(super) fn create() -> Result<Self> {
         let profile_name = appcontainer_profile_name();
         let name = wide_null(OsStr::new(&profile_name));
-        let display = wide_null(OsStr::new("A3S Native Sandbox"));
-        let description = wide_null(OsStr::new(
-            "Sandbox-scoped AppContainer for fail-closed A3S command execution",
-        ));
         let mut sid = null_mut();
-        let status = unsafe {
-            CreateAppContainerProfile(
-                name.as_ptr(),
-                display.as_ptr(),
-                description.as_ptr(),
-                null(),
-                0,
-                &mut sid,
-            )
-        };
-        if status as u32 == HRESULT_ALREADY_EXISTS {
-            sid = null_mut();
-            let derived =
-                unsafe { DeriveAppContainerSidFromAppContainerName(name.as_ptr(), &mut sid) };
-            if derived < 0 {
-                bail!(
-                    "DeriveAppContainerSidFromAppContainerName failed with HRESULT 0x{:08x}",
-                    derived as u32
-                );
-            }
-        } else if status < 0 {
+        // Commands use private scratch storage; registering a profile would leave persistent state.
+        let status = unsafe { DeriveAppContainerSidFromAppContainerName(name.as_ptr(), &mut sid) };
+        if status < 0 {
             bail!(
-                "CreateAppContainerProfile failed with HRESULT 0x{:08x}",
+                "DeriveAppContainerSidFromAppContainerName failed with HRESULT 0x{:08x}",
                 status as u32
             );
         }

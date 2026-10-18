@@ -519,6 +519,11 @@ fn canonical_system_toolchains_do_not_receive_temporary_grants() {
     const CHILD: &str = "A3S_SANDBOX_TEST_SYSTEM_TOOLCHAIN";
     if let Some(root) = std::env::var_os(CHILD) {
         let root = PathBuf::from(root);
+        std::env::set_var("PROGRAMFILES", root.join("system"));
+        assert_eq!(
+            std::env::var_os("PROGRAMFILES"),
+            Some(root.join("system").into_os_string())
+        );
         let system = root.join("system").canonicalize().unwrap();
         let binary = system.join("tool.exe");
         let original = [acl_state(&system), acl_state(&binary)];
@@ -554,7 +559,6 @@ fn canonical_system_toolchains_do_not_receive_temporary_grants() {
     let status = std::process::Command::new(std::env::current_exe().unwrap())
         .args(["--exact", "platform::windows_security::acl_tests::canonical_system_toolchains_do_not_receive_temporary_grants", "--nocapture"])
         .env(CHILD, root.path())
-        .env("PROGRAMFILES", root.path().join("system"))
         .status().unwrap();
     assert!(status.success(), "canonical system-tree exclusion failed");
 }

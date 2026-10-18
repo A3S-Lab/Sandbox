@@ -182,6 +182,25 @@ jobs:
           }
           git diff --exit-code -- src/platform/windows_security.rs
           exit $LASTEXITCODE
+      - name: Verify the Windows profile lifecycle oracle
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $path = Join-Path $PWD 'src/platform/windows_security.rs'
+          $original = [IO.File]::ReadAllText($path)
+          try {
+            $mutated = $original.Replace('DeriveAppContainerSidFromAppContainerName(name.as_ptr(), &mut sid)', 'windows_sys::Win32::Security::Isolation::CreateAppContainerProfile(name.as_ptr(), name.as_ptr(), name.as_ptr(), null(), 0, &mut sid)')
+            if ($mutated -eq $original) { throw 'profile registration mutation did not apply' }
+            [IO.File]::WriteAllText($path, $mutated)
+            $PSNativeCommandUseErrorActionPreference = $false
+            cargo test --lib --locked platform::windows::profile_lifetime_tests::constructing_a_sandbox_does_not_register_a_persistent_profile -- --exact --nocapture 2>&1 | Tee-Object profile-mutation.log
+            if ($LASTEXITCODE -eq 0) { throw 'profile oracle accepted persistent registration' }
+            if (-not (Select-String -Path profile-mutation.log -SimpleMatch 'constructing a sandbox registered persistent AppContainer state' -Quiet)) { throw 'profile mutation failed for an unrelated reason' }
+          } finally {
+            [IO.File]::WriteAllText($path, $original)
+          }
+          git diff --exit-code -- src/platform/windows_security.rs
+          exit $LASTEXITCODE
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
         with:
           go-version: 'stable'

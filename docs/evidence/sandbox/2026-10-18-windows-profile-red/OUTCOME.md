@@ -1,12 +1,35 @@
-# Windows AppContainer profile lifecycle regression preparation
+# Windows AppContainer profile lifecycle regression
 
 ## Result
 
-Three native profile lifecycle contracts are prepared on top of
-`76ae1ca260c374e4d7d6cddc65d0f3d8c1c9feed`. Their native red/green results
-are pending. Production profile creation and capability claims remain unchanged.
+Three native profile lifecycle contracts fail independently on exact source
+`16c83c1714e1eecb4ddb23bd79ea60ab8be1a127`. Production profile creation and
+capability claims were unchanged in that failing source.
 The preceding [system-path diagnostic preparation](../2026-10-18-windows-system-path-diagnostics/OUTCOME.md)
 retains the failing batch-source native run and isolated results.
+
+## Observed native red
+
+[CI 39102112795](https://github.com/A3S-Lab/Sandbox/actions/runs/39102112795)
+passes its Linux and macOS jobs. The Windows early qualification step executes
+all five selected contracts separately and retains
+[the complete job](native-windows.log). Each of these three profile contracts
+records 0 passed / 1 failed / 0 ignored:
+
+- Constructor: `constructing a sandbox registered persistent AppContainer state`.
+- Completed real command: `an AppContainer profile survived the completed command`.
+- Killed host plus successful real restart: `the terminated host's AppContainer
+  profile survived restart`.
+
+The marker/exit assertions passed before profile registration was inspected.
+The oracle also completed owned-profile cleanup before each lifecycle assertion;
+these are observed persistence failures, not launcher or cleanup-helper errors.
+The WindowsApps ACL nonmutation contract passes alone (1 / 0 / 0). The canonical
+system fixture fails because its PROGRAMFILES override was not established in
+the child: both before and after profile creation still read `C:\Program Files`,
+while the claimed fixture root was under the private temporary directory. The
+existing production helper therefore correctly treated that fixture as a user
+PATH root. Full Windows suites and mutations were skipped after the early step.
 
 ## Contracts and oracle
 
@@ -43,7 +66,7 @@ whole-file test module is registered in the Windows backend.
 
 ## Explicitly not claimed
 
-- No observed native profile lifecycle red or green result yet.
+- No native profile lifecycle green result on this failing source.
 - No profile cleanup fix, DOS-device recovery, full S4 qualification or capability
   promotion; `host_exit_cleanup` remains false.
 - No resolution yet of the canonical system-root fixture mismatch, arbitrary
